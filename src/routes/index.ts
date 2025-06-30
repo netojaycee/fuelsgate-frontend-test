@@ -1,0 +1,7 @@
+export const DASHBOARD = '/dashboard'
+export const MY_ORDERS = '/dashboard/my-orders'
+export const TICKET = '/dashboard/ticket'
+export const RFQ_TICKET = '/dashboard/rfq/'
+export const CHAT = '/dashboard/chat'
+export const CHAT_DETAILS = '/dashboard/chat/[chatId]'
+export const RFQ = '/dashboard/my-rfq'

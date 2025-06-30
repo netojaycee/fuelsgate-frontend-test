@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+.bg-light-blue-tone {
+  background-color: #7dd3fc;
+}
+
+@media screen and (max-width: 768px) {
+  .container {
+    padding-right: 1rem !important;
+    padding-left: 1rem !important;
+  }
+}
+
+
+@layer utilities {
+  .animate {
+    @apply duration-200 ease-in-out transition-all
+  }
+}
+
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+  }
+}

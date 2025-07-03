@@ -43,6 +43,7 @@ const Trucks = () => {
         fetchNextPage={fetchNextLockedUserTruckPage}
         isLoading={isLoadingLockedUserTrucks}
         trucks={lockedUserTrucks}
+        filter={false}
       />
     </>
   );

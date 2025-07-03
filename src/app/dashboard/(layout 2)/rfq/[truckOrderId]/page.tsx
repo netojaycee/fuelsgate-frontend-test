@@ -75,7 +75,7 @@ const TruckOrderDetails = () => {
               <div className="col-span-5 max-lg:col-span-6 max-md:col-span-12">
                 <RfqSlip truckOrder={data.data} />
 
-                {(role === 'buyer' || role === 'transporter') && (
+                {/* {(role === 'buyer' || role === 'transporter') && (
                   <Alert className="rounded-xl bg-blue-tone-50 border-none my-8">
                     <FGInfoFill
                       height={15}
@@ -92,7 +92,7 @@ const TruckOrderDetails = () => {
                         : 'Transport invoice includes platform service charge (4.5% of transport cost) for secure transactions.'}
                     </AlertDescription>
                   </Alert>
-                )}
+                )} */}
               </div>
               <div className="col-span-7 max-lg:col-span-6 max-md:col-span-12 py-1">
                 <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
@@ -102,7 +102,7 @@ const TruckOrderDetails = () => {
                     color="text-dark-500"
                     fontWeight="semibold"
                   >
-                    Transport RFQ Ticket
+                   Ticket Order
                   </Heading>
                   {data?.data.expiresIn && (
                     <Timer

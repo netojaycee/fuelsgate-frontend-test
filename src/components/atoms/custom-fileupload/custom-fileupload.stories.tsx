@@ -63,7 +63,7 @@ export const Base = {
   },
 } satisfies Story;
 
-export const optional = {
+export const Optional = {
   args: {
     fileType: 'image',
     name: "pdf",

@@ -1,3 +1,4 @@
+"use client";
 import {
   useInfiniteQuery,
   useMutation,
@@ -17,11 +18,13 @@ import {
   updateTruckOrderStatusRequest,
 } from '@/services/truck-order.service';
 import { TruckOrderDto } from '@/types/truck-order.types';
+import { useRouter } from 'next/navigation';
 
 const useTruckOrderHook = () => {
   const { handleClose } = useContext(ModalContext);
   const { showToast } = useToastConfig();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const useFetchTruckOrders = (query?: string) => {
     return useInfiniteQuery({
@@ -57,6 +60,7 @@ const useTruckOrderHook = () => {
           queryKey: ['TRUCK_ORDERS'],
         });
         handleClose && handleClose();
+        router.push('/dashboard/my-rfq');
       },
       onError: (response) => {
         showToast(response.message, 'error');

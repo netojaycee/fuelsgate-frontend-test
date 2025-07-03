@@ -47,6 +47,10 @@ const useAuthenticationHook = () => {
       showToast(response.message, 'success');
       if (response.data.role === 'transporter') {
         router.push('/login');
+      } else if (response.data.user.role === 'buyer') {
+        saveUserData(response.data.user);
+        saveProfileData(response.data.buyerData);
+        router.push('/dashboard');
       } else {
         saveUserData(response.data.user);
         router.push('/onboarding');

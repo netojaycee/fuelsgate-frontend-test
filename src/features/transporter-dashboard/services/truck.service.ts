@@ -17,7 +17,7 @@ export const saveTrucksRequest = async (data: Omit<TruckDto, '_id' | 'profileId'
   return await requestHandler('post', url, data)
 }
 
-export const updateTrucksRequest = async (data: Omit<TruckDto, '_id' | 'profileId' | 'status'>, id: string) => {
+export const updateTrucksRequest = async (data: Omit<TruckDto, '_id' | 'profileId'>, id: string) => {
   const url = `/truck/${id}`;
   return await requestHandler('put', url, data)
 }

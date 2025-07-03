@@ -34,7 +34,7 @@ const VerifyOtpForm = () => {
     }
 
     return _email
-  }, [])
+  }, [router, showToast]);
 
   const { 
     setValue,

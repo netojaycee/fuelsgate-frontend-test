@@ -40,7 +40,7 @@ const RoleSelectForm = ({ roles }: RoleSelectFormProps) => {
         color="text-deep-gray-350"
         classNames="mb-2"
       >
-        Welcome to Fuelsgate&apos;s Search.
+        Welcome to Fuelsgate Search.
       </Heading>
 
       <Text

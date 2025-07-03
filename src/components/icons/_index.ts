@@ -23,6 +23,7 @@ import ClockFillIcon from './ClockFillIcon'
 import TimesCircleIcon from './TimesCircleIcon'
 import FuelsgateGold from './FuelsgateGold'
 import TwitterIcon from './TwitterIcon'
+import WhatsAppIcon from './WhatsAppIcon'
 
 export type IconType = {
   color?: string
@@ -56,5 +57,6 @@ export {
   ClockFillIcon as FGClockFill,
   TimesCircleIcon as FGTimesCircle,
   FuelsgateGold as FGGoldLogo,
-  TwitterIcon as FGTwitterX
+  TwitterIcon as FGTwitterX,
+  WhatsAppIcon as FGWhatsApp
 }

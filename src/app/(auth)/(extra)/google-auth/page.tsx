@@ -34,7 +34,7 @@ const GoogleAuth = () => {
     } catch (error) {
       console.error('Error during Google authentication:', error);
     }
-  }, []);
+  }, [router, saveUserData, saveProfileData]);
 
   useEffect(() => {
     handleGoogleCallback();

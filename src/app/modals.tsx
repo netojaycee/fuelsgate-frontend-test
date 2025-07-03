@@ -18,9 +18,16 @@ import {
   CONFIRMATION_MODAL,
   ConfirmationModal,
 } from '@/modals/confirmation-modal';
+import UpdateTruckStatusModal, {
+  UPDATE_TRUCK_STATUS,
+} from '@/modals/update-truck-status-modal';
 import ConditionsModal from '@/modals/conditional-modal';
 
-const requiresConditions = [ORDER_SUMMARY, LOCK_TRUCK];
+// responsible for showing confirmationmoadl before tagert
+// const requiresConditions = [ORDER_SUMMARY, LOCK_TRUCK];
+
+
+const requiresConditions = [ORDER_SUMMARY];
 
 const AllModals = () => {
   const { openModal } = useContext(ModalContext);
@@ -63,6 +70,8 @@ const AllModals = () => {
         return <ReviewOrderModal />;
       case CONFIRMATION_MODAL:
         return <ConfirmationModal />;
+      case UPDATE_TRUCK_STATUS:
+        return <UpdateTruckStatusModal />;
       default:
         return null;
     }

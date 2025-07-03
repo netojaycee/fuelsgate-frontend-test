@@ -22,7 +22,10 @@ const useTruckListingHook = () => {
     fetchNextPage: fetchNextUserTruckPage,
     hasNextPage: userTruckHasNextPage,
     isFetchingNextPage: loadingFetchNextUserTruckPage,
-  } = useFetchUserTrucks(`?status=available&limit=15&page=`, 'USER_TRUCKS');
+  } = useFetchUserTrucks(
+    `?status=available,pending&limit=15&page=`,
+    'USER_TRUCKS',
+  );
 
   const {
     data: lockedUserTrucks,

@@ -6,6 +6,7 @@ import { Inter } from 'next/font/google';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ModalProvider } from '@/contexts/ModalContext';
+import WhatsAppWidget from '@/components/atoms/whatsapp-widget';
 import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -44,6 +45,10 @@ export default function RootLayout({
             <body className={inter.className}>
               <Toaster />
               <AllModals />
+              <WhatsAppWidget
+                phoneNumber="+2348117074094"
+                message="Hello! I would like to make an enquiry about Fuelsgate services. I'm interested in learning more about your fuel products and how I can get started."
+              />
               {children}
             </body>
           </html>

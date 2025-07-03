@@ -25,7 +25,7 @@ import useTruckHook from '@/features/transporter-dashboard/hooks/useTruck.hook';
 import { useForm } from 'react-hook-form';
 import { TruckDto } from '@/features/transporter-dashboard/types/truck.type';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { truckSchema } from '@/features/transporter-dashboard/validations/truck.validation';
+import { truckFormSchema } from '@/features/transporter-dashboard/validations/truck.validation';
 import { renderErrors } from '@/utils/renderErrors';
 import { DepotHubDto } from '@/types/depot-hub.types';
 import { TRUCK_SIZES } from '@/data/truck-sizes';
@@ -40,6 +40,12 @@ import {
 const sora = Sora({ subsets: ['latin'] });
 const LIST_TRUCK = 'list_truck';
 
+// Delivery type options
+const DELIVERY_TYPES = [
+  { label: 'Bridging', value: 'bridging' },
+  { label: 'Local', value: 'local' },
+];
+
 const ListTruckModal = () => {
   const { handleClose, openModal } = useContext(ModalContext);
   const { useFetchDepotHubs } = useDepotHubHook();
@@ -47,12 +53,12 @@ const ListTruckModal = () => {
   const [depotHub, setDepotHub] = useState<CustomSelectOption | undefined>(
     undefined,
   );
-  const [selectedState, setSelectedState] = useState<
-    CustomSelectOption | undefined
-  >(undefined);
-  const [selectedLGA, setSelectedLGA] = useState<
-    CustomSelectOption | undefined
-  >(undefined);
+  // const [selectedState, setSelectedState] = useState<
+  //   CustomSelectOption | undefined
+  // >(undefined);
+  // const [selectedLGA, setSelectedLGA] = useState<
+  //   CustomSelectOption | undefined
+  // >(undefined);
   const { useFetchProducts } = useProductHook();
   const { data: productsRes, isLoading: loadingProducts } = useFetchProducts;
   const [product, setProduct] = useState<CustomSelectOption | undefined>(
@@ -64,15 +70,18 @@ const ListTruckModal = () => {
   );
   const [customCapacity, setCustomCapacity] = useState<string>('');
   const [showCustomCapacity, setShowCustomCapacity] = useState<boolean>(false);
+  const [deliveryType, setDeliveryType] = useState<
+    CustomSelectOption | undefined
+  >(undefined);
   const { useSaveTruck, useUpdateTruck } = useTruckHook();
   const { mutateAsync: saveTruck, isPending: isSavingData } = useSaveTruck();
   const { mutateAsync: updateTruck, isPending: isSavingUpdatedData } =
     useUpdateTruck(openModal?.data?.truck?._id);
-  const { useFetchStates, useFetchStateLGA } = useStateHook();
-  const { data: stateRes, isLoading: loadingState } = useFetchStates;
-  const { data: lgaRes, isLoading: loadingLGA } = useFetchStateLGA(
-    selectedState?.value,
-  );
+  // const { useFetchStateLGA } = useStateHook();
+  // const { data: stateRes, isLoading: loadingState } = useFetchStates;
+  // const { data: lgaRes, isLoading: loadingLGA } = useFetchStateLGA(
+  //   selectedState?.value,
+  // );
   const {
     setError,
     register,
@@ -84,22 +93,35 @@ const ListTruckModal = () => {
     Omit<TruckDto, '_id' | 'profileId' | 'status'> & {
       depotHubId: string;
       productId: string;
+      deliveryType: string;
     }
   >({
-    resolver: yupResolver(truckSchema),
+    resolver: yupResolver(truckFormSchema) as any,
     defaultValues: {
       ...(openModal?.data?.truck ? { ...openModal?.data?.truck } : {}),
       depotHubId: openModal?.data?.truck?.depotHubId?._id || '',
       productId: openModal?.data?.truck?.productId?._id || '',
       profileId: openModal?.data?.truck?.profileId?._id || '',
-      currentState: openModal?.data?.truck?.currentState || '',
-      currentCity: openModal?.data?.truck?.currentCity || '',
+      // currentState: openModal?.data?.truck?.currentState || '',
+      // currentCity: openModal?.data?.truck?.currentCity || '',
+      deliveryType: '',
     },
   });
   const onSubmit = async (
-    data: Omit<TruckDto, '_id' | 'profileId' | 'status'>,
+    data: Omit<TruckDto, '_id' | 'profileId' | 'status'> & {
+      deliveryType: string;
+    },
   ) => {
     try {
+      // Validate delivery type
+      if (!data.deliveryType) {
+        setError('deliveryType', {
+          type: 'manual',
+          message: 'Delivery type is required',
+        });
+        return;
+      }
+
       // Validate custom capacity if "others" is selected
       if (showCustomCapacity) {
         if (
@@ -116,23 +138,39 @@ const ListTruckModal = () => {
         data.capacity = customCapacity;
       }
 
+      // Format truck number based on delivery type
+      if (data.deliveryType && data.truckNumber) {
+        const rawTruckNumber = data.truckNumber
+          .replace(/^B\/L-/, '') // Remove existing B/L- prefix
+          .replace(/^L-/, ''); // Remove existing L- prefix
+
+        if (data.deliveryType === 'bridging') {
+          data.truckNumber = `B/L-${rawTruckNumber}`;
+        } else if (data.deliveryType === 'local') {
+          data.truckNumber = `L-${rawTruckNumber}`;
+        }
+      }
+
+      // Remove deliveryType from data before sending to API
+      const { deliveryType, ...truckData } = data;
+
       if (openModal?.data.edit) {
-        await updateTruck(data);
+        await updateTruck(truckData);
       } else {
-        await saveTruck(data);
+        await saveTruck(truckData);
       }
     } catch (error: any) {
       renderErrors(error?.errors, setError);
     }
   };
 
-  const handleStateChange = useCallback((value: unknown) => {
-    setSelectedState(value as CustomSelectOption);
-  }, []);
+  // const handleStateChange = useCallback((value: unknown) => {
+  //   setSelectedState(value as CustomSelectOption);
+  // }, []);
 
-  const handleLGAChange = useCallback((value: unknown) => {
-    setSelectedLGA(value as CustomSelectOption);
-  }, []);
+  // const handleLGAChange = useCallback((value: unknown) => {
+  //   setSelectedLGA(value as CustomSelectOption);
+  // }, []);
 
   const depotHubs = useMemo(() => {
     if (depotHubsRes) {
@@ -164,6 +202,10 @@ const ListTruckModal = () => {
 
   const handleDepotChange = useCallback((value: unknown) => {
     setDepot(value as CustomSelectOption);
+  }, []);
+
+  const handleDeliveryTypeChange = useCallback((value: unknown) => {
+    setDeliveryType(value as CustomSelectOption);
   }, []);
 
   useEffect(() => {
@@ -203,23 +245,23 @@ const ListTruckModal = () => {
     return [];
   }, [depotHub, depotHubsRes]);
 
-  const states = useMemo(() => {
-    if (stateRes) {
-      return stateRes?.map((item: string[]) => ({
-        label: item,
-        value: item,
-      }));
-    }
-  }, [stateRes]);
+  // const states = useMemo(() => {
+  //   if (stateRes) {
+  //     return stateRes?.map((item: string[]) => ({
+  //       label: item,
+  //       value: item,
+  //     }));
+  //   }
+  // }, [stateRes]);
 
-  const lgas = useMemo(() => {
-    if (lgaRes) {
-      return lgaRes?.map((item: string[]) => ({
-        label: item,
-        value: item,
-      }));
-    }
-  }, [lgaRes]);
+  // const lgas = useMemo(() => {
+  //   if (lgaRes) {
+  //     return lgaRes?.map((item: string[]) => ({
+  //       label: item,
+  //       value: item,
+  //     }));
+  //   }
+  // }, [lgaRes]);
   const handleCapacityChange = useCallback(
     (value: unknown) => {
       const selectedCapacity = value as CustomSelectOption;
@@ -249,16 +291,22 @@ const ListTruckModal = () => {
   }, [customCapacity, setValue]);
 
   useEffect(() => {
-    if (selectedState) {
-      setValue('currentState', selectedState.value);
+    if (deliveryType) {
+      setValue('deliveryType', deliveryType.value);
     }
-  }, [selectedState, lgas, getValues, setValue]);
+  }, [deliveryType, setValue]);
 
-  useEffect(() => {
-    if (selectedLGA) {
-      setValue('currentCity', selectedLGA.value);
-    }
-  }, [selectedLGA, setValue]);
+  // useEffect(() => {
+  //   if (selectedState) {
+  //     setValue('currentState', selectedState.value);
+  //   }
+  // }, [selectedState, lgas, getValues, setValue]);
+
+  // useEffect(() => {
+  //   if (selectedLGA) {
+  //     setValue('currentCity', selectedLGA.value);
+  //   }
+  // }, [selectedLGA, setValue]);
 
   useEffect(() => {
     if (getValues('depotHubId')) {
@@ -300,22 +348,43 @@ const ListTruckModal = () => {
       }
     }
 
-    if (getValues('currentState')) {
-      const _selectedState = states?.find(
-        (item: CustomSelectOption) =>
-          item.value === getValues('currentState')?.toString(),
-      );
-      if (_selectedState) setSelectedState(_selectedState);
-    }
+    // if (getValues('currentState')) {
+    //   const _selectedState = states?.find(
+    //     (item: CustomSelectOption) =>
+    //       item.value === getValues('currentState')?.toString(),
+    //   );
+    //   if (_selectedState) setSelectedState(_selectedState);
+    // }
 
-    if (getValues('currentCity')) {
-      const _selectedCity = lgas?.find(
-        (item: CustomSelectOption) =>
-          item.value === getValues('currentCity')?.toString(),
-      );
-      if (_selectedCity) setSelectedLGA(_selectedCity);
+    // if (getValues('currentCity')) {
+    //   const _selectedCity = lgas?.find(
+    //     (item: CustomSelectOption) =>
+    //       item.value === getValues('currentCity')?.toString(),
+    //   );
+    //   if (_selectedCity) setSelectedLGA(_selectedCity);
+    // }
+
+    // Initialize delivery type based on truck number format
+    if (getValues('truckNumber')) {
+      const truckNumber = getValues('truckNumber').toString();
+      let _selectedDeliveryType;
+
+      if (truckNumber.startsWith('B/L-')) {
+        _selectedDeliveryType = DELIVERY_TYPES.find(
+          (item) => item.value === 'bridging',
+        );
+      } else if (truckNumber.startsWith('L-')) {
+        _selectedDeliveryType = DELIVERY_TYPES.find(
+          (item) => item.value === 'local',
+        );
+      }
+
+      if (_selectedDeliveryType) {
+        setDeliveryType(_selectedDeliveryType);
+        setValue('deliveryType', _selectedDeliveryType.value);
+      }
     }
-  }, [depotHubs, depots, products, states, lgas, getValues]);
+  }, [depotHubs, depots, products, getValues, setValue]);
 
   return (
     <>
@@ -345,16 +414,25 @@ const ListTruckModal = () => {
               value={product}
               onChange={handleProductChange}
               isDisabled={loadingProducts}
-              error={errors.productId?.message}
+              // ts-ignore-next-line eslint-disable-next-line
+              error={errors.productId?.message as any}
               classNames="col-span-full"
             />
-            <CustomInput
+           <CustomInput
               type="type"
               name="truckNumber"
               label="Truck number"
               register={register}
               error={errors.truckNumber?.message}
-            />{' '}
+            />
+            <CustomSelect
+              name="deliveryType"
+              label="Delivery Type"
+              options={DELIVERY_TYPES}
+              value={deliveryType}
+              onChange={handleDeliveryTypeChange}
+              error={errors.deliveryType?.message}
+            />
             <CustomSelect
               name="size"
               label="Capacity"
@@ -363,6 +441,7 @@ const ListTruckModal = () => {
               onChange={handleCapacityChange}
               error={errors.capacity?.message}
               ValueContainer={LitreValueContainerWrapper}
+              classNames='w-full col-span-full'
             />
             {showCustomCapacity && (
               <CustomInput
@@ -401,7 +480,7 @@ const ListTruckModal = () => {
             />
           </div>
 
-          <div className="bg-light-gray-150 grid grid-cols-2 max-sm:grid-cols-1 gap-3 py-[10px] px-4 rounded-[10px] mb-8">
+          {/* <div className="bg-light-gray-150 grid grid-cols-2 max-sm:grid-cols-1 gap-3 py-[10px] px-4 rounded-[10px] mb-8">
             <CustomSelect
               label="Current State"
               name="state"
@@ -420,7 +499,7 @@ const ListTruckModal = () => {
               onChange={handleLGAChange}
               error={errors.currentCity?.message}
             />
-          </div>
+          </div> */}
 
           <div className="flex items-center gap-2">
             <CustomButton

@@ -10,6 +10,8 @@ import { LIST_TRUCK } from '@/modals/list-truck-modal';
 import useTruckHook from '../hooks/useTruck.hook';
 import { useConfirmation } from '@/hooks/useConfirmation.hook';
 import { Edit, Trash } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { UPDATE_TRUCK_STATUS } from '@/modals/update-truck-status-modal';
 
 type TruckProps = {
   data: TruckDto;
@@ -48,9 +50,27 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
       },
     });
   };
+  
+  const handleStatusToggle = (checked: boolean) => {
+    // Don't toggle if status is already pending
+    if (data?.status === 'pending') return;
+    
+    // If current status is 'available', we're toggling to 'locked'
+    // If current status is 'locked', we're toggling to 'pending'
+    const newStatus = data?.status === 'available' ? 'locked' : 'pending';
+    
+    handleToggle && handleToggle({
+      state: true,
+      name: UPDATE_TRUCK_STATUS,
+      data: { 
+        truck: data,
+        newStatus
+      },
+    });
+  };
 
   return (
-    <div className="relative p-4 border border-green-tone-200 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[280px] max-w-[320px] h-[180px] flex flex-col group">
+    <div className="relative p-4 border border-green-tone-200 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 min-w-[280px] max-w-[320px] h-[170px] flex flex-col group">
       {/* Floating Status Badge - Top Right */}
       <div className="absolute -top-2 -right-2 z-10">
         {data?.status === 'locked' && (
@@ -67,17 +87,36 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
             </Text>
           </span>
         )}
+
+        {data?.status === 'pending' && (
+          <span className="flex items-center justify-center bg-orange-500 border-2 border-white px-2 py-1 rounded-full shadow-lg">
+            <Text variant="pxs" fontWeight="semibold" color="text-white">
+              Pending
+            </Text>
+          </span>
+        )}
       </div>
 
       {/* Header with Action Buttons */}
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <span
-            className={`h-10 w-10 rounded-lg flex items-center justify-center shadow-sm ${
-              (typeof data?.productId === 'object'
-                ? data?.productId?.color
-                : null) || 'bg-blue-tone-100'
+            className={`h-10 w-10 rounded-lg flex items-center justify-center shadow-sm relative overflow-hidden ${
+              !(typeof data?.productId === 'object' && data?.productId?.color)
+                ? 'bg-blue-tone-100'
+                : ''
             }`}
+            style={
+              typeof data?.productId === 'object' && data?.productId?.color
+                ? data?.productId?.color.includes('-')
+                  ? {
+                      background: `linear-gradient(to bottom, ${
+                        data.productId.color.split('-')[0]
+                      } 50%, ${data.productId.color.split('-')[1]} 50%)`,
+                    }
+                  : { backgroundColor: data?.productId?.color }
+                : undefined
+            }
           >
             <FGTruckFill color="#ffffff" height={20} width={20} />
           </span>
@@ -124,6 +163,24 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
 
       {/* Truck Details */}
       <div className="flex-1 space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Text variant="pxs" color="text-gray-500">
+              Status
+            </Text>
+            <Switch
+              size="sm"
+              checked={data?.status === 'available'}
+              onCheckedChange={handleStatusToggle}
+              disabled={data?.status === 'pending'}
+              className={
+                data?.status === 'pending'
+                  ? 'opacity-60 cursor-not-allowed'
+                  : ''
+              }
+            />
+          </div>
+        </div>
         {/* Capacity */}
         <div className="flex items-center justify-between">
           <Text variant="pxs" color="text-gray-500">
@@ -135,7 +192,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
         </div>
 
         {/* Location */}
-        <div className="flex items-center justify-between">
+        {/* <div className="flex items-center justify-between">
           <Text variant="pxs" color="text-gray-500">
             Location
           </Text>
@@ -148,7 +205,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
               {data?.currentCity}, {data?.currentState}
             </Text>
           </div>
-        </div>
+        </div> */}
 
         {/* Depot */}
         <div className="flex items-center justify-between">

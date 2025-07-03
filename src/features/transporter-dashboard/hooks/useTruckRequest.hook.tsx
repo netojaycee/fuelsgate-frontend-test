@@ -12,7 +12,7 @@ const useTruckRequestHook = () => {
   const { profile, user } = useContext(AuthContext);
   const role = user?.data?.role;
   const [page, setPage] = useState(1);
-  const { useFetchTrucks } = useTruckHook();
+  const { useFetchTrucks, useFetchUserTrucks } = useTruckHook();
   const {
     data: trucks,
     isFetching: isLoadingTrucks,
@@ -20,6 +20,14 @@ const useTruckRequestHook = () => {
     hasNextPage: truckHasNextPage,
     isFetchingNextPage: loadingFetchNextTruckPage,
   } = useFetchTrucks(`?profileId=${profile?._id}&limit=15&page=`);
+
+  const {
+    data: userTrucks,
+    isFetching: isLoadingUserTrucks,
+    fetchNextPage: fetchNextUserTruckPage,
+    hasNextPage: userTruckHasNextPage,
+    isFetchingNextPage: loadingFetchNextUserTruckPage,
+  } = useFetchUserTrucks(`?status=available,pending&limit=15&page=`, 'USER_TRUCKS');
 
   const { useFetchTransporterOrders } = useTruckOrderHook();
   const {
@@ -30,6 +38,8 @@ const useTruckRequestHook = () => {
   } = useFetchTransporterOrders(
     `?profileId=${profile?._id}&profileType=${role}&limit=${20}&page=${page}`,
   );
+
+  
 
   const queryClient = useQueryClient();
   useEffect(() => {
@@ -65,6 +75,10 @@ const useTruckRequestHook = () => {
     isLoadingOrders,
     openUploadProductModal,
     loadingFetchNextTruckPage,
+    userTrucks,
+    isLoadingUserTrucks,
+    fetchNextUserTruckPage,
+    userTruckHasNextPage,
   };
 };
 

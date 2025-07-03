@@ -108,7 +108,7 @@ const LockBtn = ({
     }
   };
 
-  console.log(truck, "Ffff")
+  // console.log(truck, "Ffff")
 
   return (
     <CustomButton

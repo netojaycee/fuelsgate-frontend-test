@@ -11,18 +11,21 @@ const truckOrderListColumns = [
     accessorKey: 'buyerId',
     header: 'Customer',
     cell: ({ row }: any) => (
-      <ClickableUserName
-        user={{
-          _id: row.getValue('buyerId').userId._id,
-          firstName: row.getValue('buyerId').userId.firstName,
-          lastName: row.getValue('buyerId').userId.lastName,
-          email: row.getValue('buyerId').userId.email,
-          role: 'buyer',
-        }}
-        variant="ps"
-        color="text-blue-600"
-        className="whitespace-nowrap"
-      />
+      // <ClickableUserName
+      //   user={{
+      //     _id: row.getValue('buyerId').userId._id,
+      //     firstName: row.getValue('buyerId').userId.firstName,
+      //     lastName: row.getValue('buyerId').userId.lastName,
+      //     email: row.getValue('buyerId').userId.email,
+      //     role: 'buyer',
+      //   }}
+      //   variant="ps"
+      //   color="text-blue-600"
+      //   className="whitespace-nowrap"
+      // />
+      <Text variant="ps">
+        {row.getValue('buyerId').userId.firstName} {row.getValue('buyerId').userId.lastName}
+      </Text>
     ),
   },
   // {

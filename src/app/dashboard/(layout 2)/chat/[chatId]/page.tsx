@@ -150,15 +150,15 @@ const ChatDetails = () => {
       }
     };
 
-    if (messageContainer.current) {
-      messageContainer.current.scrollTop =
-        messageContainer.current.scrollHeight;
-      messageContainer.current.addEventListener('scroll', handleScroll);
+    const currentContainer = messageContainer.current;
+    if (currentContainer) {
+      currentContainer.scrollTop = currentContainer.scrollHeight;
+      currentContainer.addEventListener('scroll', handleScroll);
     }
 
     return () => {
-      if (messageContainer.current) {
-        messageContainer.current.removeEventListener('scroll', handleScroll);
+      if (currentContainer) {
+        currentContainer.removeEventListener('scroll', handleScroll);
       }
     };
   }, [fetchMessageNextPage]);

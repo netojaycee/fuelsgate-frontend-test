@@ -7,15 +7,18 @@ import TrucksRenderer from './trucks-renderer';
 
 const TruckRequest = () => {
   const {
-    trucks,
+    // trucks,
+    userTrucks,
     isLoadingTrucks,
     setPage,
     fetchNextTruckPage,
     fetchingTruckError,
     truckOrders,
     isLoadingOrders,
+   
+    // refetchUserTruckOrders,
   } = useTruckRequestHook();
-
+// console.log(userTrucks)
   return (
     <>
       <Header />
@@ -23,7 +26,7 @@ const TruckRequest = () => {
       <TrucksRenderer
         fetchNextPage={fetchNextTruckPage}
         isLoading={isLoadingTrucks}
-        trucks={trucks}
+        trucks={userTrucks}
       />
 
       <Text variant="pl" color="text-dark-gray-500" fontWeight="medium">

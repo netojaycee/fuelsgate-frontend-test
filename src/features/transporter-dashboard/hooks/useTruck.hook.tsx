@@ -83,7 +83,7 @@ const useTruckHook = () => {
   const useUpdateTruck = (id: string) => {
     const queryClient = useQueryClient();
     return useMutation({
-      mutationFn: (data: Omit<TruckDto, '_id' | 'profileId' | 'status'>) =>
+      mutationFn: (data: Omit<TruckDto, '_id' | 'profileId'>) =>
         updateTrucksRequest(data, id),
       onSuccess: (response) => {
         showToast(response.message, 'success');

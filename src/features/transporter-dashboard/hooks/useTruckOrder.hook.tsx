@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchTransporterOrderRequest } from '../services/truck-order.service';
+import { fetchTransporterOrderRequest, fetchUserTransporterOrderRequest } from '../services/truck-order.service';
 
 const useTruckOrderHook = () => {
   const useFetchTransporterOrders = (query?: string) => {
@@ -9,10 +9,19 @@ const useTruckOrderHook = () => {
       },
       queryKey: ['TRANSPORTER_ORDERS'],
     });
-  };
+  };;
 
+  const useFetchUserTransporterOrders = (query?: string) => {
+    return useQuery({
+      queryFn: async () => {
+        return await fetchUserTransporterOrderRequest(query ?? '');
+      },
+      queryKey: ['USER_TRANSPORTER_ORDERS'],
+    });
+  };
   return {
     useFetchTransporterOrders,
+    useFetchUserTransporterOrders,
   };
 };
 

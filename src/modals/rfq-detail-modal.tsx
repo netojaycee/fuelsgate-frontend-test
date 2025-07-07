@@ -31,7 +31,7 @@ const RFQDetailModal = () => {
   const { handleClose } = useContext(ModalContext);
   
   const gotoTicket = () => {
-    handleClose(); // Close the modal
+    handleClose?.(); // Close the modal if handleClose exists
     router.push(`${RFQ_TICKET}/${data?.data?._id}`);
   };
   // console.log(data?.data);

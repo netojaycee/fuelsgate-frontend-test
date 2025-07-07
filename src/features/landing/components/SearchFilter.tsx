@@ -9,9 +9,20 @@ import {
 import usePublicSearch from '@/features/landing/hooks/usePublicSearch.hook';
 import { cn } from '@/lib/utils';
 import { Search } from 'lucide-react';
-import React from 'react';
+import React, { Suspense } from 'react';
 
-const SearchFilter = ({
+// Search filter loader placeholder for Suspense fallback
+const SearchFilterLoader = () => {
+  return (
+    <div className="relative col-span-7 max-xl:col-span-12 grid max-sm:grid-cols-1 items-center gap-2 grid-cols-3">
+      <div className="animate-pulse bg-gray-200 h-12 rounded"></div>
+      <div className="animate-pulse bg-gray-200 h-12 rounded"></div>
+      <div className="animate-pulse bg-gray-200 h-12 rounded"></div>
+    </div>
+  );
+};
+
+const SearchFilterContent = ({
   isLoading = false,
   search = false,
 }: {
@@ -83,7 +94,7 @@ const SearchFilter = ({
           }
         />
       </div>
-      <div className={cn("search-button-container", search ? 'mt-8' : '')}>
+      <div className={cn('search-button-container', search ? 'mt-8' : '')}>
         <CustomButton
           variant="glow"
           onClick={handleSearchTruckClick}
@@ -101,6 +112,15 @@ const SearchFilter = ({
         />
       </div>
     </>
+  );
+};
+
+// Wrap the actual component with Suspense
+const SearchFilter = (props: { isLoading?: boolean; search?: boolean }) => {
+  return (
+    <Suspense fallback={<SearchFilterLoader />}>
+      <SearchFilterContent {...props} />
+    </Suspense>
   );
 };
 

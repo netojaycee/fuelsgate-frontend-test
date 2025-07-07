@@ -45,10 +45,7 @@ export default function RootLayout({
             <body className={inter.className}>
               <Toaster />
               <AllModals />
-              <WhatsAppWidget
-                phoneNumber="+2348117074094"
-                message="Hello! I would like to make an enquiry about Fuelsgate services. I'm interested in learning more about your fuel products and how I can get started."
-              />
+              <WhatsAppWidget phoneNumber="+2348117074094" />
               {children}
             </body>
           </html>

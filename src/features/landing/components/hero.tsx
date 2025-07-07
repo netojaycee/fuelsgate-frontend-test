@@ -25,6 +25,7 @@ import {
 import usePricingHook from '@/hooks/usePricing.hook';
 import ProductRenderer from '@/components/atoms/product-renderer';
 import { formatNumber } from '@/utils/formatNumber';
+import SearchFilter from './SearchFilter';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -214,28 +215,31 @@ const Hero = () => {
           lineHeight="leading-12"
           classNames="max-w-[850px] mx-auto mb-2 max-sm:text-[30px]"
         >
-          Search, Find &amp; Negotiate Deals at{' '}
-          <span className="text-gold">Depots Nationwide</span>
+          Search, Find &amp; Negotiate Deals for{' '}
+          <span className="text-gold">Trucks</span>
         </Heading>
         <Text
           variant="pm"
           classNames="max-w-[786px] mx-auto mb-10"
           color="text-mid-gray-175"
         >
-          Save time, money &amp; effort on the Fuelsgate productivity tool that
-          directly connect suppliers, transporters &amp; buyers of bulk
-          petroleum products: PMS (Petrol), AGO (Diesel), ATK (Jet Fuel), LPG
-          (Cooking Gas), CNG (Automobile Gas) and Trucks, Anywhere, Anytime.
+          Save time, money & effort with Fuelsgate productivity tool. The
+          smartest way to source & book exact trucks you need – Instantly
+          connect by size, product type and locations at depots, Dangote
+          refinery & Truck parks.
         </Text>
+        <div className="space-y-4">
+          <SearchFilter />
+        </div>
         <div className="flex items-center justify-center mb-14 max-sm:mb-6">
-          <CustomButton
+          {/* <CustomButton
             variant="glow"
             onClick={handleSelectRole}
             leftIcon={<Search />}
             label="Search..."
             width="w-[250px]"
             height="h-12"
-          />
+          /> */}
           {/* <CustomButton
             variant="plain"
             onClick={handleSignIn}

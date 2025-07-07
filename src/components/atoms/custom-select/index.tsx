@@ -153,7 +153,7 @@ const CustomSelect = forwardRef<
           <Label
             name={name}
             label={label}
-            classNames="mb-1"
+            classNames={cn('mb-1', classNames)}
             {...labelHTMLElements}
           />
         )}

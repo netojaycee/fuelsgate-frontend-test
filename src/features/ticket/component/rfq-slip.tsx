@@ -19,6 +19,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import { UserType } from '@/types/user.types';
 import { AuthContext } from '@/contexts/AuthContext';
+import { useServiceFees } from '@/hooks/useServiceFees.hook';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -27,11 +28,14 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const { user } = useContext(AuthContext);
   const userRole = user?.data?.role;
+  const { serviceFees, isLoading: isLoadingFees } = useServiceFees();
 
   // Calculate platform service charges
   const transportCost = truckOrder.price;
-  const transporterServiceCharge = transportCost * 0.03; // 3% for transporter
-  const buyerServiceCharge = transportCost * 0.045; // 4.5% for buyer
+  const transporterServiceCharge =
+    transportCost * serviceFees.transporterServiceFee;
+  const buyerServiceCharge =
+    transportCost * serviceFees.traderServiceFee;
 
   // Total amounts
   // const transporterTotal = transportCost + transporterServiceCharge;
@@ -62,9 +66,17 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
       wrapper.style.position = 'relative';
       wrapper.style.width = '100%';
       wrapper.style.padding = '24px';
-      wrapper.style.paddingBottom = '48px'; // Match the pb-12
-      wrapper.style.borderRadius = '20px 20px 0 0'; // Match rounded-t-[20px]
+      wrapper.style.paddingBottom = '48px';
+      wrapper.style.borderRadius = '20px 20px 0 0';
       wrapper.style.overflow = 'hidden';
+
+      // Define color variables
+      const goldColor = '#D4AF37';
+      const darkColor = '#1a1a1a';
+      const blackColor = '#000000';
+      const whiteColor = '#ffffff';
+      const whiteTransparentColor = 'rgba(255, 255, 255, 0.72)';
+      const greenCheckColor = '#41D195';
 
       // Explicitly load the background image and ensure it's rendered properly
       const bgImg = new Image();
@@ -72,7 +84,7 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
       bgImg.src = '/images/Subtract.svg';
 
       // Wait for the background image to load
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve) => {
         bgImg.onload = () => {
           wrapper.style.backgroundImage = `url('${bgImg.src}')`;
           wrapper.style.backgroundPosition = 'left bottom';
@@ -84,7 +96,6 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
           console.error('Failed to load background image');
           resolve(); // Continue even if image fails
         };
-
         // Set a timeout just in case
         setTimeout(resolve, 1000);
       });
@@ -94,11 +105,11 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
       container.appendChild(wrapper);
 
       // Wait for any images, fonts, and styles to fully apply
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       // Use html2canvas with advanced options to capture the complete design
       const canvas = await html2canvas(wrapper, {
-        scale: 3, // Higher scale for better quality
+        scale: 4, // Higher scale for better quality
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
@@ -119,42 +130,69 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
             mainElement.style.backgroundRepeat = 'no-repeat';
           }
 
-          // Apply inline styles to preserve appearance
+          // Apply inline styles to preserve appearance for dark background elements
           const darkElements = element.querySelectorAll('.bg-dark-100');
           darkElements.forEach((el) => {
             if (el instanceof HTMLElement) {
-              el.style.backgroundColor = '#1a1a1a';
+              el.style.backgroundColor = darkColor;
               el.style.borderRadius = '24px';
+              el.style.padding = '20px';
             }
           });
 
+          // Black background elements
           const blackElements = element.querySelectorAll('.bg-black');
           blackElements.forEach((el) => {
             if (el instanceof HTMLElement) {
-              el.style.backgroundColor = '#000000';
+              el.style.backgroundColor = blackColor;
               el.style.borderRadius = '24px';
+              el.style.padding = '16px';
             }
           });
 
           // Ensure text colors are preserved
           element.querySelectorAll('[class*="text-white"]').forEach((el) => {
-            if (el instanceof HTMLElement) el.style.color = '#ffffff';
+            if (el instanceof HTMLElement) el.style.color = whiteColor;
           });
 
+          // Transparent white text
           element
             .querySelectorAll('[class*="text-\\[\\#FFFFFFB8\\]"]')
             .forEach((el) => {
               if (el instanceof HTMLElement)
-                el.style.color = 'rgba(255, 255, 255, 0.72)';
+                el.style.color = whiteTransparentColor;
             });
 
-          // Fix borders
+          // Gold colored elements
+          element.querySelectorAll('[class*="text-gold"]').forEach((el) => {
+            if (el instanceof HTMLElement) el.style.color = goldColor;
+          });
+
+          // Border styles
           element
             .querySelectorAll('.border-white\\/20, [class*="border-white"]')
             .forEach((el) => {
               if (el instanceof HTMLElement)
                 el.style.borderColor = 'rgba(255, 255, 255, 0.2)';
             });
+
+          // Border gold elements
+          element.querySelectorAll('[class*="border-gold"]').forEach((el) => {
+            if (el instanceof HTMLElement) {
+              el.style.borderColor = goldColor;
+              el.style.borderLeftWidth = '4px';
+              el.style.borderStyle = 'solid';
+            }
+          });
+
+          // Gold gradient backgrounds
+          element.querySelectorAll('[class*="from-gold"]').forEach((el) => {
+            if (el instanceof HTMLElement) {
+              el.style.background = `linear-gradient(to right, rgba(212, 175, 55, 0.1), transparent)`;
+              el.style.borderRadius = '12px';
+              el.style.padding = '12px';
+            }
+          });
 
           // Fix SVG icons
           element.querySelectorAll('svg').forEach((icon) => {
@@ -179,11 +217,54 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
             }
           });
 
+          // Fix check icon color
+          element.querySelectorAll('[color="#41D195"]').forEach((el) => {
+            if (el instanceof SVGElement) {
+              el.querySelectorAll('path').forEach((path) => {
+                path.setAttribute('fill', greenCheckColor);
+                path.setAttribute('stroke', greenCheckColor);
+              });
+            }
+          });
+
           // Ensure rounded corners
           element.querySelectorAll('[class*="rounded"]').forEach((el) => {
             if (el instanceof HTMLElement) {
               const computedStyle = window.getComputedStyle(el);
               el.style.borderRadius = computedStyle.borderRadius;
+            }
+          });
+
+          // Fix grid layouts for PDF rendering
+          element.querySelectorAll('.grid').forEach((grid) => {
+            if (grid instanceof HTMLElement) {
+              const columns = grid.classList.contains('grid-cols-2') ? 2 : 1;
+              grid.style.display = 'grid';
+              grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+              grid.style.gap = '1rem';
+            }
+          });
+
+          // Preserve flex layouts
+          element.querySelectorAll('.flex').forEach((flex) => {
+            if (flex instanceof HTMLElement) {
+              flex.style.display = 'flex';
+
+              if (flex.classList.contains('items-center')) {
+                flex.style.alignItems = 'center';
+              }
+
+              if (flex.classList.contains('justify-between')) {
+                flex.style.justifyContent = 'space-between';
+              }
+
+              if (flex.classList.contains('flex-col')) {
+                flex.style.flexDirection = 'column';
+              }
+
+              if (flex.classList.contains('flex-wrap')) {
+                flex.style.flexWrap = 'wrap';
+              }
             }
           });
         },
@@ -192,10 +273,10 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
       // Clean up the temporary elements
       document.body.removeChild(container);
 
-      // Create a new PDF with the proper dimensions
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const a4Width = 210; // mm
-      const a4Height = 297; // mm
+      // Create a new PDF - using landscape orientation for more square appearance
+      const pdf = new jsPDF('l', 'mm', [220, 200]); // Custom landscape size for more square appearance
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
       // Get canvas dimensions
       const canvasWidth = canvas.width;
@@ -203,30 +284,29 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
 
       // Calculate proper scaling to maintain aspect ratio
       const aspectRatio = canvasWidth / canvasHeight;
-      let pdfWidth = a4Width - 20; // 10mm margins on each side
+      let pdfWidth = pageWidth - 20; // 10mm margins on each side
       let pdfHeight = pdfWidth / aspectRatio;
 
-      // If height exceeds A4, scale down
-      if (pdfHeight > a4Height - 60) {
-        // Leave space for the logo
-        pdfHeight = a4Height - 60;
+      // If height exceeds page, scale down
+      if (pdfHeight > pageHeight - 30) {
+        pdfHeight = pageHeight - 30;
         pdfWidth = pdfHeight * aspectRatio;
       }
 
-      // Center the content horizontally
-      const xOffset = (a4Width - pdfWidth) / 2;
-      const yOffset = 20; // Leave space at the top for logo
+      // Center the content
+      const xOffset = (pageWidth - pdfWidth) / 2;
+      const yOffset = 15; // Space at the top
 
-      // Convert canvas to image data
+      // Convert canvas to image data with high quality
       const imgData = canvas.toDataURL('image/png', 1.0);
 
-      // Load the logo for adding to the PDF
+      // Load the logo for adding to the PDF - using the PNG version for better quality
       const logoImg = new Image();
       logoImg.crossOrigin = 'anonymous';
-      logoImg.src = '/images/logo_gold.svg';
+      logoImg.src = '/images/logo_gold.png'; // Using PNG version for better quality
 
       // Wait for logo to load
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve) => {
         logoImg.onload = () => resolve();
         logoImg.onerror = () => {
           console.error('Failed to load logo image');
@@ -245,10 +325,10 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
           logoCtx.drawImage(logoImg, 0, 0);
 
           // Add logo at the top center of the PDF
-          const logoWidth = 40; // mm
-          const logoHeight = 15; // mm
-          const logoX = (a4Width - logoWidth) / 2;
-          const logoY = 5; // 5mm from top
+          const logoWidth = 50; // mm - larger size for better quality
+          const logoHeight = logoWidth * (logoImg.height / logoImg.width);
+          const logoX = (pageWidth - logoWidth) / 2;
+          const logoY = 2; // Close to top
 
           // Add the logo to PDF
           pdf.addImage(
@@ -266,15 +346,15 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
       }
 
       // Add the main ticket content
-      pdf.addImage(imgData, 'PNG', xOffset, yOffset, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, 'PNG', xOffset, yOffset + 12, pdfWidth, pdfHeight);
 
       // Add footer text for authenticity
       pdf.setFontSize(8);
       pdf.setTextColor(100, 100, 100);
       pdf.text(
         'This document was generated by Fuels Gate Resources Ltd. and is an official record.',
-        a4Width / 2,
-        a4Height - 10,
+        pageWidth / 2,
+        pageHeight - 2, // Changed from pageHeight - 5 to pageHeight - 2 to shift down by 3px
         { align: 'center' },
       );
 
@@ -286,35 +366,62 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
       setIsDownloading(false);
     }
   };
+  console.log(truckOrder, 'truckorderr');
+  console.log('Service Fees:', {
+    transporterServiceFee: serviceFees.transporterServiceFee,
+    traderServiceFee: serviceFees.traderServiceFee,
+    transporterCharge: transporterServiceCharge,
+    buyerCharge: buyerServiceCharge,
+  });
 
   return (
     <div className="relative bg-[url('/images/Subtract.svg')] bg-left-bottom w-full bg-cover bg-no-repeat rounded-t-[20px] overflow-hidden p-6 max-sm:px-3 pb-12">
       <div ref={ticketRef}>
-        {/* Black wrapper around all sections */}
+        {/* Black wrapper around all sections - More landscape-oriented layout */}
         <div className="bg-black p-4 rounded-3xl">
-          <div className="bg-dark-100 p-5 max-sm:px-3 rounded-3xl mb-2">
-            <span className="bg-blue-tone-900/10 h-14 w-14 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FGTruckFill color="#375DFB" height={32} width={32} />
-            </span>
-            <Text
-              variant="pm"
-              classNames="text-center uppercase mb-3"
-              fontWeight="medium"
-              color="text-white"
-            >
-              Ticket Order
-            </Text>
-            <Heading
-              variant="h5"
-              fontWeight="regular"
-              classNames="text-center uppercase"
-              color="text-white"
-            >
-              {
-                ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
-                  ?.value
-              }
-            </Heading>
+          <div className="flex items-center justify-between bg-dark-100 p-5 max-sm:px-3 rounded-3xl mb-2">
+            <div className="flex items-center">
+              <span className="bg-blue-tone-900/10 border h-14 w-14 rounded-full flex items-center justify-center mr-4">
+                <FGTruckFill
+                  color={
+                    typeof truckOrder.truckId === 'object'
+                      ? (truckOrder.truckId as TruckDto)?.productId?.color
+                      : undefined
+                  }
+                  height={32}
+                  width={32}
+                />
+              </span>
+              <div>
+                <Text
+                  variant="pm"
+                  classNames="uppercase mb-1"
+                  fontWeight="medium"
+                  color="text-white"
+                >
+                  Ticket Order
+                </Text>
+                <Heading
+                  variant="h5"
+                  fontWeight="regular"
+                  classNames="uppercase"
+                  color="text-white"
+                >
+                  {
+                    ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
+                      ?.value
+                  }
+                </Heading>
+              </div>
+            </div>
+            <div className="flex flex-col items-end">
+              <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                Reference ID
+              </Text>
+              <Text variant="pm" color="text-white" fontWeight="medium">
+                {truckOrder.trackingId}
+              </Text>
+            </div>
           </div>
 
           <div className="bg-dark-100 p-5 max-sm:px-3 rounded-3xl mb-2">
@@ -327,227 +434,282 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
               Contract Details
             </Text>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Buyer
-              </Text>
-              <Text variant="pxs" color="text-white">
-                {
-                  ((truckOrder.buyerId as BuyerDto)?.userId as UserType)
-                    ?.firstName
-                }{' '}
-                {
-                  ((truckOrder.buyerId as BuyerDto)?.userId as UserType)
-                    ?.lastName
-                }
-              </Text>
-            </div>
+            {/* Grid layout for contract details - more compact and landscape-oriented */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Buyer
+                </Text>
+                <Text variant="pxs" color="text-white">
+                  {
+                    ((truckOrder.buyerId as BuyerDto)?.userId as UserType)
+                      ?.firstName
+                  }{' '}
+                  {
+                    ((truckOrder.buyerId as BuyerDto)?.userId as UserType)
+                      ?.lastName
+                  }
+                </Text>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Transporter
-              </Text>
-              <Text variant="pxs" color="text-white">
-                {(truckOrder.profileId as TransporterDto)?.companyName}
-              </Text>
-            </div>
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Transporter
+                </Text>
+                <Text variant="pxs" color="text-white">
+                  {(truckOrder.profileId as TransporterDto)?.companyName}
+                </Text>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Product type
-              </Text>
-              <Text variant="pxs" color="text-white uppercase">
-                {
-                  ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
-                    ?.value
-                }
-              </Text>
-            </div>
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Product Type
+                </Text>
+                <Text variant="pxs" color="text-white uppercase">
+                  {
+                    ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
+                      ?.value
+                  }
+                </Text>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Ref Number
-              </Text>
-              <Text variant="pxs" color="text-white">
-                {truckOrder.trackingId}
-              </Text>
-            </div>
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Truck Number
+                </Text>
+                <Text variant="pxs" color="text-white">
+                  {(truckOrder.truckId as TruckDto)?.truckNumber}
+                </Text>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Truck Number
-              </Text>
-              <Text variant="pxs" color="text-white">
-                {(truckOrder.truckId as TruckDto)?.truckNumber}
-              </Text>
-            </div>
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Hub
+                </Text>
+                <Text variant="pxs" color="text-white">
+                  {
+                    (
+                      (truckOrder.truckId as TruckDto)
+                        ?.depotHubId as DepotHubDto
+                    )?.name
+                  }
+                </Text>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Hub
-              </Text>
-              <Text variant="pxs" color="text-white">
-                {
-                  ((truckOrder.truckId as TruckDto)?.depotHubId as DepotHubDto)
-                    ?.name
-                }
-              </Text>
-            </div>
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Loading Depot
+                </Text>
+                <Text variant="pxs" color="text-white">
+                  {truckOrder.loadingDepot}
+                </Text>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Loading Depot
-              </Text>
-              <Text variant="pxs" color="text-white">
-                {truckOrder.loadingDepot}
-              </Text>
-            </div>
+              <div className="flex flex-col col-span-2">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Destination
+                </Text>
+                <Text variant="pxs" color="text-white">
+                  {truckOrder.destination}, {truckOrder.city},{' '}
+                  {truckOrder.state}
+                </Text>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Destination
-              </Text>
-              <Text variant="pxs" color="text-white">
-                {truckOrder.destination}, {truckOrder.city}, {truckOrder.state}
-              </Text>
-            </div>
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Truck Capacity
+                </Text>
+                <Text
+                  variant="pxs"
+                  color="text-white"
+                  classNames="inline-flex items-center gap-1"
+                >
+                  <FGCheckCircle height={16} width={16} color="#41D195" />
+                  {formatNumber(
+                    (truckOrder.truckId as TruckDto)?.capacity,
+                  )}{' '}
+                  Ltrs
+                </Text>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Truck Capacity
-              </Text>
-              <Text
-                variant="pxs"
-                color="text-white"
-                classNames="inline-flex items-center gap-1"
-              >
-                <FGCheckCircle height={16} width={16} color="#41D195" />
-                {formatNumber((truckOrder.truckId as TruckDto)?.capacity)} Ltrs
-              </Text>
-            </div>
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Loading Date
+                </Text>
+                <Text variant="pxs" color="text-white">
+                  {truckOrder.loadingDate
+                    ? formatDateDashTime(truckOrder.loadingDate.toString())
+                    : 'TBD'}
+                </Text>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Loading Date
-              </Text>
-              <Text variant="pxs" color="text-white">
-                {truckOrder.loadingDate
-                  ? formatDateDashTime(truckOrder.loadingDate.toString())
-                  : 'TBD'}
-              </Text>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between mb-3">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
-                Status
-              </Text>
-              <Text variant="pxs" color="text-white capitalize">
-                {truckOrder.status}
-              </Text>
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Status
+                </Text>
+                <Text variant="pxs" color="text-white capitalize">
+                  {truckOrder.status}
+                </Text>
+              </div>
             </div>
 
             <div className="border-b border-dashed border-white/20 my-4" />
 
-            <div className="flex flex-wrap items-center justify-between">
-              <Text variant="pxs" color="text-[#FFFFFFB8]">
+            {/* Highlighted Transport Fee - More prominent */}
+            <div className="flex flex-wrap items-center justify-between mt-6 p-3 bg-gradient-to-r from-gold/10 to-transparent rounded-xl border-l-4 border-gold">
+              <Text variant="pm" fontWeight="medium" color="text-gold">
                 Transport Fee
               </Text>
-              <Text variant="pm" color="text-white" fontFamily={sora.className}>
+              <Heading
+                variant="h4"
+                color="text-gold"
+                fontFamily={sora.className}
+                fontWeight="semibold"
+              >
                 ₦{formatNumber(transportCost, true)}
-              </Text>
+              </Heading>
             </div>
-
-            <div className="border-b border-dashed border-white/20 my-4" />
           </div>
 
           {/* Payment Information */}
           <div className="bg-dark-100 p-5 max-sm:px-3 rounded-3xl mb-2">
-            <Text
-              variant="pm"
-              fontWeight="medium"
-              color="text-white"
-              classNames="mb-4"
-            >
-              Platform Payment Information{' '}
-            </Text>
+            <div className="flex justify-between items-center mb-4">
+              <Text variant="pm" fontWeight="medium" color="text-white">
+                Platform Payment Information
+              </Text>
 
-            {userRole === 'transporter' ? (
-              <>
-                <div className="flex flex-wrap items-center justify-between mb-3">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]">
+              {/* Platform Service Charge - Less prominent than transport fee */}
+              {userRole === 'transporter' ? (
+                <div className="flex flex-col items-end">
+                  <Text
+                    variant="pxs"
+                    color="text-[#FFFFFFB8]"
+                    classNames="mb-1"
+                  >
                     Platform Service Charge
-                    {/* (
-                    {userRole === 'transporter' ? '3%' : '4.5%'}) */}
+                    
                   </Text>
                   <Text
-                    variant="ps"
+                    variant="pm"
                     color="text-white"
                     fontFamily={sora.className}
+                    fontWeight="medium"
                   >
-                    ₦
-                    {formatNumber(
-                      userRole === 'transporter'
-                        ? transporterServiceCharge
-                        : buyerServiceCharge,
-                      true,
-                    )}
+                    {isLoadingFees
+                      ? 'Loading...'
+                      : `₦${formatNumber(transporterServiceCharge, true)}`}
                   </Text>
                 </div>
-                <div className="flex flex-wrap items-center justify-between mb-3">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]">
-                    Bank Name
+              ) : (
+                <div className="flex flex-col items-end">
+                  <Text
+                    variant="pxs"
+                    color="text-[#FFFFFFB8]"
+                    classNames="mb-1"
+                  >
+                    Platform Service Charge
+                
                   </Text>
-                  <Text variant="pxs" color="text-white">
-                    FIDELITY BANK PLC
-                  </Text>
-                </div>
-                <div className="flex flex-wrap items-center justify-between mb-3">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]">
-                    Account Name
-                  </Text>
-                  <Text variant="pxs" color="text-white">
-                    FUELS GATE RESOURCES LTD
-                  </Text>
-                </div>
-                <div className="flex flex-wrap items-center justify-between">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]">
-                    Account Number
-                  </Text>
-                  <Text variant="pxs" color="text-white">
-                    5540001642
+                  <Text
+                    variant="pm"
+                    color="text-white"
+                    fontFamily={sora.className}
+                    fontWeight="medium"
+                  >
+                    {isLoadingFees
+                      ? 'Loading...'
+                      : `₦${formatNumber(buyerServiceCharge, true)}`}
                   </Text>
                 </div>
-              </>
-            ) : (
-              <>
-                <div className="flex flex-wrap items-center justify-between mb-3">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]">
-                    Bank Name
-                  </Text>
-                  <Text variant="pxs" color="text-white">
-                    ZENITH BANK PLC
-                  </Text>
-                </div>
-                <div className="flex flex-wrap items-center justify-between mb-3">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]">
-                    Account Name
-                  </Text>
-                  <Text variant="pxs" color="text-white">
-                    FUELS GATE RESOURCES LTD
-                  </Text>
-                </div>
-                <div className="flex flex-wrap items-center justify-between">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]">
-                    Account Number
-                  </Text>
-                  <Text variant="pxs" color="text-white">
-                    1013478130
-                  </Text>
-                </div>
-              </>
-            )}
+              )}
+            </div>
+
+            <div className="border-b border-dashed border-white/20 mb-4" />
+
+            {/* Bank details in grid layout */}
+            <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              {userRole === 'transporter' ? (
+                <>
+                  <div className="flex flex-col">
+                    <Text
+                      variant="pxs"
+                      color="text-[#FFFFFFB8]"
+                      classNames="mb-1"
+                    >
+                      Bank Name
+                    </Text>
+                    <Text variant="pxs" color="text-white">
+                      FIDELITY BANK PLC
+                    </Text>
+                  </div>
+                  <div className="flex flex-col">
+                    <Text
+                      variant="pxs"
+                      color="text-[#FFFFFFB8]"
+                      classNames="mb-1"
+                    >
+                      Account Name
+                    </Text>
+                    <Text variant="pxs" color="text-white">
+                      FUELS GATE RESOURCES LTD
+                    </Text>
+                  </div>
+                  <div className="flex flex-col col-span-2">
+                    <Text
+                      variant="pxs"
+                      color="text-[#FFFFFFB8]"
+                      classNames="mb-1"
+                    >
+                      Account Number
+                    </Text>
+                    <Text variant="pxs" color="text-white">
+                      5540001642
+                    </Text>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex flex-col">
+                    <Text
+                      variant="pxs"
+                      color="text-[#FFFFFFB8]"
+                      classNames="mb-1"
+                    >
+                      Bank Name
+                    </Text>
+                    <Text variant="pxs" color="text-white">
+                      ZENITH BANK PLC
+                    </Text>
+                  </div>
+                  <div className="flex flex-col">
+                    <Text
+                      variant="pxs"
+                      color="text-[#FFFFFFB8]"
+                      classNames="mb-1"
+                    >
+                      Account Name
+                    </Text>
+                    <Text variant="pxs" color="text-white">
+                      FUELS GATE RESOURCES LTD
+                    </Text>
+                  </div>
+                  <div className="flex flex-col col-span-2">
+                    <Text
+                      variant="pxs"
+                      color="text-[#FFFFFFB8]"
+                      classNames="mb-1"
+                    >
+                      Account Number
+                    </Text>
+                    <Text variant="pxs" color="text-white">
+                      1013478130
+                    </Text>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>{' '}
+        </div>
         {/* Close black wrapper */}
       </div>
 

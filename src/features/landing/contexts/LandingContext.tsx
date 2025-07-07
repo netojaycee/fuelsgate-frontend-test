@@ -23,7 +23,7 @@ type LandingProviderProps = {
 };
 
 const LandingProvider = ({ children }: LandingProviderProps) => {
-  const [activeTab, setActiveTab] = useState<Roles>('seller');
+  const [activeTab, setActiveTab] = useState<Roles>('buyer');
   const router = useRouter();
 
   const gotoComingSoon = () => router.push('coming-soon');

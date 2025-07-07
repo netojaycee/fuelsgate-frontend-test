@@ -22,6 +22,7 @@ type LockBtnProps = {
   sellerId?: SellerDto | string;
   affix: 'Volume' | 'Truck';
   disabled?: boolean;
+  isSearch?: boolean;
 };
 
 const LockBtn = ({
@@ -31,7 +32,8 @@ const LockBtn = ({
   productUploadId,
   sellerId,
   affix,
-  disabled
+  disabled,
+  isSearch = false,
 }: LockBtnProps) => {
   const { handleToggle } = useContext(ModalContext);
   const { profile } = useContext(AuthContext);
@@ -87,7 +89,9 @@ const LockBtn = ({
         router.push(`/dashboard/my-orders`);
       }
     } else if (affix === 'Truck') {
-      if (availability === 'available') {
+      if (isSearch) {
+        router.push(`/register?role=buyer`);
+      } else if (!isSearch && availability === 'available') {
         handleToggle &&
           handleToggle({
             state: true,
@@ -124,8 +128,10 @@ const LockBtn = ({
         orderStatus && isHovered
           ? 'View Orders'
           : orderStatus
-            ? 'Locked'
-            : affix === 'Volume' ? 'Lock Volume' : "Request Quote",
+          ? 'Locked'
+          : affix === 'Volume'
+          ? 'Lock Volume'
+          : 'Request Quote',
       )}
       leftIcon={
         orderStatus ? (

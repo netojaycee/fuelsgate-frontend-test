@@ -54,12 +54,12 @@ const RoleRenderer = () => {
     >
       <div className="flex items-center justify-evenly p-1.5 mb-14 border gap-2 border-green-tone-350 mx-auto w-[398px] h-[58px] bg-light-gray-475 rounded-full">
         <RendererTab
-          active={activeTab === 'seller'}
-          onClick={() => handleTabChange('seller')}
+          active={activeTab === 'buyer'}
+          onClick={() => handleTabChange('buyer')}
         >
-          <BookOpen height={18} width={18} color="#1E1E1E" />
-          Suppliers
-        </RendererTab>
+          <Users height={18} width={18} color="#666666" />
+          Traders
+        </RendererTab>{' '}
         <RendererTab
           active={activeTab === 'transporter'}
           onClick={() => handleTabChange('transporter')}
@@ -68,11 +68,11 @@ const RoleRenderer = () => {
           Transporters
         </RendererTab>
         <RendererTab
-          active={activeTab === 'buyer'}
-          onClick={() => handleTabChange('buyer')}
+          active={activeTab === 'seller'}
+          onClick={() => handleTabChange('seller')}
         >
-          <Users height={18} width={18} color="#666666" />
-          Traders
+          <BookOpen height={18} width={18} color="#1E1E1E" />
+          Suppliers
         </RendererTab>
       </div>
 

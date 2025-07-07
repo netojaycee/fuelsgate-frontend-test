@@ -28,8 +28,13 @@ const RFQDetailModal = () => {
     openModal?.data.truckOrderId,
   );
   const router = useRouter();
-  const gotoTicket = () => router.push(`${RFQ_TICKET}/${data?.data?._id}`);
-  console.log(data?.data);
+  const { handleClose } = useContext(ModalContext);
+  
+  const gotoTicket = () => {
+    handleClose(); // Close the modal
+    router.push(`${RFQ_TICKET}/${data?.data?._id}`);
+  };
+  // console.log(data?.data);
 
   return (
     <>

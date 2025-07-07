@@ -2,6 +2,7 @@ import React, { forwardRef, memo } from 'react';
 import { Button } from '../../ui/button';
 import clsx from 'clsx';
 import { FontWeight, getFontWeight } from '@/lib/utils';
+import { Loader2 } from 'lucide-react';
 
 type TCustomButton = {
   label?: string;
@@ -105,7 +106,7 @@ const CustomButton = forwardRef<HTMLButtonElement, TCustomButton>(
       >
         <span className="relative !flex items-center justify-center animate gap-3">
           {loading ? (
-            'Loading...'
+            <Loader2 className="animate-spin h-5 w-5 text-white" />
           ) : (
             <>
               {leftIcon}

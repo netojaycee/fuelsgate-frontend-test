@@ -32,36 +32,35 @@ const Buyer = () => {
         fontWeight="regular"
         lineHeight="leading-[45px]"
       >
-        Find depot prices, direct from{' '}
-        <span className="text-gold font-semibold">suppliers</span>
+        Stop waiting for <span className="text-gold font-semibold">trucks</span>{' '}
+        . Start loading faster.
       </Heading>
       <Heading
         variant="h6"
         classNames="text-center mb-20"
         color="text-dark-gray-400"
       >
-        When you trade on Fuelsgate, there are more options to buy PMS (Petrol),
-        AGO (Diesel), ATK (Jet Fuel), LPG (Cooking Gas), CNG (Automobile Gas),
-        because we work with all the suppliers.
+        Connect directly with trucks already at refineries, depots & truck
+        parks, for bridging or local delivery. PMS, AGO, ATK, LPG, CNG.
       </Heading>
 
       <div className="grid grid-cols-2 max-lg:grid-cols-1 items-start gap-10 max-sm:gap-2">
         <div className="flex flex-col h-full gap-5 py-5">
           <Checklist
-            title="Find products & prices daily"
-            description="Direct access to suppliers & transporters on the go"
+            title="Updated with new trucks hourly"
+            description="New trucks arrive the depot area throughout the each day"
           />
           <Checklist
-            title="Search & deal with every depot"
-            description="Access to depots in Lagos, Port Harcourt, Calabar, Warri, Oghara, Koko"
+            title="Search by exact truck"
+            description="Filter by depot, product, truck capacity & local or bridging"
           />
           <Checklist
-            title="Compare sellers & transporters offers"
-            description="Get only the best deals"
+            title="Deal Directly with Drivers"
+            description="Request quotes, negotiate, meet & pay the driver directly"
           />
           <Checklist
-            title="Bargain all offers privately"
-            description="Flexibility in every transaction"
+            title="Access kry deposits"
+            description="Active at Lagos depots & Dangote refinery, Oghere Park & more locations launching soon."
           />
           <div>
             <Link

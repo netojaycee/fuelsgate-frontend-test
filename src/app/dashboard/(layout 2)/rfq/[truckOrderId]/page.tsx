@@ -72,7 +72,7 @@ const TruckOrderDetails = () => {
 
             <div className="relative pt-12 px-8 max-md:px-4 max-sm:px-3 grid grid-cols-12 gap-12 max-lg:gap-6">
               {' '}
-              <div className="col-span-5 max-lg:col-span-6 max-md:col-span-12">
+              <div className="col-span-7 max-md:col-span-12">
                 <RfqSlip truckOrder={data.data} />
 
                 {/* {(role === 'buyer' || role === 'transporter') && (
@@ -94,7 +94,7 @@ const TruckOrderDetails = () => {
                   </Alert>
                 )} */}
               </div>
-              <div className="col-span-7 max-lg:col-span-6 max-md:col-span-12 py-1">
+              <div className="col-span-5 max-md:col-span-12 py-1">
                 <div className="flex items-center justify-between gap-2 flex-wrap mb-3">
                   {' '}
                   <Heading

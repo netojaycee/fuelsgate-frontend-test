@@ -225,7 +225,7 @@ const Hero = () => {
         >
           Save time, money & effort with Fuelsgate productivity tool. The
           smartest way to source & book exact trucks you need – Instantly
-          connect by size, product type and locations at depots, Dangote
+          connect by size, product type and locations at Depots, Dangote
           refinery & Truck parks.
         </Text>
         <div className="space-y-4">

@@ -52,27 +52,29 @@ const RoleRenderer = () => {
       id="roles"
       className="relative bg-light-gray-250 rounded-t-[40px] py-20 min-h-[897px] -mt-10"
     >
-      <div className="flex items-center justify-evenly p-1.5 mb-14 border gap-2 border-green-tone-350 mx-auto w-[398px] h-[58px] bg-light-gray-475 rounded-full">
+      <div className="flex items-center justify-evenly p-0.5 sm:p-1.5 mb-14 border gap-2 border-green-tone-350 mx-auto w-[95%] max-w-[380px] h-[58px] bg-light-gray-475 rounded-full">
         <RendererTab
           active={activeTab === 'buyer'}
           onClick={() => handleTabChange('buyer')}
         >
-          <Users height={18} width={18} color="#666666" />
-          Traders
+          <Users height={16} width={16} color="#666666" />
+          <p className="text-xs sm:text-sm">Traders</p>
         </RendererTab>{' '}
         <RendererTab
           active={activeTab === 'transporter'}
           onClick={() => handleTabChange('transporter')}
         >
-          <FGTruck height={18} width={18} color="#666666" />
-          Transporters
+          <FGTruck height={16} width={16} color="#666666" />
+
+          <p className="text-xs sm:text-sm">Transporters</p>
         </RendererTab>
         <RendererTab
           active={activeTab === 'seller'}
           onClick={() => handleTabChange('seller')}
         >
-          <BookOpen height={18} width={18} color="#1E1E1E" />
-          Suppliers
+          <BookOpen height={16} width={16} color="#1E1E1E" />
+
+          <p className="text-xs sm:text-sm">Suppliers</p>
         </RendererTab>
       </div>
 

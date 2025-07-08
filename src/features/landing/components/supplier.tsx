@@ -82,7 +82,7 @@ const Supplier = () => {
               height="h-12"
             />
           ) : (
-            <div className="flex items-center justify-start mt-auto">
+            <div className="flex sm:items-center justify-start mt-auto flex-col sm:flex-row gap-4">
               <CustomButton
                 onClick={handleSellerSignUp}
                 variant="glow"

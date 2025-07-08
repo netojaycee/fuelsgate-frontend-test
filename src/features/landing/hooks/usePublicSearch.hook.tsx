@@ -47,6 +47,7 @@ const usePublicSearch = (isSearchPage = false) => {
     value: string;
   } | null>(null);
   const [volume, setVolume] = useState<string>('');
+  const [urlParamsInitialized, setUrlParamsInitialized] = useState(false);
 
   // Fetch public data without authentication requirements
   const { useFetchPublicDepotHubs } = usePublicDepotHub();
@@ -209,7 +210,7 @@ const usePublicSearch = (isSearchPage = false) => {
 
   // Initialize values from URL when on search page
   useEffect(() => {
-    if (isSearchPage) {
+    if (isSearchPage && searchParams) {
       // Get values from URL
       const productId = searchParams.get('productId');
       const depotHubId = searchParams.get('depotHubId');
@@ -238,10 +239,46 @@ const usePublicSearch = (isSearchPage = false) => {
           );
           if (size) setSelectedSize(size);
         }
+
+        setUrlParamsInitialized(true);
+      } else {
+        // If no URL params, reset selections
+        setUrlParamsInitialized(true);
       }
+    } else if (!isSearchPage) {
+      // Not on search page, mark as initialized
+      setUrlParamsInitialized(true);
     }
   }, [isSearchPage, searchParams, products, depots]);
 
+
+  const constructedSearchQuery = useMemo(() => {
+    if (
+      isSearchPage &&
+      urlParamsInitialized &&
+      areRequiredFieldsPresent &&
+      selectedProduct &&
+      depot &&
+      selectedSize
+    ) {
+      return `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&status=available&limit=20&page=`;
+    }
+    return ''; // Empty query will prevent the hook from running
+  }, [
+    isSearchPage,
+    urlParamsInitialized,
+    areRequiredFieldsPresent,
+    selectedProduct,
+    depot,
+    selectedSize,
+  ]);
+
+  useEffect(() => {
+    if (constructedSearchQuery) {
+      setSearchQuery(constructedSearchQuery);
+      setHasSearched(true);
+    }
+  }, [constructedSearchQuery]);
   // Run search if all required fields are present (separate effect)
   useEffect(() => {
     if (
@@ -272,7 +309,10 @@ const usePublicSearch = (isSearchPage = false) => {
     hasNextPage: truckHasNextPage,
     isFetchingNextPage: loadingFetchNextTruckPage,
     refetch: refetchTrucks,
-  } = useFetchPublicTrucks(searchQuery, 'PUBLIC_SEARCH_TRUCKS');
+  } = useFetchPublicTrucks(
+    constructedSearchQuery || undefined,
+    'PUBLIC_SEARCH_TRUCKS',
+  );
 
   // Search handler
   const handleSearchTruckClick = useCallback(() => {
@@ -344,6 +384,7 @@ const usePublicSearch = (isSearchPage = false) => {
     hasSearched,
     searchQuery,
     areRequiredFieldsPresent,
+    urlParamsInitialized,
 
     // Search results
     trucksData,

@@ -42,12 +42,13 @@ const SearchFilterContent = ({
     handleSizeChange,
     handleSearchTruckClick,
     areRequiredFieldsPresent,
+    isSearching,
   } = usePublicSearch(search);
   return (
     <>
-      <div className="relative col-span-7 max-xl:col-span-12 grid max-sm:grid-cols-1 items-center gap-2 grid-cols-3">
+      <div className="relative col-span-7 max-xl:col-span-12 grid  items-center gap-2 grid-cols-3">
         <CustomSelect
-          label="Select Product"
+          label="Product"
           classNames={search ? '' : 'text-white'}
           name="product"
           options={products}
@@ -69,7 +70,7 @@ const SearchFilterContent = ({
 
         <CustomSelect
           label="Depot Hub"
-          classNames={search ? '' : 'text-white'}
+          classNames={search ? '' : 'text-white text-left'}
           name="depot"
           options={depots}
           value={depot || undefined}
@@ -83,7 +84,7 @@ const SearchFilterContent = ({
 
         <CustomSelect
           label="Truck Size"
-          classNames={search ? '' : 'text-white'}
+          classNames={search ? '' : 'text-white text-left'}
           name="truckSize"
           options={TRUCK_SIZES}
           value={selectedSize || undefined}
@@ -102,7 +103,7 @@ const SearchFilterContent = ({
           label="Search..."
           width="w-[250px]"
           height="h-12"
-          loading={isLoading}
+          loading={isSearching || isLoading}
           disabled={!areRequiredFieldsPresent}
           classNames={`transition-transform duration-200 ${
             areRequiredFieldsPresent

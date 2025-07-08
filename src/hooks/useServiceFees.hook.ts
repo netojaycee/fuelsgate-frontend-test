@@ -48,8 +48,8 @@ export const useServiceFees = () => {
     useEffect(() => {
         if (data) {
             setServiceFees({
-                transporterServiceFee: data.transporterServiceFee || 0.03,
-                traderServiceFee: data.traderServiceFee || 0.045
+                transporterServiceFee: data.transporterServiceFee/100 || 0.03,
+                traderServiceFee: data.traderServiceFee/100 || 0.045
             });
         }
     }, [data]);

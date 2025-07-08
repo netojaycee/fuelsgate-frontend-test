@@ -94,7 +94,7 @@ const CustomSelect = forwardRef<
         fontSize: '14px',
         fontWeight: 'normal',
         height: 'auto',
-        minHeight: height ?? '56px',
+        minHeight: height ?? '40px',
         borderRadius: borderRadius ?? '6px',
         borderColor: '#D0D5DD',
         boxShadow: 'none',

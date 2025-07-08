@@ -25,12 +25,26 @@ export default function TruckSearchPage() {
     isSearching,
     hasSearched,
     areRequiredFieldsPresent,
+    urlParamsInitialized,
   } = usePublicSearch(true);
 
   useEffect(() => {
       const mergedDataArray = trucks?.pages?.flatMap((page) => page.data) || [];
       setTrucksData(mergedDataArray?.flatMap((item) => item.trucks));
     }, [trucks]);
+
+    if (!urlParamsInitialized) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold mx-auto"></div>
+              <p className="mt-4 text-gray-600">Initializing search...</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
   return (
     <div className="bg-white min-h-screen ">
@@ -52,7 +66,7 @@ export default function TruckSearchPage() {
             </p>
           </div>
           <div className="grid grid-cols-12 gap-4 max-w-5xl mx-auto">
-            <SearchFilter isLoading={isSearching} search />
+            <SearchFilter isLoading={isLoadingTrucks} search />
           </div>
         </div>
       </div>
@@ -69,11 +83,11 @@ export default function TruckSearchPage() {
             )}
         </div>
 
-        {isLoadingTrucks || isSearching ? (
+        {isLoadingTrucks || !hasSearched ? (
           <div className="flex flex-col items-center justify-center h-60 bg-light-gray-200 rounded-lg">
             <Loader className="animate-spin mb-4 text-gold" size={40} />
             <Text variant="pl" fontWeight="medium">
-              {isSearching ? 'Searching for trucks...' : 'Loading trucks...'}
+              {'Searching for trucks...'}
             </Text>
             <Text variant="ps" color="text-dark-gray-300">
               This may take a moment

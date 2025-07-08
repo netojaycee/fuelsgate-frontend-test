@@ -68,12 +68,12 @@ const RatingModal: React.FC<RatingModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>Rate Your Experience</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto pr-2">
           {/* User Info */}
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
             <Avatar className="h-12 w-12">
@@ -133,23 +133,23 @@ const RatingModal: React.FC<RatingModalProps> = ({
               {review.length}/500 characters
             </Text>
           </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3 justify-end">
-            <CustomButton
-              variant="secondary"
-              label="Cancel"
-              onClick={handleClose}
-              disabled={isPending}
-            />
-            <CustomButton
-              variant="primary"
-              label="Submit Rating"
-              onClick={handleSubmit}
-              loading={isPending}
-              disabled={rating === 0}
-            />
-          </div>
+        </div>
+        
+        {/* Action Buttons - Fixed at the bottom */}
+        <div className="flex gap-3 justify-end pt-4 mt-2 border-t">
+          <CustomButton
+            variant="secondary"
+            label="Cancel"
+            onClick={handleClose}
+            disabled={isPending}
+          />
+          <CustomButton
+            variant="primary"
+            label="Submit Rating"
+            onClick={handleSubmit}
+            loading={isPending}
+            disabled={rating === 0}
+          />
         </div>
       </DialogContent>
     </Dialog>

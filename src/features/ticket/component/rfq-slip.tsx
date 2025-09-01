@@ -395,7 +395,7 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
                 >
                   <FGCheckCircle height={16} width={16} color="#41D195" />
                   {formatNumber(
-                    (truckOrder?.truckId as TruckDto)?.capacity,
+                    (truckOrder?.truckId as TruckDto)?.capacity ?? 0,
                   )}{' '}
                   Ltrs
                 </Text>

@@ -139,7 +139,7 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
               }
             </span>
             <span className="flex-shrink-0">
-              {formatNumber((truckOrder.truckId as TruckDto)?.capacity)} Ltrs
+              {formatNumber((truckOrder.truckId as TruckDto)?.capacity ?? 0)} Ltrs
             </span>
             {truckOrder.rfqStatus === 'pending' ? (
               <span className="text-orange-500 ml-3 flex-shrink-0 italic">

@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronDownIcon } from 'lucide-react';
 import useDepotHubHook from '@/hooks/useDepotHub.hook';
 import { DepotHubDto } from '@/types/depot-hub.types';
+import useOrderHook from '@/hooks/useOrder.hook';
 
 const sora = Sora({ subsets: ['latin'] });
 const LOCK_TRUCK = 'lOCK_TRUCK';
@@ -40,9 +41,9 @@ const LockTruckModal = () => {
   const { handleClose, openModal } = useContext(ModalContext);
   const { truckId, truckNumber, depotHub, truckSize, product, state, city } =
     openModal?.data;
-  const { useCreateTruckOrder } = useTruckOrderHook();
+  const { useCreateOrder } = useOrderHook();
   const { mutateAsync: createNewOrder, isPending: isLoading } =
-    useCreateTruckOrder();
+    useCreateOrder();
 
   const {
     setError,
@@ -85,9 +86,11 @@ const LockTruckModal = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onSubmit = async (data: TruckOrderFormDto) => {
+  const onSubmit = async (data: any) => {
     try {
-      await createNewOrder(data);
+      console.log(data, 'data in LockTruckModal onSubmit');
+      await createNewOrder({...data, type: 'truck'});
+      window.location.href = `/dashboard/my-rfq/`;
     } catch (error: any) {
       renderErrors(error?.errors, setError);
     }
@@ -128,7 +131,7 @@ const LockTruckModal = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative z-[1] before:z-0 before:absolute before:bg-gray-200 before:rounded-lg before:animate-ping before:h-full before:w-full"
+                // className="relative z-[1] before:z-2 before:absolute before:bg-gray-200 before:rounded-lg  before:h-full before:w-full"
               >
                 <ChevronDownIcon className="w-4 h-4" />
               </Button>

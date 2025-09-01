@@ -20,6 +20,7 @@ import useBuyerDashboardHook from '../hooks/useBuyerDashboard.hook';
 import { TRUCK_SIZES } from '@/data/truck-sizes';
 import { formatNumber } from '@/utils/formatNumber';
 import Marquee from 'react-fast-marquee';
+import { LOAD_STATUS_OPTIONS } from '@/modals/list-truck-modal';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -57,13 +58,17 @@ const BuyerDashboard = () => {
     handleVolumeChange,
     selectedState,
     buyerData,
+    selectedLoadStatus,
     // loadingBuyerAnalytics,
     handleDepotChange,
+    handleLoadStatusChange,
     handleStateChange,
     handleProductsChange,
     handleSizeChange,
     handleRefetchClick,
     handleLGAChange,
+    selectedSize: selectedSizeHeader,
+    selectedProduct: selectedProductHeader,
   } = useBuyerDashboardHook();
 
   return (
@@ -78,7 +83,7 @@ const BuyerDashboard = () => {
             lineHeight="leading-[38px]"
             classNames="max-w-[511px] mr-auto"
           >
-            A Digital Platform For Bulk Fuel Procurement
+            A Digital Platform For Bulk Fuel Transactions
           </Heading>
 
           {/* <div className="flex flex-wrap items-center gap-3">
@@ -106,7 +111,7 @@ const BuyerDashboard = () => {
         {/* SEARCH AND FILTER CARD AND INPUTS */}
         <div className="bg-white border border-light-gray-450 rounded-[20px]">
           <div className="flex flex-wrap items-center gap-3 px-9 py-4 max-sm:px-4 border-b border-mid-gray-350">
-            <CustomButton
+            {/* <CustomButton
               variant="plain"
               onClick={() => handleTabClick('seller')}
               width="w-fit"
@@ -126,7 +131,7 @@ const BuyerDashboard = () => {
               fontWeight="semibold"
               leftIcon={<FGUserHeart color="#666666" />}
               label="Sellers"
-            />
+            /> */}
             <CustomButton
               variant="plain"
               onClick={() => handleTabClick('transporter')}
@@ -200,12 +205,14 @@ const BuyerDashboard = () => {
             <div className="grid grid-cols-12 gap-2 items-center justify-stretch bg-light-gray-200 p-3 px-4 rounded-[10px]">
               <div
                 className={cn(
-                  'relative col-span-7 max-xl:col-span-12 grid max-sm:grid-cols-1 items-center gap-2',
-                  activeTab === 'transporter' ? 'grid-cols-3' : 'grid-cols-2',
+                  'relative col-span-12 grid max-sm:grid-cols-1 items-center gap-2',
+                  activeTab === 'transporter'
+                    ? 'grid-cols-4'
+                    : 'grid-cols-[3fr_3fr_3fr_1fr]',
                 )}
               >
                 <CustomSelect
-                  label="Select Product"
+                  label="Product"
                   name="product"
                   options={products}
                   value={selectedProduct}
@@ -224,30 +231,50 @@ const BuyerDashboard = () => {
                   isDisabled={loadingDepots}
                 />
 
-                {activeTab === 'transporter' && (
-                  <CustomSelect
-                    label="Truck Size"
-                    name="truckSize"
-                    options={TRUCK_SIZES}
-                    value={selectedSize}
-                    onChange={handleSizeChange}
-                  />
+                {activeTab === 'transporter' ? (
+                  <>
+                    <CustomSelect
+                      label="Truck Size"
+                      name="truckSize"
+                      options={TRUCK_SIZES}
+                      value={selectedSize}
+                      onChange={handleSizeChange}
+                    />
+                    <CustomSelect
+                      label="Load Status"
+                      name="loadStatus"
+                      options={LOAD_STATUS_OPTIONS}
+                      value={selectedLoadStatus}
+                      onChange={handleLoadStatusChange}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <CustomInput
+                      type="number"
+                      name="litres"
+                      label="Volume"
+                      classNames="grow"
+                      defaultValue={volume}
+                      onChange={handleVolumeChange}
+                      affix="Ltr"
+                    />
+                    <CustomButton
+                      variant="primary"
+                      type="button"
+                      label="Search"
+                      width="w-fit max-sm:w-full"
+                      classNames="!rounded-lg mt-5"
+                      leftIcon={<Search />}
+                      onClick={handleRefetchClick}
+                    />
+                  </>
                 )}
               </div>
 
               <div className="col-span-12 md:flex md:items-end gap-2 bg-mid-gray-150 rounded-lg px-4 py-2">
-                {activeTab === 'seller' ? (
-                  <CustomInput
-                    type="number"
-                    name="litres"
-                    label="Volume"
-                    classNames="grow"
-                    defaultValue={volume}
-                    onChange={handleVolumeChange}
-                    affix="Ltr"
-                  />
-                ) : (
-                  <div className="grow grid grid-cols-1 md:grid-cols-2 gap-2">
+                {activeTab === 'transporter' && (
+                  <div className="grow grid grid-cols-1 md:grid-cols-[4fr_4fr_1fr] gap-2">
                     <CustomSelect
                       label="Delivery State"
                       name="state"
@@ -264,17 +291,18 @@ const BuyerDashboard = () => {
                       value={selectedLGA}
                       onChange={handleLGAChange}
                     />
+
+                    <CustomButton
+                      variant="primary"
+                      type="button"
+                      label="Search"
+                      width="w-fit max-sm:w-full"
+                      classNames="!rounded-lg mt-6"
+                      leftIcon={<Search />}
+                      onClick={handleRefetchClick}
+                    />
                   </div>
                 )}
-                <CustomButton
-                  variant="primary"
-                  type="button"
-                  label="Search"
-                  width="w-fit max-sm:w-full"
-                  classNames="!rounded-lg mt-5 md:mt-0"
-                  leftIcon={<Search />}
-                  onClick={handleRefetchClick}
-                />
               </div>
             </div>
           </div>
@@ -289,7 +317,10 @@ const BuyerDashboard = () => {
             fontFamily={sora.className}
             color="text-dark-500"
           >
-            {depot && <q>{depot?.label}</q>}
+            {depot && <q>{depot?.label}</q>}{' '}
+            {selectedSizeHeader && <q>{selectedSizeHeader?.label}</q>}{' '}
+            {selectedProductHeader && <q>{selectedProductHeader?.label}</q>}{' '}
+            {selectedLoadStatus && <q>{selectedLoadStatus?.label}</q>}{' '}
           </Heading>
           {activeTab === 'seller' && buyerData?.data?.totalSellers ? (
             <div className="h-7 bg-deep-gray-300 py-1 px-[10px] rounded-full w-fit">

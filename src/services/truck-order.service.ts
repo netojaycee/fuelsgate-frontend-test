@@ -25,6 +25,11 @@ export const updateTruckOrderRFQStatusRequest = async (data: unknown, id: string
   return await requestHandler('patch', url, data)
 }
 
+export const rejectTruckOrderRequest = async (data: unknown, id: string) => {
+  const url = `/truck-order/reject/${id}`;
+  return await requestHandler('post', url, data)
+}
+
 export const updateTruckOrderPriceRequest = async (data: unknown, id: string) => {
   const url = `/truck-order/price/${id}`;
   return await requestHandler('patch', url, data)
@@ -34,3 +39,5 @@ export const getTruckOrderDetailsRequest = async (id: string) => {
   const url = `/truck-order/${id}`;
   return await requestHandler('get', url)
 }
+
+

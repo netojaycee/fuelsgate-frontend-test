@@ -27,7 +27,7 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
   const userRole = user?.data?.role;
 
   const handleTruckRfqDetailModal = () => {
-    if (truckOrder.rfqStatus !== 'accepted') {
+    if (truckOrder.status === 'pending' || truckOrder.status === 'cancelled') {
       router.push(`/dashboard/my-rfq/${truckOrder._id}`);
     } else {
       handleToggle &&
@@ -108,10 +108,16 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
   };
 
   return (
-    <div className="relative bg-white flex items-center justify-between border border-mid-gray-550 p-4 rounded-[10px] min-h-[120px] max-h-[120px]">
-      <div className="flex items-start gap-4 flex-1 min-w-0 pr-4">
+    <div className="relative bg-white flex flex-col md:flex-row items-start md:items-center justify-between border border-mid-gray-550 p-4 rounded-[10px] min-h-[120px] max-h-[none] md:max-h-[120px]">
+      <div className="flex items-start gap-4 flex-1 min-w-0 pr-0 md:pr-4 w-full">
         <div className="h-[50px] w-[50px] rounded-[7px] bg-blue-tone-100 flex items-center justify-center flex-shrink-0">
-          <FGTruckFill height={31} width={31} color="#1868DB" />
+          <FGTruckFill
+            height={31}
+            width={31}
+            color={
+              ((truckOrder.truckId as TruckDto)?.productId as ProductDto)?.color || '#1868DB'
+            }
+          />
         </div>
         <div className="flex-1 min-w-0">
           <Text
@@ -120,11 +126,20 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
             fontWeight="semibold"
             classNames="flex flex-wrap items-center gap-2 mb-1"
           >
-            <span className="inline-flex items-center justify-center bg-green-tone-700 w-[43px] h-[17px] text-white rounded-[2px] uppercase font-medium text-xs flex-shrink-0">
-              {((truckOrder.truckId as TruckDto).productId as ProductDto).value}
+            <span
+              style={{
+              backgroundColor:
+                ((truckOrder.truckId as TruckDto)?.productId as ProductDto)?.color || '#1868DB',
+              }}
+              className="inline-flex items-center justify-center w-[43px] h-[17px] text-white rounded-[2px] uppercase font-medium text-xs flex-shrink-0"
+            >
+              {
+                ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
+                  ?.value
+              }
             </span>
             <span className="flex-shrink-0">
-              {formatNumber((truckOrder.truckId as TruckDto).capacity)} Ltrs
+              {formatNumber((truckOrder.truckId as TruckDto)?.capacity)} Ltrs
             </span>
             {truckOrder.rfqStatus === 'pending' ? (
               <span className="text-orange-500 ml-3 flex-shrink-0 italic">
@@ -135,17 +150,17 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
                 &#8358; {formatNumber(truckOrder.price, true)}
               </span>
             )}
-          </Text>{' '}
+          </Text>
           {renderUserInfo()}
           <Text
             variant="ps"
             color="text-dark-gray-50"
             fontWeight="regular"
-            classNames="mb-1"
+            classNames="mb-1 md:flex items-center"
           >
             Destination -{' '}
             <span
-              className="text-medium truncate inline-block max-w-[200px]"
+              className="text-medium truncate inline-block max-w-full md:max-w-[200px]"
               title={`${truckOrder.destination}, ${truckOrder.city}, ${truckOrder.state}`}
             >
               {truckOrder.destination}, {truckOrder.city}, {truckOrder.state}.
@@ -153,8 +168,8 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
           </Text>
         </div>
       </div>
-      <div className="flex-shrink-0 text-right min-w-[140px]">
-        <Text variant="ps" color="text-dark-gray-50" classNames="mb-3">
+      <div className="flex flex-row justify-between items-center w-full mt-4 md:mt-0 md:flex-col md:justify-end md:items-end md:w-auto md:min-w-[140px] text-right">
+        <Text variant="ps" color="text-dark-gray-50" classNames="mb-3 md:mb-3">
           {timeDiffDay(truckOrder.createdAt as Date)}
         </Text>
         <div className="flex items-center gap-2 justify-end">

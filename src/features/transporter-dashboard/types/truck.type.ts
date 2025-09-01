@@ -7,14 +7,16 @@ export interface TruckDto {
   _id?: string
   profileId: string | any
   availability?: 'locked' | 'available'
-  truckNumber: string
-  capacity: string 
-  productId: string | any
-  depotHubId: string | DepotHubDto
-  depot: string
-  // currentState: string;
-  // currentCity: string;
+  truckNumber?: string // Optional for flatbed trucks
+  capacity?: string // Optional for flatbed trucks
+  productId?: string | any // Optional for flatbed trucks
+  depotHubId?: string | DepotHubDto // Optional for flatbed trucks
+  depot?: string // Optional for flatbed trucks
+  loadStatus?: 'loaded' | 'unloaded' // Optional for flatbed trucks
+  truckType: 'tanker' | 'flatbed'
+  currentState?: string
+  currentCity?: string
   status?: TruckStatus
   truckOrderId?: string
-  profileType: string
+  profileType?: string | undefined
 }

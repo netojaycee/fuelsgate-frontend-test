@@ -7,10 +7,13 @@ import { LandingProvider } from '@/features/landing/contexts/LandingContext';
 export default function Home() {
   return (
     <LandingProvider>
+      <div className='bg-black'>
       <Hero />
       <Productivity />
+      </div>
       <RoleRenderer />
       <DashboardFooter />
+
     </LandingProvider>
   );
 }

@@ -26,6 +26,8 @@ const useBuyerDashboardHook = () => {
     depot,
     selectedSize,
     selectedProduct,
+    selectedLoadStatus,
+    handleLoadStatusChange,
     handleDepotChange,
     handleStateChange,
     handleProductsChange,
@@ -49,6 +51,16 @@ const useBuyerDashboardHook = () => {
   const [totalProducts, setTotalProducts] = useState<number>(0);
 
   const { useFetchTrucks } = useTruckHook();
+  const shouldFetchTrucks =
+    selectedProduct?.value &&
+    depot?.value &&
+    selectedLoadStatus?.value &&
+    selectedSize?.value &&
+    selectedProduct?.value !== '' &&
+    depot?.value !== '' &&
+    selectedSize?.value !== '' &&
+    selectedLoadStatus?.value !== '';
+
   const {
     data: trucks,
     isFetching: isLoadingTrucks,
@@ -59,7 +71,8 @@ const useBuyerDashboardHook = () => {
   } = useFetchTrucks(
     `?productId=${selectedProduct?.value ?? ''}&depotHubId=${
       depot?.value ?? ''
-    }&size=${selectedSize?.value ?? ''}&status=available&limit=20&page=`,
+    }&size=${selectedSize?.value ?? ''}&loadStatus=${selectedLoadStatus?.value ?? ''}&status=available&limit=20&page=`,
+    { enabled: !!shouldFetchTrucks }
   );
 
   const { useFetchProductUploads } = useProductUploadHook();
@@ -107,6 +120,10 @@ const useBuyerDashboardHook = () => {
       showToast('Please select your destination LGA', 'error');
       return false;
     }
+    if (!selectedLoadStatus) {
+      showToast('Please select load status', 'error');
+      return false;
+    }
     return true;
   }, [
     selectedProduct,
@@ -115,6 +132,7 @@ const useBuyerDashboardHook = () => {
     selectedState,
     selectedLGA,
     showToast,
+    selectedLoadStatus,
   ]);
 
   const { useFetchBuyerAnalytics, useFetchBuyerScrollData } = useBuyerHook();
@@ -143,7 +161,7 @@ const useBuyerDashboardHook = () => {
   };
 
   const [activeTab, setActive] = useState<TabTypes>(
-    isTabType(_activeTab) ? _activeTab : 'seller',
+    isTabType(_activeTab) ? _activeTab : 'transporter',
   );
 
   const [isMounted, setIsMounted] = useState<boolean>(false);
@@ -258,6 +276,7 @@ const useBuyerDashboardHook = () => {
     loadingDepots,
     loadingProducts,
     selectedLGA,
+    selectedLoadStatus,
     selectedState,
     loadingState,
     loadingLGA,
@@ -283,6 +302,7 @@ const useBuyerDashboardHook = () => {
     handleDepotChange,
     handleStateChange,
     handleProductsChange,
+    handleLoadStatusChange,
     handleSizeChange,
     handleLGAChange,
     buyerScrollData,

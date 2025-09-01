@@ -116,6 +116,7 @@ const LockBtn = ({
 
   return (
     <CustomButton
+    hideLabel
       disabled={disabled}
       variant={cn(orderStatus ? 'primary' : 'white')}
       classNames={cn(
@@ -144,25 +145,25 @@ const LockBtn = ({
             />
           ) : undefined
         ) : (
-          // <LockKeyholeOpen
-          //   className="shrink-0"
-          //   height={18}
-          //   width={18}
-          //   color="#666666"
-          // />
-          <Receipt
+          <LockKeyholeOpen
             className="shrink-0"
             height={18}
             width={18}
             color="#666666"
           />
+          // <Receipt
+          //   className="shrink-0"
+          //   height={18}
+          //   width={18}
+          //   color="#666666"
+          // />
         )
       }
       height="h-[38px]"
       border="border-mid-gray-400 border"
       fontSize="text-xs"
       fontWeight="medium"
-      width="w-[122px]"
+      width="w-auto"
       onClick={handleOnClick}
       onMouseLeave={() => setIsHovered(false)}
       onMouseEnter={() => setIsHovered(true)}

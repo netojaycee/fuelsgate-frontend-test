@@ -6,8 +6,8 @@ import { CornerUpLeft } from "lucide-react";
 import GoBack from "@/features/authentication/components/go-back";
 
 export const metadata: Metadata = {
-  title: "Fuelsgate | Onboarding",
-  description: "A Digital Platform For Bulk Fuel Procurement",
+  title: 'Fuelsgate | Onboarding',
+  description: 'A Digital Platform For Bulk Fuel Transactions',
 };
 
 

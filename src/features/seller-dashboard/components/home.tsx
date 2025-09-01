@@ -62,7 +62,7 @@ const Home = () => {
           fontSize="text-sm"
           leftIcon={<Plus height={24} width={24} />}
           classNames="gap-1 rounded-lg p-2"
-          onClick={openUploadProductModal}
+          onClick={(openUploadProductModal)}
         />
       </div>
 

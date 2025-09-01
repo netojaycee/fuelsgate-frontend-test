@@ -32,8 +32,8 @@ const TrucksSearchAndFilter: React.FC<SearchAndFilterProps> = ({
         {/* <Text variant="h4" color="text-gray-900" fontWeight="semibold">
           My Trucks
         </Text> */}
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex md:flex-row flex-col items-center gap-3 justify-between">
+          <div className="relative w-full md:w-60">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Search className="w-4 h-4 text-gray-400" />
             </div>
@@ -46,7 +46,7 @@ const TrucksSearchAndFilter: React.FC<SearchAndFilterProps> = ({
             />
           </div>
           
-          <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1 w-full md:w-auto h-10">
             <button
               onClick={() => handleFilter('all')}
               className={`px-3 py-1.5 text-sm rounded-md transition-all ${

@@ -93,7 +93,7 @@ const Ticket = () => {
                     color="text-dark-500"
                     fontWeight="semibold"
                   >
-                    Procurement Ticket
+                    Transaction Ticket
                   </Heading>
 
                   {data?.data.expiresIn && (

@@ -22,9 +22,14 @@ const useTruckHook = () => {
   const { user } = useContext(AuthContext);
   const role = user?.data?.role;
 
-  const useFetchTrucks = (query?: string, queryKey?: string) => {
+  const useFetchTrucks = (
+    query?: string,
+    options?: { queryKey?: string; enabled?: boolean },
+  ) => {
+    const { queryKey, enabled } = options || {};
     return useInfiniteQuery({
       queryFn: async ({ pageParam = 1 }) => {
+        console.log(query, " fetch")
         return await fetchTrucksRequest(query ?? '', pageParam);
       },
       initialPageParam: 1,
@@ -34,7 +39,7 @@ const useTruckHook = () => {
         const totalPage = lastPage.data.totalPages;
         return currentPage < totalPage ? currentPage + 1 : undefined;
       },
-      enabled: role === 'buyer' ? false : true,
+      enabled,
     });
   };
 

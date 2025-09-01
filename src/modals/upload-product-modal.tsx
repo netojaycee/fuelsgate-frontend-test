@@ -218,7 +218,7 @@ const UploadProductModal = () => {
         <div className="bg-light-gray-150 grid grid-cols-2 gap-3 py-[10px] px-4 rounded-[10px] mb-3">
           <CustomSelect
             name="productId"
-            label="Select product"
+            label="product"
             options={products}
             Option={CustomProductOptionWrapper}
             ValueContainer={CustomValueContainerWrapper}

@@ -24,6 +24,7 @@ import { getMinutesDifference } from '@/utils/formatDate';
 import { AuthContext } from '@/contexts/AuthContext';
 import { Roles } from '@/features/authentication/types/authentication.types';
 import useTruckOrderHook from '@/hooks/useTruckOrder.hook';
+import useTicketHook from '@/hooks/useTicket.hook';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -38,14 +39,29 @@ const TruckOrderDetails = () => {
   const { user } = useContext(AuthContext);
   const role: Roles = user?.data?.role as Roles;
   const { useGetTruckOrderDetails } = useTruckOrderHook();
-  const { data, isLoading } = useGetTruckOrderDetails(
+  const { data, isLoading: isLoadingTruckOrder } = useGetTruckOrderDetails(
     params.truckOrderId as string,
   );
+
+  const { useGetOrderDetails } = useOrderHook();
+  const { data: orderData, isLoading: isLoadingOrder } = useGetOrderDetails(
+    params.truckOrderId as string,
+  );
+
+  const { useGetTicketDetails } = useTicketHook();
+  const { data: ticketData, isLoading: isLoadingTicket, } = useGetTicketDetails(
+    params.truckOrderId as string,
+  );
+
+  console.log(orderData, ticketData, 'orderData in TruckOrderDetails');
+
+  const isLoading = isLoadingOrder || isLoadingTicket;
+  console.log('ticketData', ticketData);
   const handleContactClick = () => {
     const phoneNumber =
       role === 'buyer'
-        ? (data?.data.profileId as any)?.phoneNumber // Transporter's phone
-        : ((data?.data.buyerId as any)?.userId as any)?.phoneNumber; // Buyer's phone
+        ? (orderData?.data?.profileId as any)?.phoneNumber // Transporter's phone
+        : ((orderData?.data?.buyerId as any)?.userId as any)?.phoneNumber; // Buyer's phone
 
     const a = document.createElement('a');
     a.href = `tel:${phoneNumber}`;
@@ -73,7 +89,16 @@ const TruckOrderDetails = () => {
             <div className="relative pt-12 px-8 max-md:px-4 max-sm:px-3 grid grid-cols-12 gap-12 max-lg:gap-6">
               {' '}
               <div className="col-span-7 max-md:col-span-12">
-                <RfqSlip truckOrder={data.data} />
+                {ticketData ? (
+                  <RfqSlip ticketData={ticketData} />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full py-16">
+                    <FGInfoFill height={40} width={40} color="#375DFB" className="mb-4" />
+                    <Text variant="pm" color="text-dark-gray-350" classNames="text-center">
+                      No ticket data available for this order.
+                    </Text>
+                  </div>
+                )}
 
                 {/* {(role === 'buyer' || role === 'transporter') && (
                   <Alert className="rounded-xl bg-blue-tone-50 border-none my-8">
@@ -102,11 +127,11 @@ const TruckOrderDetails = () => {
                     color="text-dark-500"
                     fontWeight="semibold"
                   >
-                   Ticket Order
+                    Ticket Order
                   </Heading>
-                  {data?.data.expiresIn && (
+                  {orderData?.data?.expiresIn && (
                     <Timer
-                      time={getMinutesDifference(data?.data.expiresIn)}
+                      time={getMinutesDifference(orderData?.data?.expiresIn)}
                       format="hh:mm"
                     />
                   )}
@@ -132,7 +157,7 @@ const TruckOrderDetails = () => {
                         <span className="h-[33px] w-[33px] bg-green-tone-800 rounded-full inline-flex items-center justify-center">
                           <Phone height={15} width={15} color="white" />
                         </span>
-                        {(data?.data.profileId as any)?.phoneNumber}
+                        {(orderData?.data?.profileId as any)?.phoneNumber}
                       </Button>
                     )}
                   </div>{' '}
@@ -141,12 +166,15 @@ const TruckOrderDetails = () => {
                       <>
                         <Avatar className="h-[38px] w-[38px]">
                           <AvatarImage
-                            src={(data?.data.profileId as any)?.profilePicture}
+                            src={
+                              (orderData?.data?.profileId as any)
+                                ?.profilePicture
+                            }
                             className="object-cover"
                           />
                           <AvatarFallback className="bg-light-gray-650">
                             {(
-                              data?.data.profileId as any
+                              orderData?.data?.profileId as any
                             )?.companyName?.substring(0, 1) || 'T'}
                           </AvatarFallback>
                         </Avatar>
@@ -157,14 +185,14 @@ const TruckOrderDetails = () => {
                             fontFamily={sora.className}
                             classNames="mb-1"
                           >
-                            {(data?.data.profileId as any)?.companyName}
+                            {(orderData?.data?.profileId as any)?.companyName}
                           </Text>
                           <Text
                             variant="ps"
                             color="text-dark-gray-50"
                             classNames="mb-2"
                           >
-                            {(data?.data.profileId as any)?.companyEmail}
+                            {(orderData?.data?.profileId as any)?.companyEmail}
                           </Text>
                           <Text
                             variant="ps"
@@ -172,7 +200,10 @@ const TruckOrderDetails = () => {
                             fontFamily={poppins.className}
                             fontWeight="medium"
                           >
-                            {(data?.data.profileId as any)?.companyAddress}
+                            {
+                              (orderData?.data?.profileId as any)
+                                ?.companyAddress
+                            }
                           </Text>
                         </div>
                       </>
@@ -184,11 +215,11 @@ const TruckOrderDetails = () => {
                           classNames="mb-1"
                         >
                           {
-                            ((data?.data.buyerId as any)?.userId as any)
+                            ((orderData?.data?.buyerId as any)?.userId as any)
                               ?.firstName
                           }{' '}
                           {
-                            ((data?.data.buyerId as any)?.userId as any)
+                            ((orderData?.data?.buyerId as any)?.userId as any)
                               ?.lastName
                           }
                         </Text>
@@ -197,7 +228,10 @@ const TruckOrderDetails = () => {
                           color="text-dark-gray-50"
                           classNames="mb-2"
                         >
-                          {((data?.data.buyerId as any)?.userId as any)?.email}
+                          {
+                            ((orderData?.data?.buyerId as any)?.userId as any)
+                              ?.email
+                          }
                         </Text>
                         <Text
                           variant="ps"
@@ -205,8 +239,11 @@ const TruckOrderDetails = () => {
                           fontFamily={poppins.className}
                           fontWeight="medium"
                         >
-                          {(data?.data.buyerId as any)?.category} -{' '}
-                          {((data?.data.buyerId as any)?.userId as any)?.status}
+                          {(orderData?.data?.buyerId as any)?.category} -{' '}
+                          {
+                            ((orderData?.data?.buyerId as any)?.userId as any)
+                              ?.status
+                          }
                         </Text>
                       </div>
                     )}

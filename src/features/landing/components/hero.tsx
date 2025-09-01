@@ -54,13 +54,13 @@ const Hero = () => {
           <SheetTitle />
           <SheetDescription />
           <div className="grid grid-cols-1 gap-14">
-            <Link
+            {/* <Link
               href="#roles"
               onClick={() => handleActiveTab('seller')}
               className="flex justify-start items-center gap-2 text-lg text-gray-600"
             >
               Supplier
-            </Link>
+            </Link> */}
             <Link
               href="/#roles"
               className="flex justify-start items-center gap-2 text-lg text-gray-600"
@@ -107,14 +107,19 @@ const Hero = () => {
   return (
     <div className="relative h-[968px] w-full bg-dark-400 pt-32">
       <div className="absolute h-full w-full top-0 left-0">
-        <Image src={Pattern} fill alt="Pattern" objectFit="cover" />
+        <Image
+          src={Pattern}
+          fill
+          alt="Pattern"
+          style={{ objectFit: 'cover' }}
+        />
       </div>
       <div className="absolute h-[334px] w-full bottom-0 left-0">
         <Image
           src={GlowingBackground}
           fill
           alt="Glowing Background"
-          objectFit="cover"
+          style={{ objectFit: 'cover' }}
         />
       </div>
       <div
@@ -128,8 +133,8 @@ const Hero = () => {
 
           <MobileMenu />
 
-          <div className="bg-white/10 sm:flex items-center justify-evenly rounded-full h-[66px] w-[359px] hidden">
-            <Link
+          <div className="bg-white/10 sm:flex items-center justify-evenly rounded-full h-[50px] w-[250px] hidden">
+            {/* <Link
               href="#roles"
               onClick={() => handleActiveTab('seller')}
               className={cn(
@@ -138,7 +143,7 @@ const Hero = () => {
               )}
             >
               Supplier
-            </Link>
+            </Link> */}
             <Link
               href="#roles"
               onClick={() => handleActiveTab('transporter')}
@@ -164,30 +169,29 @@ const Hero = () => {
       </div>
 
       {/* bg-[url(/images/scrollBg.svg)] */}
-      {pricing?.data?.pricings?.length > 0 && (
-        <Marquee className="relative bg-transparent bg-center py-4 bg-cover h-fit mb-14">
-          {pricing?.data?.pricings?.map((pricing: any) => (
-            <div key={pricing._id} className="text-white mr-40">
-              <p className="text-xs text-center">
-                {pricing.depot}, {pricing.depotHubId.name}
-              </p>
-              <div
-                className={cn(
-                  'flex items-center justify-center text-xs gap-2',
-                  pricing.positive ? 'text-green-500' : 'text-red-500',
-                )}
-              >
-                <ProductRenderer product={pricing.productId} />
-                &#8358;{formatNumber(pricing.price)}
-                {pricing.positive ? (
-                  <ArrowUp size={16} />
-                ) : (
-                  <ArrowDown size={16} />
-                )}
-              </div>
+      <Marquee className="relative bg-transparent bg-center py-4 bg-cover h-fit mb-14">
+        {pricing?.data?.pricings?.map((pricing: any) => (
+          <div key={pricing._id} className="text-white mr-40">
+            <p className="text-xs text-center">
+              {pricing.depot}, {pricing.depotHubId.name}
+            </p>
+            <div
+              className={cn(
+                'flex items-center justify-center text-xs gap-2',
+                pricing.positive ? 'text-green-500' : 'text-red-500',
+              )}
+            >
+              <ProductRenderer product={pricing.productId} />
+              &#8358;{formatNumber(pricing.price)}
+              {pricing.positive ? (
+                <ArrowUp size={16} />
+              ) : (
+                <ArrowDown size={16} />
+              )}
             </div>
-          ))}
-          {/* <Text
+          </div>
+        ))}
+        {/* <Text
           variant="pm"
           color="text-white"
           fontWeight="semibold"
@@ -204,8 +208,7 @@ const Hero = () => {
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
           &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
         </Text> */}
-        </Marquee>
-      )}
+      </Marquee>
 
       <div className="relative container mx-auto flex flex-col text-center min-h-screen">
         <Heading
@@ -228,7 +231,7 @@ const Hero = () => {
           connect by size, product type and locations at Depots, Dangote
           refinery & Truck parks.
         </Text>
-        <div className="space-y-4">
+        <div className="space-y-6">
           <SearchFilter />
         </div>
         <div className="flex items-center justify-center mb-14 max-sm:mb-6">
@@ -250,12 +253,12 @@ const Hero = () => {
             height="h-13"
           /> */}
         </div>
-        <div className="relative w-full h-[473px] max-sm:h-[273px] mx-auto overflow-visible">
+        <div className="relative w-full mx-auto overflow-visible">
           <Image
             src={FuelsGateBrand}
             fill
             alt="fuelsgate"
-            objectFit="contain"
+            style={{ objectFit: 'contain' }}
             loading="lazy"
           />
         </div>

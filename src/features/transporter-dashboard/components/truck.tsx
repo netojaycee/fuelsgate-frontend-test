@@ -9,7 +9,7 @@ import { formatNumber } from '@/utils/formatNumber';
 import { LIST_TRUCK } from '@/modals/list-truck-modal';
 import useTruckHook from '../hooks/useTruck.hook';
 import { useConfirmation } from '@/hooks/useConfirmation.hook';
-import { Edit, Trash } from 'lucide-react';
+import { Edit, Trash, Truck as TruckIcon } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { UPDATE_TRUCK_STATUS } from '@/modals/update-truck-status-modal';
 
@@ -50,23 +50,24 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
       },
     });
   };
-  
+
   const handleStatusToggle = (checked: boolean) => {
     // Don't toggle if status is already pending
     if (data?.status === 'pending') return;
-    
+
     // If current status is 'available', we're toggling to 'locked'
     // If current status is 'locked', we're toggling to 'pending'
     const newStatus = data?.status === 'available' ? 'locked' : 'pending';
-    
-    handleToggle && handleToggle({
-      state: true,
-      name: UPDATE_TRUCK_STATUS,
-      data: { 
-        truck: data,
-        newStatus
-      },
-    });
+
+    handleToggle &&
+      handleToggle({
+        state: true,
+        name: UPDATE_TRUCK_STATUS,
+        data: {
+          truck: data,
+          newStatus,
+        },
+      });
   };
 
   return (
@@ -97,17 +98,32 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
         )}
       </div>
 
+      {/* Truck Type Badge - Top Left */}
+      <div className="absolute -top-2 -left-2 z-10">
+        <span 
+          className={`flex items-center justify-center border-2 border-white px-2 py-1 rounded-full shadow-lg ${
+            data?.truckType === 'flatbed' 
+              ? 'bg-purple-500' 
+              : 'bg-blue-500'
+          }`}
+        >
+          <Text variant="pxs" fontWeight="semibold" color="text-white">
+            {data?.truckType === 'flatbed' ? 'Flatbed' : 'Tanker'}
+          </Text>
+        </span>
+      </div>
+
       {/* Header with Action Buttons */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-3">
           <span
-            className={`h-10 w-10 rounded-lg flex items-center justify-center shadow-sm relative overflow-hidden ${
-              !(typeof data?.productId === 'object' && data?.productId?.color)
+            className={`h-8 w-10 rounded-full flex items-center justify-center shadow-sm relative overflow-hidden ${
+              data?.truckType === 'flatbed' || !(typeof data?.productId === 'object' && data?.productId?.color)
                 ? 'bg-blue-tone-100'
                 : ''
             }`}
             style={
-              typeof data?.productId === 'object' && data?.productId?.color
+              data?.truckType === 'tanker' && typeof data?.productId === 'object' && data?.productId?.color
                 ? data?.productId?.color.includes('-')
                   ? {
                       background: `linear-gradient(to bottom, ${
@@ -118,7 +134,11 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
                 : undefined
             }
           >
-            <FGTruckFill color="#ffffff" height={20} width={20} />
+            {data?.truckType === 'flatbed' ? (
+              <TruckIcon color="#ffffff" size={20} />
+            ) : (
+              <FGTruckFill color="#ffffff" height={20} width={20} />
+            )}
           </span>
 
           <div className="flex-1 min-w-0">
@@ -128,12 +148,15 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
               color="text-gray-900"
               classNames="truncate"
             >
-              {data?.truckNumber}
+              {data?.truckNumber || 'N/A'}
             </Text>
             <Text variant="pxs" color="text-gray-500" classNames="truncate">
-              {typeof data?.productId === 'object'
-                ? data?.productId?.name
-                : 'Unknown Product'}
+              {data?.truckType === 'tanker' 
+                ? (typeof data?.productId === 'object'
+                    ? data?.productId?.name
+                    : 'Unknown Product')
+                : 'Flatbed Truck'
+              }
             </Text>
           </div>
         </div>
@@ -149,14 +172,14 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
             >
               <Edit className="text-blue-600 w-4 h-4" />
             </button>
-            <button
+            {/* <button
               type="button"
               onClick={handleDeleteTruck}
               className="flex items-center justify-center p-1 rounded-lg bg-red-50 border border-red-200 hover:bg-red-100 hover:border-red-300 active:bg-red-200 transition-all duration-200 shadow-sm"
               title="Delete Truck"
             >
               <Trash className="text-red-600 w-4 h-4" />
-            </button>
+            </button> */}
           </div>
         )}
       </div>
@@ -180,72 +203,117 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
               }
             />
           </div>
-        </div>
-        {/* Capacity */}
-        <div className="flex items-center justify-between">
-          <Text variant="pxs" color="text-gray-500">
-            Capacity
-          </Text>
-          <Text variant="ps" fontWeight="semibold" color="text-gray-900">
-            {formatNumber(data?.capacity)} Ltrs
-          </Text>
-        </div>
-
-        {/* Location */}
-        {/* <div className="flex items-center justify-between">
-          <Text variant="pxs" color="text-gray-500">
-            Location
-          </Text>
-          <div title={`${data?.currentCity}, ${data?.currentState}`}>
-            <Text
-              variant="pxs"
-              color="text-gray-700"
-              classNames="text-right truncate max-w-[140px]"
+          {/* Load Status Badge - Only for tanker trucks */}
+          {data?.truckType === 'tanker' && data?.loadStatus && (
+            <span
+              className={`flex items-center justify-center ml-2 px-2 py-1 rounded-full shadow-none border border-white ${
+                data.loadStatus === 'loaded' ? 'bg-blue-500' : 'bg-gray-400'
+              }`}
             >
-              {data?.currentCity}, {data?.currentState}
+              <Text variant="pxs" fontWeight="medium" color="text-white">
+                {data.loadStatus === 'loaded' ? 'Loaded' : 'Unloaded'}
+              </Text>
+            </span>
+          )}
+        </div>
+        
+        {/* Capacity - Only for tanker trucks */}
+        {data?.truckType === 'tanker' && data?.capacity && (
+          <div className="flex items-center justify-between">
+            <Text variant="pxs" color="text-gray-500">
+              Capacity
+            </Text>
+            <Text variant="ps" fontWeight="semibold" color="text-gray-900">
+              {formatNumber(data.capacity)} Ltrs
             </Text>
           </div>
-        </div> */}
+        )}
 
-        {/* Depot */}
-        <div className="flex items-center justify-between">
-          <Text variant="pxs" color="text-gray-500">
-            Depot
-          </Text>
-          <div title={data?.depot}>
-            <Text
-              variant="pxs"
-              color="text-gray-700"
-              classNames="text-right truncate max-w-[140px]"
-            >
-              {data?.depot}
-            </Text>
-          </div>
-        </div>
+        {/* Location - For flatbed trucks, show current state and city */}
+        {data?.truckType === 'flatbed' && (data?.currentState || data?.currentCity) && (
+          <>
+            {data?.currentState && (
+              <div className="flex items-center justify-between">
+                <Text variant="pxs" color="text-gray-500">
+                  State
+                </Text>
+                <div title={data?.currentState}>
+                  <Text
+                    variant="pxs"
+                    color="text-gray-700"
+                    classNames="text-right truncate max-w-[140px]"
+                  >
+                    {data?.currentState}
+                  </Text>
+                </div>
+              </div>
+            )}
+            
+            {data?.currentCity && (
+              <div className="flex items-center justify-between">
+                <Text variant="pxs" color="text-gray-500">
+                  City
+                </Text>
+                <div title={data?.currentCity}>
+                  <Text
+                    variant="pxs"
+                    color="text-gray-700"
+                    classNames="text-right truncate max-w-[140px]"
+                  >
+                    {data?.currentCity}
+                  </Text>
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
-        {/* Hub */}
-        <div className="flex items-center justify-between">
-          <Text variant="pxs" color="text-gray-500">
-            Hub
-          </Text>
-          <div
-            title={
-              typeof data?.depotHubId === 'object'
-                ? data?.depotHubId?.name
-                : 'Unknown Hub'
-            }
-          >
-            <Text
-              variant="pxs"
-              color="text-gray-700"
-              classNames="text-right truncate max-w-[140px]"
-            >
-              {typeof data?.depotHubId === 'object'
-                ? data?.depotHubId?.name
-                : 'Unknown Hub'}
-            </Text>
-          </div>
-        </div>
+        {/* Depot and Hub - Only for tanker trucks */}
+        {data?.truckType === 'tanker' && (
+          <>
+            {data?.depot && (
+              <div className="flex items-center justify-between">
+                <Text variant="pxs" color="text-gray-500">
+                  Depot
+                </Text>
+                <div title={data?.depot}>
+                  <Text
+                    variant="pxs"
+                    color="text-gray-700"
+                    classNames="text-right truncate max-w-[140px]"
+                  >
+                    {data?.depot}
+                  </Text>
+                </div>
+              </div>
+            )}
+
+            {data?.depotHubId && (
+              <div className="flex items-center justify-between">
+                <Text variant="pxs" color="text-gray-500">
+                  Hub
+                </Text>
+                <div
+                  title={
+                    typeof data?.depotHubId === 'object'
+                      ? data?.depotHubId?.name
+                      : 'Unknown Hub'
+                  }
+                >
+                  <Text
+                    variant="pxs"
+                    color="text-gray-700"
+                    classNames="text-right truncate max-w-[140px]"
+                  >
+                    {typeof data?.depotHubId === 'object'
+                      ? data?.depotHubId?.name
+                      : 'Unknown Hub'}
+                  </Text>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

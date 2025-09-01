@@ -28,23 +28,25 @@ export default function TruckSearchPage() {
     urlParamsInitialized,
   } = usePublicSearch(true);
 
-  useEffect(() => {
-      const mergedDataArray = trucks?.pages?.flatMap((page) => page.data) || [];
-      setTrucksData(mergedDataArray?.flatMap((item) => item.trucks));
-    }, [trucks]);
+  console.log(trucks, 'gggg search');
 
-    if (!urlParamsInitialized) {
-      return (
+  useEffect(() => {
+    const mergedDataArray = trucks?.pages?.flatMap((page) => page.data) || [];
+    setTrucksData(mergedDataArray?.flatMap((item) => item.trucks));
+  }, [trucks]);
+
+  if (!urlParamsInitialized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold mx-auto"></div>
-              <p className="mt-4 text-gray-600">Initializing search...</p>
-            </div>
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gold mx-auto"></div>
+            <p className="mt-4 text-gray-600">Initializing search...</p>
           </div>
         </div>
-      );
-    }
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white min-h-screen ">
@@ -65,7 +67,7 @@ export default function TruckSearchPage() {
               Use the filters below to find trucks that match your requirements
             </p>
           </div>
-          <div className="grid grid-cols-12 gap-4 max-w-5xl mx-auto">
+          <div className="bg-black rounded-3xl">
             <SearchFilter isLoading={isLoadingTrucks} search />
           </div>
         </div>
@@ -83,7 +85,7 @@ export default function TruckSearchPage() {
             )}
         </div>
 
-        {isLoadingTrucks || !hasSearched ? (
+        {isLoadingTrucks ? (
           <div className="flex flex-col items-center justify-center h-60 bg-light-gray-200 rounded-lg">
             <Loader className="animate-spin mb-4 text-gold" size={40} />
             <Text variant="pl" fontWeight="medium">
@@ -93,8 +95,7 @@ export default function TruckSearchPage() {
               This may take a moment
             </Text>
           </div>
-        ) : hasSearched &&
-          trucks?.pages?.length &&
+        ) : trucks?.pages?.length &&
           trucks.pages[0]?.data?.trucks?.length > 0 ? (
           //   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           //     {trucks.pages.map((page) =>
@@ -157,7 +158,9 @@ export default function TruckSearchPage() {
           <>
             <TruckTableList
               trucks={trucksData}
-              loading={isLoadingTrucks || loadingFetchNextTruckPage || isSearching}
+              loading={
+                isLoadingTrucks || loadingFetchNextTruckPage || isSearching
+              }
               isSearch
             />
 

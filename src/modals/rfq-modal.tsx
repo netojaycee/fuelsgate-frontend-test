@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import useTruckOrderHook from '@/hooks/useTruckOrder.hook';
+// import useTruckOrderHook from '@/hooks/useTruckOrder.hook';
 import CustomLoader from '@/components/atoms/custom-loader';
 import { TruckOrderDto } from '@/types/truck-order.types';
 import { renderErrors } from '@/utils/renderErrors';
@@ -18,26 +18,39 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { updateTruckOrderPriceSchema } from '@/validations/truck-order.validation';
 import { formatDate } from '@/utils/formatDate';
+import useOrderHook from '@/hooks/useOrder.hook';
 
 const sora = Sora({ subsets: ['latin'] });
 const TRUCK_RFQ = 'truck_rfq';
 
 const RFQModal = () => {
   const { handleClose, openModal } = useContext(ModalContext);
-  const {
-    useGetTruckOrderDetails,
-    useUpdateTruckOrderPrice,
-    useUpdateTruckOrderRFQStatus,
-  } = useTruckOrderHook();
+  // const {
+  //   useGetTruckOrderDetails,
+  //   useUpdateTruckOrderPrice,
+  //   useUpdateTruckOrderRFQStatus,
+  // } = useTruckOrderHook();
 
-  const { data, isLoading } = useGetTruckOrderDetails(
+  const { useUpdateOrder, useGetOrderDetails } = useOrderHook();
+
+  // const { data, isLoading } = useGetTruckOrderDetails(
+  //   openModal?.data.truckOrderId,
+  // );
+
+  const { data: orderData, isLoading } = useGetOrderDetails(
     openModal?.data.truckOrderId,
   );
-  const { mutateAsync: updatePrice, isPending: updatingPrice } =
-    useUpdateTruckOrderPrice(openModal?.data.truckOrderId);
 
-    const { mutateAsync: updateRFQStatus, isPending: isUpdatingStatus } =
-      useUpdateTruckOrderRFQStatus(openModal?.data.truckOrderId);
+  // console.log(orderData, "orderData in RFQModal");
+  // const { mutateAsync: updatePrice, isPending: updatingPrice } =
+  //   useUpdateTruckOrderPrice(openModal?.data.truckOrderId);
+
+  const { mutateAsync: updateOrder, isPending: updatingOrder } = useUpdateOrder(
+    openModal?.data.truckOrderId,
+  );
+
+  // const { mutateAsync: updateRFQStatus, isPending: isUpdatingStatus } =
+  //   useUpdateTruckOrderRFQStatus(openModal?.data.truckOrderId);
 
   const {
     setError,
@@ -48,19 +61,25 @@ const RFQModal = () => {
     resolver: yupResolver(updateTruckOrderPriceSchema),
     defaultValues: {
       ...(openModal?.data || {}),
-      price: data?.data?.price,
-      arrivalTime: data?.data?.arrivalTime,
+      price: orderData?.data?.price,
+      arrivalTime: orderData?.data?.arrivalTime,
     },
   });
 
-
-
-  const onSubmit = async (data: Pick<TruckOrderDto, 'price'>) => {
+  const onSubmit = async (data: any) => {
     try {
-      await updatePrice(data);
-      await updateRFQStatus({
+      // await updatePrice(data);
+      // await updateRFQStatus({
+      //   rfqStatus: 'sent',
+      // });
+      const credentials = {
+        ...data,
+        description: 'sending_rfq',
+        type: 'truck',
         rfqStatus: 'sent',
-      });
+      };
+      // console.log(credentials);
+      await updateOrder(credentials)
     } catch (error: any) {
       renderErrors(error?.errors, setError);
     }
@@ -108,7 +127,20 @@ const RFQModal = () => {
                     fontWeight="bold"
                     classNames="text-right"
                   >
-                    {data.data.truckId.truckNumber}
+                    {orderData?.data?.truckId?.truckNumber}
+                  </Text>
+                </div>
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <Text variant="ps" color="text-dark-gray-550">
+                  Product
+                  </Text>
+                  <Text
+                    variant="ps"
+                    color="text-[#151A23]"
+                    fontWeight="bold"
+                    classNames="text-right"
+                  >
+                    {orderData?.data?.truckId?.productId?.name}
                   </Text>
                 </div>
 
@@ -122,8 +154,8 @@ const RFQModal = () => {
                     fontWeight="medium"
                     classNames="text-right"
                   >
-                    {data.data.loadingDepot},{' '}
-                    {data.data.truckId.depotHubId.name}
+                    {orderData?.data?.loadingDepot},{' '}
+                    {orderData?.data?.truckId?.depotHubId?.name}
                   </Text>
                 </div>
 
@@ -137,7 +169,8 @@ const RFQModal = () => {
                     fontWeight="medium"
                     classNames="text-right"
                   >
-                    {data.data.destination}, {data.data.city}, {data.data.state}
+                    {orderData?.data?.destination}, {orderData?.data?.city},{' '}
+                    {orderData?.data?.state}
                   </Text>
                 </div>
 
@@ -151,7 +184,7 @@ const RFQModal = () => {
                     fontWeight="medium"
                     classNames="text-right"
                   >
-                    {formatDate(data.data.loadingDate)}
+                    {formatDate(orderData?.data?.loadingDate)}
                   </Text>
                 </div>
               </div>
@@ -164,7 +197,7 @@ const RFQModal = () => {
                   name="price"
                   register={register}
                   error={errors.price?.message}
-                  value={data?.data?.price}
+                  value={orderData?.data?.price}
                   label="Enter amount"
                   prefix="₦"
                   prefixPadding="pl-10"
@@ -190,7 +223,7 @@ const RFQModal = () => {
                   variant="primary"
                   label="Send Quote"
                   type="submit"
-                  loading={updatingPrice}
+                  loading={updatingOrder}
                 />
               </div>
             </form>

@@ -115,7 +115,7 @@ const WhatsAppWidget: React.FC<WhatsAppWidgetProps> = ({
   return (
     <div className={`fixed ${getPositionClasses()} z-50 ${className}`}>
       {/* Outer pulsing ring */}
-      <div className="absolute inset-0 rounded-full bg-gold animate-ping opacity-75"></div>
+      {/* <div className="absolute inset-0 rounded-full bg-gold animate-ping opacity-75"></div> */}
 
       {/* Middle ring with slower pulse */}
       <div className="absolute inset-0 rounded-full bg-gold animate-pulse opacity-50 scale-100"></div>
@@ -155,8 +155,8 @@ const WhatsAppWidget: React.FC<WhatsAppWidgetProps> = ({
       </button>
 
       {/* Additional decorative elements */}
-      <div className="absolute -top-2 -right-2 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-      <div className="absolute -bottom-2 -left-2 w-2 h-2 bg-gold rounded-full animate-ping delay-1000"></div>
+      {/* <div className="absolute -top-2 -right-2 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+      <div className="absolute -bottom-2 -left-2 w-2 h-2 bg-gold rounded-full animate-ping delay-1000"></div> */}
     </div>
   );
 };

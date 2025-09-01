@@ -56,57 +56,58 @@ const CustomInput = forwardRef<HTMLInputElement, CustomInputProps>(
         {label && <Label {...{ name, label, optional }} classNames="mb-1" />}
         <div className="relative h-fit w-full">
           {(type === 'tel' || prefix) && (
-            <div className="absolute top-2.5 left-2 text-sm text-center font-normal text-dark-500 bg-transparent backdrop-blur-sm p-2">
-              {type === 'tel' ? '+234 |' : prefix}
-            </div>
+        <div className="absolute inset-y-0 left-0 flex items-center text-sm text-center font-normal text-dark-500 bg-transparent backdrop-blur-sm p-2">
+          {type === 'tel' ? '+234 |' : prefix}
+        </div>
           )}
           <input
-            type={type === 'password' && showPassword ? 'text' : type}
-            className={cn(
-              'w-full h-14 px-4 text-sm border border-mid-gray-450 rounded-md focus:outline-none',
-              (type === 'tel' || prefix) && (prefixPadding ?? 'pl-20'),
-              affix && (affixPadding ?? 'pr-4'),
-              className,
-            )}
-            id={name}
-            name={name}
-            title={name}
-            min={0}
-            step=".001"
-            defaultValue={value}
-            onChange={onChange}
-            ref={ref}
-            {...(register && { ...register(`${name}`) })}
-            {...props}
+        type={type === 'password' && showPassword ? 'text' : type}
+        className={cn(
+          'w-full h-10 px-4 text-sm border border-mid-gray-450 rounded-md focus:outline-none',
+          (type === 'tel' || prefix) && (prefixPadding ?? 'pl-20'),
+          affix && (affixPadding ?? 'pr-4'),
+          className,
+        )}
+        id={name}
+        name={name}
+        title={name}
+        min={0}
+        step=".001"
+        defaultValue={value}
+        onChange={onChange}
+        ref={ref}
+        {...(register && { ...register(`${name}`) })}
+        {...props}
           />
           {affix && (
-            <div className="absolute top-2.5 right-2 text-sm font-normal text-dark-gray-150 bg-transparent backdrop-blur-sm p-2">
-              {affix}
-            </div>
+        <div className="absolute inset-y-0 right-0 flex items-center text-sm font-normal text-dark-gray-150 bg-transparent backdrop-blur-sm p-2">
+          {affix}
+        </div>
           )}
           {type === 'password' && (
-            <button
-              title="visibility toggle"
-              type="button"
-              className="absolute top-2.5 right-2 bg-transparent backdrop-blur-sm p-2"
-              onClick={togglePasswordVisibility}
-            >
-              {!showPassword ? (
-                <Eye className="h-5 w-5" />
-              ) : (
-                <EyeOff className="h-5 w-5" />
-              )}
-            </button>
+        <button
+          title="visibility toggle"
+          type="button"
+          className="absolute inset-y-0 right-2 flex items-center bg-transparent backdrop-blur-sm p-2"
+          onClick={togglePasswordVisibility}
+          style={{ height: '100%' }}
+        >
+          {!showPassword ? (
+            <Eye className="h-5 w-5" />
+          ) : (
+            <EyeOff className="h-5 w-5" />
+          )}
+        </button>
           )}
         </div>
         {error && (
           <Text
-            variant="ps"
-            color="text-red-500"
-            fontWeight="regular"
-            classNames="mt-1"
+        variant="ps"
+        color="text-red-500"
+        fontWeight="regular"
+        classNames="mt-1"
           >
-            {error}
+        {error}
           </Text>
         )}
       </div>

@@ -22,6 +22,7 @@ import UpdateTruckStatusModal, {
   UPDATE_TRUCK_STATUS,
 } from '@/modals/update-truck-status-modal';
 import ConditionsModal from '@/modals/conditional-modal';
+import { MAKE_A_TRUCK_OFFER, MakeATruckOfferModal } from '@/modals/make-a-truck-offer-modal';
 
 // responsible for showing confirmationmoadl before tagert
 // const requiresConditions = [ORDER_SUMMARY, LOCK_TRUCK];
@@ -52,6 +53,8 @@ const AllModals = () => {
     switch (openModal?.name) {
       case MAKE_AN_OFFER:
         return <MakeAnOfferModal />;
+      case MAKE_A_TRUCK_OFFER:
+        return <MakeATruckOfferModal />;
       case LOCK_TRUCK:
         return <LockTruckModal />;
       case UPLOAD_PRODUCT:

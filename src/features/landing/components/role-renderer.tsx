@@ -68,14 +68,14 @@ const RoleRenderer = () => {
 
           <p className="text-xs sm:text-sm">Transporters</p>
         </RendererTab>
-        <RendererTab
+        {/* <RendererTab
           active={activeTab === 'seller'}
           onClick={() => handleTabChange('seller')}
         >
           <BookOpen height={16} width={16} color="#1E1E1E" />
 
           <p className="text-xs sm:text-sm">Suppliers</p>
-        </RendererTab>
+        </RendererTab> */}
       </div>
 
       <Suspense fallback={<Loading />}>

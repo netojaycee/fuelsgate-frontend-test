@@ -1,0 +1,495 @@
+'use client';
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
+import io, { Socket } from 'socket.io-client';
+import { AuthContext } from './AuthContext';
+import { SOCKET_EVENTS } from '../lib/socketEvents';
+import useNotificationHook from '../hooks/useNotification.hook';
+
+interface BadgeCounts {
+  product_order: number;
+  truck_order: number;
+  chat: number;
+}
+
+interface SocketContextType {
+  socket: Socket | null;
+  isConnected: boolean;
+  badgeCounts: BadgeCounts;
+  joinedRooms: string[];
+  sendMessage: (payload: {
+    negotiationId: string;
+    receiverId: string;
+    price: number;
+  }) => void;
+  markMessageRead: (messageId: string) => void;
+  markCategoryAsRead: (category: keyof BadgeCounts) => void;
+  isReconnecting: boolean;
+}
+
+const SocketContext = createContext<SocketContextType | undefined>(undefined);
+
+export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { user } = useContext(AuthContext);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [joinedRooms, setJoinedRooms] = useState<string[]>([]);
+  const [badgeCounts, setBadgeCounts] = useState<BadgeCounts>({
+    product_order: 0,
+    truck_order: 0,
+    chat: 0,
+  });
+
+  // Add reconnection state
+  const [isReconnecting, setIsReconnecting] = useState(false);
+  const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const reconnectAttemptsRef = useRef(0);
+  const maxReconnectAttempts = 10; // Maximum attempts before giving up
+
+  // Use refs to store the latest functions without causing re-renders
+  const updateBadgeCountRef = useRef<any>(null);
+  const markCategoryAsReadRef = useRef<any>(null);
+  const startReconnectionIntervalRef = useRef<any>(null);
+
+  const { updateBadgeCount, useMarkCategoryAsRead, useGetBadgeCounts } =
+    useNotificationHook();
+  const { mutateAsync: markCategoryAsRead } = useMarkCategoryAsRead();
+
+  // Store the latest functions in refs
+  updateBadgeCountRef.current = updateBadgeCount;
+  markCategoryAsReadRef.current = markCategoryAsRead;
+
+  // Memoize stable values
+  const userId = useMemo(() => user?.data?._id, [user?.data?._id]);
+  const userToken = useMemo(() => user?.token, [user?.token]);
+
+  // Fetch initial badge counts when user is available
+  const { data: initialBadgeCounts, isLoading: isLoadingBadges } =
+    useGetBadgeCounts(userId || '');
+
+    console.log('Initial badge counts:', initialBadgeCounts);
+
+  // Update badge counts when initial data is fetched
+  useEffect(() => {
+    if (initialBadgeCounts && !isLoadingBadges) {
+      setBadgeCounts(initialBadgeCounts);
+      console.log('Initial badge counts loaded:', initialBadgeCounts);
+    }
+  }, [initialBadgeCounts, isLoadingBadges]);
+
+  // Clear reconnection interval
+  const clearReconnectInterval = useCallback(() => {
+    if (reconnectIntervalRef.current) {
+      clearInterval(reconnectIntervalRef.current);
+      reconnectIntervalRef.current = null;
+    }
+    setIsReconnecting(false);
+  }, []);
+
+  // Manual reconnection function
+  const attemptReconnection = useCallback(() => {
+    if (!userId || !userToken || isConnected || isReconnecting) {
+      return;
+    }
+
+    if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
+      console.warn('Max reconnection attempts reached. Stopping reconnection.');
+      clearReconnectInterval();
+      return;
+    }
+
+    console.log(
+      `Attempting socket reconnection... (attempt ${
+        reconnectAttemptsRef.current + 1
+      }/${maxReconnectAttempts})`,
+    );
+    setIsReconnecting(true);
+    reconnectAttemptsRef.current += 1;
+
+    // Disconnect existing socket if any
+    if (socket) {
+      socket.disconnect();
+      setSocket(null);
+    }
+
+    // Create new socket connection
+    const socketUrl = process.env.NEXT_PUBLIC_API_BASE_URL!;
+    if (!socketUrl) {
+      console.error('NEXT_PUBLIC_API_BASE_URL is not defined');
+      setIsReconnecting(false);
+      return;
+    }
+
+    const newSocket = io(socketUrl, {
+      auth: { token: userToken },
+      transports: ['websocket'],
+      reconnection: false, // Disable built-in reconnection, we handle it manually
+      timeout: 10000, // 10 second timeout
+    });
+
+    // Set up event handlers for the new socket
+    setupSocketEventHandlers(newSocket);
+    setSocket(newSocket);
+    // eslint-disable-next-line
+  }, [
+    userId,
+    userToken,
+    isConnected,
+    isReconnecting,
+    socket,
+    clearReconnectInterval,
+    
+  ]);
+
+  // Start reconnection interval
+  const startReconnectionInterval = useCallback(() => {
+    if (reconnectIntervalRef.current || !userId || !userToken) {
+      return;
+    }
+
+    console.log('Starting reconnection interval (every 10 seconds)');
+    reconnectIntervalRef.current = setInterval(() => {
+      if (!isConnected && userId && userToken) {
+        attemptReconnection();
+      } else if (isConnected) {
+        // Connected successfully, clear interval and reset attempts
+        console.log('Socket reconnected successfully');
+        reconnectAttemptsRef.current = 0;
+        clearReconnectInterval();
+      }
+    }, 10000); // 10 seconds
+  }, [
+    userId,
+    userToken,
+    isConnected,
+    attemptReconnection,
+    clearReconnectInterval,
+  ]);
+
+  // Store the latest startReconnectionInterval function in ref
+  startReconnectionIntervalRef.current = startReconnectionInterval;
+
+  // Setup socket event handlers (extracted to avoid duplication)
+  const setupSocketEventHandlers = useCallback(
+    (newSocket: Socket) => {
+      // Connection event handlers
+      newSocket.on('connect', () => {
+        console.log('Socket connected:', newSocket.id);
+        setIsConnected(true);
+        setIsReconnecting(false);
+        reconnectAttemptsRef.current = 0; // Reset attempts on successful connection
+        clearReconnectInterval(); // Stop reconnection attempts
+      });
+
+      newSocket.on('connect_error', (err) => {
+        console.error('Socket connection error:', err.message);
+        setIsConnected(false);
+        setIsReconnecting(false);
+
+        // Start reconnection process if user is logged in - use setTimeout to avoid infinite loop
+        setTimeout(() => {
+          if (
+            userId &&
+            userToken &&
+            !reconnectIntervalRef.current &&
+            startReconnectionIntervalRef.current
+          ) {
+            startReconnectionIntervalRef.current();
+          }
+        }, 100);
+      });
+
+      newSocket.on('disconnect', (reason) => {
+        console.log('Socket disconnected:', reason);
+        setIsConnected(false);
+        setJoinedRooms([]); // Clear joined rooms on disconnect
+
+        // Start reconnection process if user is logged in - use setTimeout to avoid infinite loop
+        setTimeout(() => {
+          if (
+            userId &&
+            userToken &&
+            !reconnectIntervalRef.current &&
+            startReconnectionIntervalRef.current
+          ) {
+            startReconnectionIntervalRef.current();
+          }
+        }, 100);
+      });
+
+      // Handle successful connection from backend
+      newSocket.on('connection', (data: { message: string }) => {
+        console.log('Backend connection confirmation:', data);
+      });
+
+      // Handle room joining confirmation
+      newSocket.on('joinedRoom', (data: { roomId: string }) => {
+        console.log('Joined room:', data.roomId);
+        setJoinedRooms((prev) => {
+          if (!prev.includes(data.roomId)) {
+            return [...prev, data.roomId];
+          }
+          return prev;
+        });
+      });
+
+      // Handle badge count notifications from backend
+      newSocket.on(
+        'notification',
+        (data: {
+          type: 'badge_update';
+          category: keyof BadgeCounts;
+          count: number;
+          notification?: any;
+        }) => {
+          console.log('Received notification:', data);
+
+          if (data.type === 'badge_update') {
+            setBadgeCounts((prev) => ({
+              ...prev,
+              [data.category]: data.count,
+            }));
+
+            // Update React Query cache using ref
+            if (userId && updateBadgeCountRef.current) {
+              updateBadgeCountRef.current(userId, data.category, data.count);
+            }
+          }
+        },
+      );
+
+      // Handle legacy notification format (from your existing NegotiationGateway)
+      newSocket.on(
+        SOCKET_EVENTS.NOTIFICATION,
+        (data: {
+          type: string;
+          negotiationId?: string;
+          orderId?: string;
+          count?: number;
+        }) => {
+          console.log('Received legacy notification:', data);
+
+          // Map legacy notification types to badge categories
+          const categoryMap: Record<string, keyof BadgeCounts> = {
+            new_message: 'chat',
+            read_message: 'chat',
+            new_negotiation: 'chat',
+            negotiation_accepted: 'chat',
+            negotiation_cancelled: 'chat',
+            new_order: 'product_order',
+            order_status_updated: 'product_order',
+            order_cancelled: 'product_order',
+          };
+
+          const category = categoryMap[data.type];
+          if (category && data.count !== undefined) {
+            setBadgeCounts((prev) => ({
+              ...prev,
+              [category]: data.count,
+            }));
+
+            if (userId && updateBadgeCountRef.current) {
+              updateBadgeCountRef.current(userId, category, data.count);
+            }
+          }
+        },
+      );
+
+      // Message event handlers
+      newSocket.on(SOCKET_EVENTS.RECEIVE_MESSAGE, (message) => {
+        console.log('Received message:', message);
+      });
+
+      newSocket.on(SOCKET_EVENTS.RECEIVE_NEGOTIATION, (negotiation) => {
+        console.log('Received negotiation:', negotiation);
+      });
+
+      newSocket.on(SOCKET_EVENTS.RECEIVE_ORDER, (order) => {
+        console.log('Received order:', order);
+      });
+
+      newSocket.on(SOCKET_EVENTS.UPDATE_ORDER, (order) => {
+        console.log('Received order update:', order);
+      });
+
+      newSocket.on('messageStatusUpdated', (data) => {
+        console.log('Message status updated:', data);
+      });
+
+      newSocket.on('updatedOrderStatus', (order) => {
+        console.log('Order status updated:', order);
+      });
+    },
+    [userId, userToken, clearReconnectInterval],
+  ); // Remove startReconnectionInterval from dependencies
+
+  const emitWithLogging = useCallback(
+    (event: string, ...args: any[]) => {
+      if (socket && isConnected) {
+        console.log('Emitting event:', { event, payload: args });
+        socket.emit(event, ...args);
+      } else {
+        console.warn('Cannot emit event: socket not connected', {
+          event,
+          args,
+          isConnected,
+        });
+      }
+    },
+    [socket, isConnected],
+  );
+
+  // Initialize socket connection - FIXED DEPENDENCIES
+  useEffect(() => {
+    if (!user || !userId || !userToken) {
+      console.log('Socket connection skipped: user or token missing');
+      // Clear any existing reconnection intervals
+      clearReconnectInterval();
+      return;
+    }
+
+    const socketUrl = process.env.NEXT_PUBLIC_API_BASE_URL!;
+    if (!socketUrl) {
+      console.error('NEXT_PUBLIC_API_BASE_URL is not defined');
+      return;
+    }
+
+    console.log('Initializing Socket.IO connection for user:', userId);
+
+    const newSocket = io(socketUrl, {
+      auth: { token: userToken },
+      transports: ['websocket'],
+      reconnection: false, // Disable built-in reconnection, we handle it manually
+      timeout: 10000, // 10 second timeout
+    });
+
+    setupSocketEventHandlers(newSocket);
+    setSocket(newSocket);
+
+    return () => {
+      console.log('Cleaning up socket connection');
+      clearReconnectInterval(); // Clear reconnection interval
+      newSocket.disconnect();
+      setSocket(null);
+      setIsConnected(false);
+      setJoinedRooms([]);
+      reconnectAttemptsRef.current = 0; // Reset attempts on cleanup
+    };
+  }, [
+    user,
+    userId,
+    userToken,
+    setupSocketEventHandlers,
+    clearReconnectInterval,
+  ]);
+
+  // Monitor connection status and start reconnection if needed
+  useEffect(() => {
+    if (
+      userId &&
+      userToken &&
+      !isConnected &&
+      !isReconnecting &&
+      !reconnectIntervalRef.current
+    ) {
+      console.log(
+        'User is logged in but socket is not connected. Starting reconnection process.',
+      );
+      startReconnectionInterval();
+    }
+  }, [
+    userId,
+    userToken,
+    isConnected,
+    isReconnecting,
+    startReconnectionInterval,
+  ]);
+
+  const sendMessage = useCallback(
+    (payload: { negotiationId: string; receiverId: string; price: number }) => {
+      if (socket && isConnected && user) {
+        emitWithLogging(
+          SOCKET_EVENTS.SEND_MESSAGE,
+          { ...payload, content: `Counter-offer: ${payload.price}` },
+          user,
+        );
+      }
+    },
+    [socket, isConnected, user, emitWithLogging],
+  );
+
+  const markMessageRead = useCallback(
+    (messageId: string) => {
+      if (socket && isConnected && user) {
+        emitWithLogging(SOCKET_EVENTS.MESSAGE_READ, { messageId }, user);
+      }
+    },
+    [socket, isConnected, user, emitWithLogging],
+  );
+
+  const handleMarkCategoryAsRead = useCallback(
+    async (category: keyof BadgeCounts) => {
+      if (!userId) return;
+
+      try {
+        // Use ref to avoid dependency issues
+        if (markCategoryAsReadRef.current) {
+          await markCategoryAsReadRef.current({ userId, category });
+          setBadgeCounts((prev) => ({ ...prev, [category]: 0 }));
+          console.log(`Marked ${category} notifications as read`);
+        }
+      } catch (error) {
+        console.error('Error marking category as read:', error);
+      }
+    },
+    [userId], // Only stable dependency
+  );
+
+  // Memoize the context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      socket,
+      isConnected,
+      badgeCounts,
+      joinedRooms,
+      sendMessage,
+      markMessageRead,
+      markCategoryAsRead: handleMarkCategoryAsRead,
+      isReconnecting,
+    }),
+    [
+      socket,
+      isConnected,
+      badgeCounts,
+      joinedRooms,
+      sendMessage,
+      markMessageRead,
+      handleMarkCategoryAsRead,
+      isReconnecting,
+    ],
+  );
+
+  return (
+    <SocketContext.Provider value={contextValue}>
+      {children}
+    </SocketContext.Provider>
+  );
+};
+
+export const useSocket = () => {
+  const context = useContext(SocketContext);
+  if (!context) {
+    throw new Error('useSocket must be used within a SocketProvider');
+  }
+  return context;
+};

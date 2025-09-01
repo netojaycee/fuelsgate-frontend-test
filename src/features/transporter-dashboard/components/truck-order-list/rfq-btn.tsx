@@ -9,21 +9,25 @@ import {
 } from '@/types/truck-order.types';
 import useTruckOrderHook from '@/hooks/useTruckOrder.hook';
 import { useRouter } from 'next/navigation';
+import useOrderHook from '@/hooks/useOrder.hook';
 
 type RfqBtnProps = {
   truckOrderId: string;
   status: TruckOrderStatus;
   rfqStatus: TruckOrderRFQStatus;
+  negotiationId?: string;
 };
 
 const RfqBtn = ({ truckOrderId, status, rfqStatus }: RfqBtnProps) => {
   const { handleToggle } = useContext(ModalContext);
+  const { useUpdateOrder } = useOrderHook();
+    const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
+      useUpdateOrder(truckOrderId as string);
 
   const handleSendRFQButton = () =>
     handleToggle &&
     handleToggle({ state: true, name: TRUCK_RFQ, data: { truckOrderId } });
     const router = useRouter();
-
   const { useUpdateTruckOrderStatus } = useTruckOrderHook();
   const { mutateAsync: updateOrderStatus, isPending: isUpdating } =
     useUpdateTruckOrderStatus(truckOrderId);
@@ -36,6 +40,30 @@ const RfqBtn = ({ truckOrderId, status, rfqStatus }: RfqBtnProps) => {
     await updateOrderStatus({
       status: 'completed',
     });
+
+    const handleStatusUpdate = async () => {
+      try {
+        const credentials = {
+          description:
+            status === 'in-progress'
+              ? 'order_to_completed'
+              : status === 'pending'
+              ? 'order_to_in_progress'
+              : null,
+          type: 'truck',
+          status:
+            status === 'in-progress'
+              ? 'completed'
+              : status === 'pending'
+              ? 'in-progress'
+              : null, // Assuming you want to set status to in-progress when accepting
+        };
+        // console.log(credentials);
+        await updateOrder(credentials);
+      } catch (error: any) {
+        console.error('Error updating RFQ status:', error);
+      }
+    };
 
   const isRfqAccepted = rfqStatus === 'accepted';
 
@@ -52,20 +80,12 @@ const RfqBtn = ({ truckOrderId, status, rfqStatus }: RfqBtnProps) => {
           <FGCheckCircle width={13} height={13} color="#38C793" />
         ) : undefined
       }
-      label={
-        rfqStatus === 'pending' || rfqStatus === 'rejected'
-          ? 'Send Invoice'
-          : 'RFQ Sent'
-      }
+      label={rfqStatus === 'pending' ? 'Send Invoice' : undefined}
       height="h-[38px]"
       fontSize="text-xs"
       fontWeight="medium"
       width="w-[122px]"
-      onClick={
-        rfqStatus === 'pending' || rfqStatus === 'rejected'
-          ? handleSendRFQButton
-          :  () => {}
-      }
+      onClick={rfqStatus === 'pending' ? handleSendRFQButton : () => {}}
     />
   ) : (
     <CustomButton
@@ -76,7 +96,7 @@ const RfqBtn = ({ truckOrderId, status, rfqStatus }: RfqBtnProps) => {
           ? 'Start Order'
           : status === 'in-progress'
           ? 'Complete Order'
-          : 'Print Ticket'
+          : 'completed'
       }
       leftIcon={
         status === 'completed' ? (
@@ -87,13 +107,12 @@ const RfqBtn = ({ truckOrderId, status, rfqStatus }: RfqBtnProps) => {
       fontSize="text-xs"
       fontWeight="medium"
       width="w-[122px]"
-      loading={isUpdating}
+      loading={isUpdatingOrder}
       onClick={
-        status === 'pending'
-          ? handleStartOrder
-          : status === 'in-progress'
-          ? handleCompleteOrder
-          : () => router.push(`/dashboard/rfq/${truckOrderId}`)
+        status === 'pending' || status === 'in-progress'
+          ? handleStatusUpdate
+          : () => {}
+        // : () => router.push(`/dashboard/rfq/${truckOrderId}`)
       }
     />
   );

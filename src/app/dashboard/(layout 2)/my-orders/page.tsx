@@ -42,7 +42,7 @@ const MyOrders = () => {
             classNames="relative max-w-[479px] mb-14"
           >
             See all the available products you have secured. Check tickets and
-            complete procurement before their price timing expires
+            complete transactions before their price timing expires
           </Text>
 
           <div className="grid grid-cols-1 gap-4">

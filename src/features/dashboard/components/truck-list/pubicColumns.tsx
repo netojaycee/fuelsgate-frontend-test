@@ -34,21 +34,21 @@ const truckListPublicColumns = [
   //     );
   //   },
   // },
-  {
-    accessorKey: 'depotHubId.name',
-    header: 'Depot Hub',
-  },
+  // {
+  //   accessorKey: 'depotHubId.name',
+  //   header: 'Depot Hub',
+  // },
   {
     accessorKey: 'depot',
-    header: 'Depot',
+    header: 'Terminal',
   },
-  {
-    accessorKey: 'capacity',
-    header: 'Truck Size',
-    cell: ({ row }: { row: any }) => {
-      return <TableNumber number={row.getValue('capacity')} type="volume" />;
-    },
-  },
+  // {
+  //   accessorKey: 'capacity',
+  //   header: 'Truck Size',
+  //   cell: ({ row }: { row: any }) => {
+  //     return <TableNumber number={row.getValue('capacity')} type="volume" />;
+  //   },
+  // },
  
   {
     accessorKey: 'status',

@@ -19,7 +19,7 @@ const OnboardingFooter = () => {
           >
             &copy;2024, BG Labs Limited. All Right Reserved{' '}
           </Text>
-          <Link href="/">
+          <Link href="/terms">
             <Text
               variant="pm"
               lineHeight="leading-[21px]"

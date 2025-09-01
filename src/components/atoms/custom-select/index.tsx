@@ -32,6 +32,7 @@ type CustomSelectProps = {
   classNames?: string;
   height?: string;
   borderRadius?: string;
+  placeholder?: string;
   options?: CustomSelectOption[];
   Option?:
     | ComponentType<OptionProps<unknown, boolean, GroupBase<unknown>>>
@@ -137,6 +138,15 @@ const CustomSelect = forwardRef<
       indicatorSeparator: (styles) => ({ ...styles, display: 'none' }),
       indicatorsContainer: (styles) => ({ ...styles, padding: '0 4px' }),
       placeholder: (styles) => ({ ...styles, padding: '0 6px' }),
+      menu: (styles) => ({
+        ...styles,
+        zIndex: 9999,
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+      }),
+      menuPortal: (styles) => ({
+        ...styles,
+        zIndex: 9999,
+      }),
     };
 
     const DropdownIndicator: React.FC<DropdownIndicatorProps> = (props) => {
@@ -169,6 +179,8 @@ const CustomSelect = forwardRef<
             onChange={onChange}
             components={{ DropdownIndicator, Option, ValueContainer }}
             isDisabled={isDisabled}
+            menuPortalTarget={undefined}
+            menuPosition="absolute"
             {...props}
           />
         )}

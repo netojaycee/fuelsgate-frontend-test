@@ -30,21 +30,21 @@ const Trucks = () => {
         trucks={userTrucks}
       />
 
-      <Text
+      {/* <Text
         variant="pl"
         color="text-dark-gray-500"
         fontWeight="medium"
         classNames="mb-4"
       >
         Locked Trucks
-      </Text>
+      </Text> */}
 
-      <TrucksRenderer
+      {/* <TrucksRenderer
         fetchNextPage={fetchNextLockedUserTruckPage}
         isLoading={isLoadingLockedUserTrucks}
         trucks={lockedUserTrucks}
         filter={false}
-      />
+      /> */}
     </>
   );
 };

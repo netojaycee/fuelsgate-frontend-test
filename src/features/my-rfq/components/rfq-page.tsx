@@ -8,12 +8,23 @@ import { RfqComponent } from '@/features/my-rfq/components/rfq';
 import useTruckOrderHook from '@/hooks/useTruckOrder.hook';
 import CustomLoader from '@/components/atoms/custom-loader';
 import { TruckOrderDto } from '@/types/truck-order.types';
+import useOrderHook from '@/hooks/useOrder.hook';
 
 const RfqPage = () => {
-  const { useFetchTruckOrders } = useTruckOrderHook();
-  const { data, isLoading } = useFetchTruckOrders(`?limit=20&page=`);
 
-  console.log(data, 'RFQ DATA');
+  const { useFetchAllOrders } = useOrderHook();
+
+  const {
+    data: allOrders,
+    isLoading: isLoadingAllOrders,
+    error: fetchingAllError,
+    fetchNextPage: fetchNextPage,
+    refetch: refetchAllOrders,
+  } = useFetchAllOrders(`?type=truck&limit=${20}&page=`);
+  // console.log(userTrucks)
+  const orders = allOrders?.pages?.[0] || [];
+
+  console.log( allOrders, 'ALL ORDERS');
 
   return (
     <>
@@ -44,17 +55,12 @@ const RfqPage = () => {
             </Text>
 
             <div className="grid grid-cols-1 gap-4">
-              {isLoading ? (
+              {isLoadingAllOrders ? (
                 <CustomLoader />
-              ) : data?.pages[0].data.total > 0 ? (
-                data?.pages.map((item) =>
-                  item.data.truckOrders.map((truckOrder: TruckOrderDto) => (
-                    <RfqComponent
-                      key={truckOrder._id}
-                      truckOrder={truckOrder}
-                    />
-                  )),
-                )
+              ) : orders?.data?.total > 0 ? (
+                orders?.data?.order.map((truckOrder: TruckOrderDto) => (
+                  <RfqComponent key={truckOrder._id} truckOrder={truckOrder} />
+                ))
               ) : (
                 <div className="text-center text-xl font-medium py-10">
                   No order found

@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Fuelsgate | Authentication',
-  description: 'A Digital Platform For Bulk Fuel Procurement',
+  description: 'A Digital Platform For Bulk Fuel Transactions',
 };
 
 export default function AuthLayout({
@@ -37,7 +37,7 @@ export default function AuthLayout({
       <div className="relative h-full flex flex-col w-full lg:w-1/2 py-10 px-3.5">
         {children}
         <div className="flex items-center justify-end gap-7 mt-14 lg:mr-14">
-          <Link className="font-medium text-base text-mid-gray-700" href="/">
+          <Link className="font-medium text-base text-mid-gray-700" href="/terms">
             Terms & Condition
           </Link>
           <Link className="font-medium text-base text-mid-gray-700" href="/">

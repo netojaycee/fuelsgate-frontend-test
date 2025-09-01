@@ -9,3 +9,9 @@ export const fetchUserTransporterOrderRequest = async (query: string) => {
   const url = '/truck-order/user' + (query ?? '')
   return await requestHandler('get', url)
 }
+
+
+export const fetchAllOrdersRequest = async (query: string) => {
+  const url = '/order' + (query ?? '')
+  return await requestHandler('get', url)
+}

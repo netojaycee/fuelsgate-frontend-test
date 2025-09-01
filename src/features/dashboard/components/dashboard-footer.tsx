@@ -101,14 +101,15 @@ const DashboardFooter = () => {
             >
               &copy;2024, BG Labs Limited. All Right Reserved{' '}
             </Text>
-            <Link href="/">
+            <Link href="/terms">
               <Text
-                variant="pm"
-                lineHeight="leading-[21px]"
-                fontWeight="medium"
-                color="text-mid-gray-700"
+              variant="pm"
+              lineHeight="leading-[21px]"
+              fontWeight="bold"
+              color="text-gold"
+              classNames="underline"
               >
-                Terms & Conditions
+              Terms & Conditions
               </Text>
             </Link>
             <Link href="/">

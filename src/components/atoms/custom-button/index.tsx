@@ -24,6 +24,7 @@ type TCustomButton = {
   onClick?: (payload?: unknown) => void;
   onMouseLeave?: () => void;
   onMouseEnter?: () => void;
+  hideLabel?: boolean;
 };
 
 const CustomButton = forwardRef<HTMLButtonElement, TCustomButton>(
@@ -47,6 +48,7 @@ const CustomButton = forwardRef<HTMLButtonElement, TCustomButton>(
       onClick,
       onMouseLeave,
       onMouseEnter,
+      hideLabel = false,
       ...attributes
     },
     ref,
@@ -94,7 +96,7 @@ const CustomButton = forwardRef<HTMLButtonElement, TCustomButton>(
           buttonClass,
           width ?? 'w-full',
           fontSize ?? 'text-base',
-          height ?? 'h-[55px]',
+          height ?? 'h-[40px]',
           fontFamily,
           getFontWeight(fontWeight),
         )}
@@ -109,9 +111,16 @@ const CustomButton = forwardRef<HTMLButtonElement, TCustomButton>(
             <Loader2 className="animate-spin h-5 w-5 text-white" />
           ) : (
             <>
-              {leftIcon}
-              {label}
-              {rightIcon}
+              {/* Show only icon if mobile and hideLabel is true */}
+              {(hideLabel && window.innerWidth <= 768) ? (
+          leftIcon ?? rightIcon
+              ) : (
+          <>
+            {leftIcon}
+            {label}
+            {rightIcon}
+          </>
+              )}
             </>
           )}
         </span>

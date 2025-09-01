@@ -39,9 +39,8 @@ const Transporter = () => {
         classNames="text-center mb-20"
         color="text-dark-gray-400"
       >
-        Discharge and immediately load at the nearest depot to you, because we
-        always have cargo transport business opportunities for you in depots
-        nationwide.
+        Discharge and immediately secure loads at the nearest depot terminal to
+        you, because we always have cargo transport business opportunities.
       </Heading>
 
       <div className="grid grid-cols-2 max-lg:grid-cols-1 items-start gap-10 max-sm:gap-2">
@@ -51,7 +50,7 @@ const Transporter = () => {
             description="Reach the market in real-time"
           />
           <Checklist
-            title="List & delist trucks anytime at any depot nationwide"
+            title="List & delist trucks anytime at any depot"
             description="Load from the closest depot to you"
           />
           <Checklist

@@ -22,6 +22,7 @@ import {
 import { LitreValueContainerWrapper } from './truck-capacity-value';
 import useDepotHubHook from '@/hooks/useDepotHub.hook';
 import useTruckHook from '@/features/transporter-dashboard/hooks/useTruck.hook';
+import useStateHook from '@/hooks/useState.hook';
 import { useForm } from 'react-hook-form';
 import { TruckDto } from '@/features/transporter-dashboard/types/truck.type';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -31,7 +32,6 @@ import { DepotHubDto } from '@/types/depot-hub.types';
 import { TRUCK_SIZES } from '@/data/truck-sizes';
 import useProductHook from '@/hooks/useProduct.hook';
 import { ProductDto } from '@/types/product.types';
-import useStateHook from '@/hooks/useState.hook';
 import {
   CustomProductOptionWrapper,
   CustomValueContainerWrapper,
@@ -40,25 +40,52 @@ import {
 const sora = Sora({ subsets: ['latin'] });
 const LIST_TRUCK = 'list_truck';
 
+// Truck type options
+const TRUCK_TYPES = [
+  { label: 'Tanker', value: 'tanker' },
+  { label: 'Flat Bed', value: 'flatbed' },
+];
+
 // Delivery type options
 const DELIVERY_TYPES = [
   { label: 'Bridging', value: 'bridging' },
   { label: 'Local', value: 'local' },
 ];
 
+// Load status options
+export const LOAD_STATUS_OPTIONS = [
+  { label: 'Loaded', value: 'loaded' },
+  { label: 'Unloaded', value: 'unloaded' },
+];
+
 const ListTruckModal = () => {
   const { handleClose, openModal } = useContext(ModalContext);
   const { useFetchDepotHubs } = useDepotHubHook();
   const { data: depotHubsRes, isLoading: loadingDepotHubs } = useFetchDepotHubs;
+  const { useFetchStates, useFetchStateLGA } = useStateHook();
+  const { data: stateRes, isLoading: loadingState } = useFetchStates;
+
+  // Truck type state
+  const [truckType, setTruckType] = useState<CustomSelectOption | undefined>(
+    undefined,
+  );
+  const [selectedState, setSelectedState] = useState<
+    CustomSelectOption | undefined
+  >(undefined);
+  const [selectedLGA, setSelectedLGA] = useState<
+    CustomSelectOption | undefined
+  >(undefined);
+
+  const { data: lgaRes, isLoading: loadingLGA } = useFetchStateLGA(
+    selectedState?.value,
+  );
+
   const [depotHub, setDepotHub] = useState<CustomSelectOption | undefined>(
     undefined,
   );
-  // const [selectedState, setSelectedState] = useState<
-  //   CustomSelectOption | undefined
-  // >(undefined);
-  // const [selectedLGA, setSelectedLGA] = useState<
-  //   CustomSelectOption | undefined
-  // >(undefined);
+  const [loadStatus, setLoadStatus] = useState<CustomSelectOption>(
+    LOAD_STATUS_OPTIONS[1],
+  ); // Default to Unloaded
   const { useFetchProducts } = useProductHook();
   const { data: productsRes, isLoading: loadingProducts } = useFetchProducts;
   const [product, setProduct] = useState<CustomSelectOption | undefined>(
@@ -77,11 +104,6 @@ const ListTruckModal = () => {
   const { mutateAsync: saveTruck, isPending: isSavingData } = useSaveTruck();
   const { mutateAsync: updateTruck, isPending: isSavingUpdatedData } =
     useUpdateTruck(openModal?.data?.truck?._id);
-  // const { useFetchStateLGA } = useStateHook();
-  // const { data: stateRes, isLoading: loadingState } = useFetchStates;
-  // const { data: lgaRes, isLoading: loadingLGA } = useFetchStateLGA(
-  //   selectedState?.value,
-  // );
   const {
     setError,
     register,
@@ -91,9 +113,12 @@ const ListTruckModal = () => {
     handleSubmit,
   } = useForm<
     Omit<TruckDto, '_id' | 'profileId' | 'status'> & {
-      depotHubId: string;
-      productId: string;
-      deliveryType: string;
+      depotHubId?: string;
+      productId?: string;
+      deliveryType?: string;
+      truckType: string;
+      currentState?: string;
+      currentCity?: string;
     }
   >({
     resolver: yupResolver(truckFormSchema) as any,
@@ -101,76 +126,142 @@ const ListTruckModal = () => {
       ...(openModal?.data?.truck ? { ...openModal?.data?.truck } : {}),
       depotHubId: openModal?.data?.truck?.depotHubId?._id || '',
       productId: openModal?.data?.truck?.productId?._id || '',
-      profileId: openModal?.data?.truck?.profileId?._id || '',
-      // currentState: openModal?.data?.truck?.currentState || '',
-      // currentCity: openModal?.data?.truck?.currentCity || '',
+      profileId: openModal?.data?.truck?._id || '',
+      currentState: openModal?.data?.truck?.currentState || '',
+      currentCity: openModal?.data?.truck?.currentCity || '',
       deliveryType: '',
+      truckType: '',
+      loadStatus: 'unloaded',
     },
   });
   const onSubmit = async (
     data: Omit<TruckDto, '_id' | 'profileId' | 'status'> & {
-      deliveryType: string;
+      deliveryType?: string;
+      truckType: string;
     },
   ) => {
     try {
-      // Validate delivery type
-      if (!data.deliveryType) {
-        setError('deliveryType', {
+      // Validate truck type
+      if (!data.truckType) {
+        setError('truckType', {
           type: 'manual',
-          message: 'Delivery type is required',
+          message: 'Truck type is required',
         });
         return;
       }
 
-      // Validate custom capacity if "others" is selected
-      if (showCustomCapacity) {
-        if (
-          !customCapacity ||
-          isNaN(parseInt(customCapacity)) ||
-          parseInt(customCapacity) <= 0
-        ) {
-          setError('capacity', {
+      // Only validate tanker-specific fields for tanker trucks
+      if (data.truckType === 'tanker') {
+        // Validate delivery type for tanker
+        if (!data.deliveryType) {
+          setError('deliveryType', {
             type: 'manual',
-            message: 'Please enter a valid custom capacity value',
+            message: 'Delivery type is required',
           });
           return;
         }
-        data.capacity = customCapacity;
-      }
 
-      // Format truck number based on delivery type
-      if (data.deliveryType && data.truckNumber) {
-        const rawTruckNumber = data.truckNumber
-          .replace(/^B\/L-/, '') // Remove existing B/L- prefix
-          .replace(/^L-/, ''); // Remove existing L- prefix
+        // Validate custom capacity if "others" is selected
+        if (showCustomCapacity) {
+          if (
+            !customCapacity ||
+            isNaN(parseInt(customCapacity)) ||
+            parseInt(customCapacity) <= 0
+          ) {
+            setError('capacity', {
+              type: 'manual',
+              message: 'Please enter a valid custom capacity value',
+            });
+            return;
+          }
+          data.capacity = customCapacity;
+        }
 
-        if (data.deliveryType === 'bridging') {
-          data.truckNumber = `B/L-${rawTruckNumber}`;
-        } else if (data.deliveryType === 'local') {
-          data.truckNumber = `L-${rawTruckNumber}`;
+        // Format truck number based on delivery type
+        if (data.deliveryType && data.truckNumber) {
+          const rawTruckNumber = data.truckNumber
+            .replace(/^B\/L-/, '') // Remove existing B/L- prefix
+            .replace(/^L-/, ''); // Remove existing L- prefix
+
+          if (data.deliveryType === 'bridging') {
+            data.truckNumber = `B/L-${rawTruckNumber}`;
+          } else if (data.deliveryType === 'local') {
+            data.truckNumber = `L-${rawTruckNumber}`;
+          }
         }
       }
 
-      // Remove deliveryType from data before sending to API
-      const { deliveryType, ...truckData } = data;
+      // Remove deliveryType and truckType from data before sending to API
+      const { deliveryType, truckType, profileType, ...rest } = data;
+
+      // Build truck data based on truck type
+      let truckData;
+      if (truckType === 'flatbed') {
+        // For flatbed trucks, exclude tanker-specific fields
+        const {
+          productId,
+          // truckNumber,
+          capacity,
+          loadStatus,
+          depotHubId,
+          depot,
+          ...flatbedData
+        } = rest;
+
+        truckData = {
+          ...flatbedData,
+          truckType,
+          ...(profileType ? { profileType: profileType.toLowerCase() } : {}),
+        };
+      } else {
+        // For tanker trucks, include all fields
+        truckData = {
+          ...rest,
+          truckType,
+          ...(profileType ? { profileType: profileType.toLowerCase() } : {}),
+        };
+      }
 
       if (openModal?.data.edit) {
         await updateTruck(truckData);
       } else {
         await saveTruck(truckData);
+        // console.log(truckData)
       }
     } catch (error: any) {
       renderErrors(error?.errors, setError);
     }
   };
 
-  // const handleStateChange = useCallback((value: unknown) => {
-  //   setSelectedState(value as CustomSelectOption);
-  // }, []);
+  const handleTruckTypeChange = useCallback((value: unknown) => {
+    console.log('Truck type changed:', value);
+    setTruckType(value as CustomSelectOption);
+    // Reset relevant fields when truck type changes
+    if ((value as CustomSelectOption)?.value === 'flatbed') {
+      // Reset tanker-specific fields
+      setDepotHub(undefined);
+      setDepot(undefined);
+      setProduct(undefined);
+      setCapacity(undefined);
+      setDeliveryType(undefined);
+      setLoadStatus(LOAD_STATUS_OPTIONS[1]); // Reset to default
+      setShowCustomCapacity(false);
+      setCustomCapacity('');
+    } else {
+      // Reset flatbed-specific fields
+      setSelectedState(undefined);
+      setSelectedLGA(undefined);
+    }
+  }, []);
 
-  // const handleLGAChange = useCallback((value: unknown) => {
-  //   setSelectedLGA(value as CustomSelectOption);
-  // }, []);
+  const handleStateChange = useCallback((value: unknown) => {
+    setSelectedState(value as CustomSelectOption);
+    setSelectedLGA(undefined); // Reset LGA when state changes
+  }, []);
+
+  const handleLGAChange = useCallback((value: unknown) => {
+    setSelectedLGA(value as CustomSelectOption);
+  }, []);
 
   const depotHubs = useMemo(() => {
     if (depotHubsRes) {
@@ -245,23 +336,26 @@ const ListTruckModal = () => {
     return [];
   }, [depotHub, depotHubsRes]);
 
-  // const states = useMemo(() => {
-  //   if (stateRes) {
-  //     return stateRes?.map((item: string[]) => ({
-  //       label: item,
-  //       value: item,
-  //     }));
-  //   }
-  // }, [stateRes]);
+  const states = useMemo(() => {
+    if (stateRes) {
+      return stateRes?.map((item: string) => ({
+        label: item,
+        value: item,
+      }));
+    }
+    return [];
+  }, [stateRes]);
 
-  // const lgas = useMemo(() => {
-  //   if (lgaRes) {
-  //     return lgaRes?.map((item: string[]) => ({
-  //       label: item,
-  //       value: item,
-  //     }));
-  //   }
-  // }, [lgaRes]);
+  const lgas = useMemo(() => {
+    if (lgaRes) {
+      return lgaRes?.map((item: string) => ({
+        label: item,
+        value: item,
+      }));
+    }
+    return [];
+  }, [lgaRes]);
+
   const handleCapacityChange = useCallback(
     (value: unknown) => {
       const selectedCapacity = value as CustomSelectOption;
@@ -278,6 +372,25 @@ const ListTruckModal = () => {
     },
     [setValue],
   );
+
+  useEffect(() => {
+    if (truckType) {
+      setValue('truckType', truckType.value as 'tanker' | 'flatbed');
+    }
+  }, [truckType, setValue]);
+
+  useEffect(() => {
+    if (selectedState) {
+      setValue('currentState', selectedState.value);
+    }
+  }, [selectedState, setValue]);
+
+  useEffect(() => {
+    if (selectedLGA) {
+      setValue('currentCity', selectedLGA.value);
+    }
+  }, [selectedLGA, setValue]);
+
   useEffect(() => {
     if (capacity && capacity.value !== 'others') {
       setValue('capacity', capacity.value);
@@ -295,6 +408,12 @@ const ListTruckModal = () => {
       setValue('deliveryType', deliveryType.value);
     }
   }, [deliveryType, setValue]);
+
+  useEffect(() => {
+    if (loadStatus) {
+      setValue('loadStatus', loadStatus.value as 'loaded' | 'unloaded');
+    }
+  }, [loadStatus, setValue]);
 
   // useEffect(() => {
   //   if (selectedState) {
@@ -330,7 +449,11 @@ const ListTruckModal = () => {
       if (_selectedProduct) setProduct(_selectedProduct);
     }
     if (getValues('capacity')) {
-      const capacityValue = getValues('capacity').toString();
+      const capacityRaw = getValues('capacity');
+      const capacityValue =
+        capacityRaw !== undefined && capacityRaw !== null
+          ? capacityRaw.toString()
+          : '';
       const _selectedCapacity = TRUCK_SIZES?.find(
         (item: CustomSelectOption) => item.value === capacityValue,
       );
@@ -348,25 +471,35 @@ const ListTruckModal = () => {
       }
     }
 
-    // if (getValues('currentState')) {
-    //   const _selectedState = states?.find(
-    //     (item: CustomSelectOption) =>
-    //       item.value === getValues('currentState')?.toString(),
-    //   );
-    //   if (_selectedState) setSelectedState(_selectedState);
-    // }
+    // Initialize truck type
+    if (getValues('truckType')) {
+      const _selectedTruckType = TRUCK_TYPES.find(
+        (item: CustomSelectOption) => item.value === getValues('truckType'),
+      );
+      if (_selectedTruckType) setTruckType(_selectedTruckType);
+    }
 
-    // if (getValues('currentCity')) {
-    //   const _selectedCity = lgas?.find(
-    //     (item: CustomSelectOption) =>
-    //       item.value === getValues('currentCity')?.toString(),
-    //   );
-    //   if (_selectedCity) setSelectedLGA(_selectedCity);
-    // }
+    // Initialize state and LGA for flatbed trucks
+    if (getValues('currentState')) {
+      const _selectedState = states?.find(
+        (item: CustomSelectOption) =>
+          item.value === getValues('currentState')?.toString(),
+      );
+      if (_selectedState) setSelectedState(_selectedState);
+    }
+
+    if (getValues('currentCity')) {
+      const _selectedCity = lgas?.find(
+        (item: CustomSelectOption) =>
+          item.value === getValues('currentCity')?.toString(),
+      );
+      if (_selectedCity) setSelectedLGA(_selectedCity);
+    }
 
     // Initialize delivery type based on truck number format
     if (getValues('truckNumber')) {
-      const truckNumber = getValues('truckNumber').toString();
+      const truckNumberRaw = getValues('truckNumber');
+      const truckNumber = truckNumberRaw ? truckNumberRaw.toString() : '';
       let _selectedDeliveryType;
 
       if (truckNumber.startsWith('B/L-')) {
@@ -384,7 +517,7 @@ const ListTruckModal = () => {
         setValue('deliveryType', _selectedDeliveryType.value);
       }
     }
-  }, [depotHubs, depots, products, getValues, setValue]);
+  }, [depotHubs, depots, products, states, lgas, getValues, setValue]);
 
   return (
     <>
@@ -398,108 +531,207 @@ const ListTruckModal = () => {
           List a truck
         </DialogTitle>
       </DialogHeader>
-      <div>
+      <div className="relative overflow-visible">
         <DialogDescription className="text-dark-gray-400 text-sm mb-10">
           Enter available truck details
         </DialogDescription>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="bg-light-gray-150 grid grid-cols-2 max-sm:grid-cols-1 gap-3 py-[10px] px-4 rounded-[10px] mb-3">
-            <CustomSelect
-              name="productId"
-              label="Product"
-              options={products}
-              Option={CustomProductOptionWrapper}
-              ValueContainer={CustomValueContainerWrapper}
-              value={product}
-              onChange={handleProductChange}
-              isDisabled={loadingProducts}
-              // ts-ignore-next-line eslint-disable-next-line
-              error={errors.productId?.message as any}
-              classNames="col-span-full"
-            />
-           <CustomInput
-              type="type"
-              name="truckNumber"
-              label="Truck number"
-              register={register}
-              error={errors.truckNumber?.message}
-            />
-            <CustomSelect
-              name="deliveryType"
-              label="Delivery Type"
-              options={DELIVERY_TYPES}
-              value={deliveryType}
-              onChange={handleDeliveryTypeChange}
-              error={errors.deliveryType?.message}
-            />
-            <CustomSelect
-              name="size"
-              label="Capacity"
-              options={TRUCK_SIZES}
-              value={capacity}
-              onChange={handleCapacityChange}
-              error={errors.capacity?.message}
-              ValueContainer={LitreValueContainerWrapper}
-              classNames='w-full col-span-full'
-            />
-            {showCustomCapacity && (
-              <CustomInput
-                type="number"
-                name="customCapacity"
-                label="Enter Custom Capacity"
-                placeholder="Enter capacity in litres"
-                value={customCapacity}
-                onChange={(e) => setCustomCapacity(e.target.value)}
-                prefix="Ltr"
-                prefixPadding="pl-12"
-                min="1"
-                error={errors.capacity?.message}
-                classNames="col-span-full"
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="relative overflow-visible"
+          style={{ pointerEvents: 'auto' }}
+        >
+          <div
+            className="bg-light-gray-150 grid grid-cols-2 max-sm:grid-cols-1 gap-3 py-[10px] px-4 rounded-[10px] mb-3 relative"
+            style={{ pointerEvents: 'auto' }}
+          >
+            <div
+              className="col-span-full relative z-50"
+              style={{ pointerEvents: 'auto' }}
+            >
+              {/* Temporary native select for debugging */}
+              {/* <label htmlFor="truckType-native" className="block text-sm font-medium text-gray-700 mb-1">
+                Truck Type (Native Test)
+              </label>
+              <select
+                id="truckType-native"
+                value={truckType?.value || ''}
+                onChange={(e) => {
+                  console.log('Native select changed:', e.target.value);
+                  const selectedType = TRUCK_TYPES.find(type => type.value === e.target.value);
+                  if (selectedType) {
+                    handleTruckTypeChange(selectedType);
+                  }
+                }}
+                className="w-full p-2 border rounded bg-white"
+              >
+                <option value="">Select truck type</option>
+                {TRUCK_TYPES.map(type => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select> */}
+
+              {/* Original CustomSelect - commented for debugging */}
+              <CustomSelect
+                name="truckType"
+                label="Truck Type"
+                options={TRUCK_TYPES}
+                value={truckType}
+                onChange={handleTruckTypeChange}
+                error={errors.truckType?.message}
+                classNames="relative z-50"
+                placeholder="Select truck type"
               />
+            </div>
+
+            {/* Only show these fields for tanker trucks */}
+            {truckType?.value === 'tanker' && (
+              <>
+                <div className="col-span-full relative z-40">
+                  <CustomSelect
+                    name="productId"
+                    label="Product"
+                    options={products}
+                    Option={CustomProductOptionWrapper}
+                    ValueContainer={CustomValueContainerWrapper}
+                    value={product}
+                    onChange={handleProductChange}
+                    isDisabled={loadingProducts}
+                    // ts-ignore-next-line eslint-disable-next-line
+                    error={errors.productId?.message as any}
+                    classNames="relative z-40"
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="relative z-30">
+              <CustomInput
+                type="type"
+                name="truckNumber"
+                label="Truck number"
+                register={register}
+                error={errors.truckNumber?.message}
+              />
+            </div>
+            <div className="relative z-30">
+              <CustomSelect
+                name="deliveryType"
+                label="Delivery Type"
+                options={DELIVERY_TYPES}
+                value={deliveryType}
+                onChange={handleDeliveryTypeChange}
+                error={errors.deliveryType?.message}
+                classNames="relative z-30"
+              />
+            </div>
+            {truckType?.value === 'tanker' && (
+              <>
+                <div className="relative z-30">
+                  <CustomSelect
+                    name="loadStatus"
+                    label="Load Status"
+                    options={LOAD_STATUS_OPTIONS}
+                    value={loadStatus}
+                    onChange={(value: unknown) =>
+                      setLoadStatus(value as CustomSelectOption)
+                    }
+                    error={errors.loadStatus?.message}
+                    classNames="relative z-30"
+                  />
+                </div>
+                <div className="relative z-30">
+                  <CustomSelect
+                    name="size"
+                    label="Capacity"
+                    options={TRUCK_SIZES}
+                    value={capacity}
+                    onChange={handleCapacityChange}
+                    error={errors.capacity?.message}
+                    ValueContainer={LitreValueContainerWrapper}
+                    classNames="relative z-30"
+                  />
+                </div>
+                {showCustomCapacity && (
+                  <CustomInput
+                    type="number"
+                    name="customCapacity"
+                    label="Enter Custom Capacity"
+                    placeholder="Enter capacity in litres"
+                    value={customCapacity}
+                    onChange={(e) => setCustomCapacity(e.target.value)}
+                    prefix="Ltr"
+                    prefixPadding="pl-12"
+                    min="1"
+                    error={errors.capacity?.message}
+                    classNames="col-span-full"
+                  />
+                )}
+              </>
             )}
           </div>
 
-          <div className="bg-light-gray-150 grid grid-cols-2 max-sm:grid-cols-1 gap-3 py-[10px] px-4 rounded-[10px] mb-3">
-            <CustomSelect
-              name="depotHubId"
-              label="Hub"
-              options={depotHubs}
-              value={depotHub}
-              onChange={handleDepotHubChange}
-              isDisabled={loadingDepotHubs}
-              error={errors.depotHubId?.message}
-            />
-            <CustomSelect
-              name="depot"
-              label="Depot"
-              options={depots}
-              value={depot}
-              onChange={handleDepotChange}
-              error={errors.depot?.message}
-            />
-          </div>
-
-          {/* <div className="bg-light-gray-150 grid grid-cols-2 max-sm:grid-cols-1 gap-3 py-[10px] px-4 rounded-[10px] mb-8">
-            <CustomSelect
-              label="Current State"
-              name="state"
-              options={states}
-              value={selectedState}
-              isDisabled={loadingState}
-              onChange={handleStateChange}
-              error={errors.currentState?.message}
-            />
-            <CustomSelect
-              label="Current City"
-              name="lga"
-              options={lgas}
-              isDisabled={loadingLGA}
-              value={selectedLGA}
-              onChange={handleLGAChange}
-              error={errors.currentCity?.message}
-            />
-          </div> */}
+          {/* Conditional location section based on truck type */}
+          {truckType && (
+            <div className="bg-light-gray-150 grid grid-cols-2 max-sm:grid-cols-1 gap-3 py-[10px] px-4 rounded-[10px] mb-3 relative">
+              {truckType.value === 'tanker' ? (
+                <>
+                  <div className="relative z-20">
+                    <CustomSelect
+                      name="depotHubId"
+                      label="Hub"
+                      options={depotHubs}
+                      value={depotHub}
+                      onChange={handleDepotHubChange}
+                      isDisabled={loadingDepotHubs}
+                      error={errors.depotHubId?.message}
+                      classNames="relative z-20"
+                    />
+                  </div>
+                  <div className="relative z-20">
+                    <CustomSelect
+                      name="depot"
+                      label="Depot"
+                      options={depots}
+                      value={depot}
+                      onChange={handleDepotChange}
+                      error={errors.depot?.message}
+                      classNames="relative z-20"
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="relative z-30">
+                    <CustomSelect
+                      label="Current State"
+                      name="state"
+                      options={states}
+                      value={selectedState}
+                      isDisabled={loadingState}
+                      onChange={handleStateChange}
+                      error={errors.currentState?.message}
+                      classNames="relative z-30"
+                    />
+                  </div>
+                  <div className="relative z-20">
+                    <CustomSelect
+                      label="Current City"
+                      name="lga"
+                      options={lgas}
+                      isDisabled={loadingLGA}
+                      value={selectedLGA}
+                      onChange={handleLGAChange}
+                      error={errors.currentCity?.message}
+                      classNames="relative z-20"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-2">
             <CustomButton

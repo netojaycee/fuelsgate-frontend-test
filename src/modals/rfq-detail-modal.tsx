@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { RFQ_TICKET } from '@/routes';
 import { FGEye } from '@fg-icons';
 import CustomButton from '@/components/atoms/custom-button';
+import useOrderHook from '@/hooks/useOrder.hook';
 
 const sora = Sora({ subsets: ['latin'] });
 const TRUCK_RFQ_DETAILS = 'truck_rfq_details';
@@ -27,13 +28,58 @@ const RFQDetailModal = () => {
   const { data, isLoading } = useGetTruckOrderDetails(
     openModal?.data.truckOrderId,
   );
+
+  const { useGetOrderDetails, useUpdateOrder } = useOrderHook();
+  const { data: orderData, isLoading: isLoadingOrder } = useGetOrderDetails(
+    openModal?.data.truckOrderId as string,
+  );
   const router = useRouter();
   const { handleClose } = useContext(ModalContext);
-  
+
   const gotoTicket = () => {
     handleClose?.(); // Close the modal if handleClose exists
-    router.push(`${RFQ_TICKET}/${data?.data?._id}`);
+    router.push(`${RFQ_TICKET}/${orderData?.data?._id}`);
   };
+
+  // Personalized info message based on user and order status
+  const user = require('@/contexts/AuthContext').useAuthContext?.()?.user;
+  const userRole = user?.data?.role;
+  const isBuyer = userRole === 'buyer';
+  const isSellerOrTransporter =
+    userRole === 'seller' || userRole === 'transporter';
+  const orderStatus = orderData?.data?.status;
+  const rfqStatus = orderData?.data?.rfqStatus;
+  const negotiationId = orderData?.data?.negotiationId;
+
+  let infoMessage = '';
+  if (orderStatus === 'pending') {
+    if (isBuyer) {
+      infoMessage =
+        'You have received a quotation for this truck. You can accept, reject, or negotiate the offer.';
+    } else {
+      infoMessage =
+        'You have sent a quotation to the buyer. Await their response or check the chat for negotiation.';
+    }
+  } else if (orderStatus === 'in-progress') {
+    if (isBuyer) {
+      infoMessage =
+        'Order is in progress. Please coordinate with the transporter for loading and delivery.';
+    } else {
+      infoMessage =
+        'Order is in progress. Proceed to complete the order after delivery.';
+    }
+  } else if (orderStatus === 'completed') {
+    infoMessage =
+      'Order has been completed. You can print the ticket for your records.';
+  } else if (orderStatus === 'cancelled') {
+    if (isBuyer) {
+      infoMessage =
+        'You cancelled this order. No further actions can be taken.';
+    } else {
+      infoMessage =
+        'This order was cancelled by the buyer. No further actions can be taken.';
+    }
+  }
   // console.log(data?.data);
 
   return (
@@ -53,18 +99,18 @@ const RFQDetailModal = () => {
           Details of the billing for this truck request
         </DialogDescription>
 
-        {isLoading ? (
+        {isLoadingOrder ? (
           <CustomLoader />
         ) : (
           <>
-            {(data.data.status === 'in-progress' ||
-              data.data.status === 'completed') && (
+            {/* Print Ticket button for all users if not pending/cancelled */}
+            {orderStatus !== 'pending' && orderStatus !== 'cancelled' && (
               <div className="mb-2 flex justify-end">
                 <CustomButton
                   variant="primary"
                   onClick={gotoTicket}
                   height="h-11"
-                  label="See Ticket"
+                  label="Print Ticket"
                   leftIcon={<FGEye color="white" />}
                   fontSize="text-sm"
                   fontWeight="medium"
@@ -83,12 +129,19 @@ const RFQDetailModal = () => {
                   Request Details
                 </Text>
 
+                {/* Personalized info message */}
+                <div className="mb-4">
+                  <Text variant="ps" color="text-blue-700">
+                    {infoMessage}
+                  </Text>
+                </div>
+
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <Text variant="ps" color="text-dark-gray-550">
                     Truck number
                   </Text>
                   <Text variant="ps" color="text-[#151A23]" fontWeight="bold">
-                    {data.data.truckId.truckNumber}
+                    {orderData?.data?.truckId?.truckNumber}
                   </Text>
                 </div>
 
@@ -97,8 +150,8 @@ const RFQDetailModal = () => {
                     Loading Depot
                   </Text>
                   <Text variant="ps" color="text-[#151A23]" fontWeight="medium">
-                    {data.data.truckId.depot},{' '}
-                    {data.data.truckId.depotHubId.name}
+                    {orderData?.data?.truckId?.depot},{' '}
+                    {orderData?.data?.truckId?.depotHubId?.name}
                   </Text>
                 </div>
 
@@ -112,7 +165,8 @@ const RFQDetailModal = () => {
                     fontWeight="medium"
                     classNames="text-right"
                   >
-                    {data.data.destination}, {data.data.city}, {data.data.state}
+                    {orderData?.data?.destination}, {orderData?.data?.city},{' '}
+                    {orderData?.data?.state}
                   </Text>
                 </div>
               </div>
@@ -124,8 +178,33 @@ const RFQDetailModal = () => {
                   <Text variant="ps" color="text-dark-500">
                     Status
                   </Text>
-                  <StatusText status={data.data.status} />
+                  <StatusText status={orderData?.data?.status} />
                 </div>
+                {/* Negotiation/Chat info for pending+rejected/accepted */}
+                {orderStatus === 'pending' &&
+                  rfqStatus === 'rejected' &&
+                  negotiationId && (
+                    <div className="mt-3 flex items-center justify-between">
+                      <Text variant="ps" color="text-dark-gray-400">
+                        Negotiation ongoing. Please check the chat to continue.
+                      </Text>
+                      <button
+                        className="text-primary-600 underline font-medium"
+                        onClick={() =>
+                          router.push(`/dashboard/chat/${negotiationId}`)
+                        }
+                      >
+                        Go to chat
+                      </button>
+                    </div>
+                  )}
+                {orderStatus === 'pending' && rfqStatus === 'accepted' && (
+                  <div className="mt-3">
+                    <Text variant="ps" color="text-green-600">
+                      Offer accepted. Order is now in progress.
+                    </Text>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -134,7 +213,7 @@ const RFQDetailModal = () => {
                 Quote Amount
               </Text>
               <Heading variant="h5" color="text-[#151A23]" fontWeight="bold">
-                ₦ {formatNumber(data.data.price, true)}
+                ₦ {formatNumber(orderData?.data?.price, true)}
               </Heading>
             </div>
           </>

@@ -26,40 +26,50 @@ const useTruckRequestHook = () => {
     isFetching: isLoadingUserTrucks,
     fetchNextPage: fetchNextUserTruckPage,
     hasNextPage: userTruckHasNextPage,
+    error: fetchingTruckError,
     isFetchingNextPage: loadingFetchNextUserTruckPage,
   } = useFetchUserTrucks(`?status=available,pending&limit=15&page=`, 'USER_TRUCKS');
 
-  const { useFetchTransporterOrders } = useTruckOrderHook();
-  const {
-    data: truckOrders,
-    isLoading: isLoadingOrders,
-    error: fetchingTruckError,
-    refetch: refetchOrders,
-  } = useFetchTransporterOrders(
-    `?profileId=${profile?._id}&profileType=${role}&limit=${20}&page=${page}`,
-  );
+  // const { useFetchTransporterOrders,  } = useTruckOrderHook();
+  // const {
+  //   data: truckOrders,
+  //   isLoading: isLoadingOrders,
+  //   error: fetchingTruckError,
+  //   refetch: refetchOrders,
+  // } = useFetchTransporterOrders(
+  //   `?profileId=${profile?._id}&profileType=${role}&limit=${20}&page=${page}`,
+  // );
+
+  // const {
+  //   data: allOrders,
+  //   isLoading: isLoadingAllOrders,
+  //   error: fetchingAllError,
+  //   refetch: refetchAllOrders,
+  // } = useFetchAllOrders(
+  //   `?profileId=${profile?._id}&profileType=${role}&type=truck&limit=${20}&page=${page}`,
+  // );
 
   
 
-  const queryClient = useQueryClient();
-  useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_BASE_URL, {
-      transports: ['websocket'],
-      secure: true,
-    });
-    socket.on('updatedTruckOrderPrice', (res) => {
-      queryClient.invalidateQueries({
-        queryKey: ['TRUCK_ORDERS', `${res._id}_TRUCK_ORDER_DETAIL`],
-      });
-      refetchOrders();
-    });
-    socket.on('updatedTruckOrderStatus', (res) => {
-      queryClient.invalidateQueries({
-        queryKey: ['TRUCK_ORDERS', `${res._id}_TRUCK_ORDER_DETAIL`],
-      });
-      refetchOrders();
-    });
-  }, [queryClient, truckOrders, refetchOrders]);
+  // const queryClient = useQueryClient();
+  // useEffect(() => {
+  //   const socket = io(process.env.NEXT_PUBLIC_API_BASE_URL, {
+  //     transports: ['websocket'],
+  //     secure: true,
+  //   });
+  //   socket.on('updatedTruckOrderPrice', (res) => {
+  //     queryClient.invalidateQueries({
+  //       queryKey: ['TRUCK_ORDERS', `${res._id}_TRUCK_ORDER_DETAIL`],
+  //     });
+  //     refetchOrders();
+  //   });
+  //   socket.on('updatedTruckOrderStatus', (res) => {
+  //     queryClient.invalidateQueries({
+  //       queryKey: ['TRUCK_ORDERS', `${res._id}_TRUCK_ORDER_DETAIL`],
+  //     });
+  //     refetchOrders();
+  //   });
+  // }, [queryClient, truckOrders, refetchOrders]);
 
   const openUploadProductModal = () =>
     handleToggle && handleToggle({ name: LIST_TRUCK, data: {}, state: true });
@@ -71,14 +81,18 @@ const useTruckRequestHook = () => {
     fetchingTruckError,
     fetchNextTruckPage,
     setPage,
-    truckOrders,
-    isLoadingOrders,
+    // truckOrders,
+    // isLoadingOrders,
     openUploadProductModal,
     loadingFetchNextTruckPage,
     userTrucks,
     isLoadingUserTrucks,
     fetchNextUserTruckPage,
     userTruckHasNextPage,
+    // allOrders,
+    // isLoadingAllOrders,
+    // fetchingAllError,
+    // refetchAllOrders,
   };
 };
 

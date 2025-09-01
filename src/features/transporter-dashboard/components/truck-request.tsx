@@ -4,6 +4,7 @@ import { TruckOrderTableList } from './truck-order-list';
 import React from 'react';
 import useTruckRequestHook from '../hooks/useTruckRequest.hook';
 import TrucksRenderer from './trucks-renderer';
+import useOrderHook from '@/hooks/useOrder.hook';
 
 const TruckRequest = () => {
   const {
@@ -13,21 +14,33 @@ const TruckRequest = () => {
     setPage,
     fetchNextTruckPage,
     fetchingTruckError,
-    truckOrders,
-    isLoadingOrders,
-   
+    // truckOrders,
+    // isLoadingOrders,
+    // allOrders,
+
     // refetchUserTruckOrders,
   } = useTruckRequestHook();
-// console.log(userTrucks)
+
+  const { useFetchAllOrders } = useOrderHook();
+
+  const {
+    data: allOrders,
+    isLoading: isLoadingAllOrders,
+    error: fetchingAllError,
+    fetchNextPage: fetchNextPage,
+    refetch: refetchAllOrders,
+  } = useFetchAllOrders(`?type=truck&limit=${20}&page=`);
+  // console.log(userTrucks)
+  const orders = allOrders?.pages?.[0] || [];
   return (
     <>
-      <Header />
+      {/* <Header /> */}
 
-      <TrucksRenderer
+      {/* <TrucksRenderer
         fetchNextPage={fetchNextTruckPage}
         isLoading={isLoadingTrucks}
         trucks={userTrucks}
-      />
+      /> */}
 
       <Text variant="pl" color="text-dark-gray-500" fontWeight="medium">
         Orders
@@ -40,10 +53,10 @@ const TruckRequest = () => {
       ) : (
         <TruckOrderTableList
           setPage={setPage}
-          currentPage={truckOrders?.data.currentPage}
-          totalPages={truckOrders?.data.totalPages}
-          orders={truckOrders?.data.truckOrders}
-          loading={isLoadingOrders}
+          currentPage={orders?.data?.currentPage}
+          totalPages={orders?.data?.totalPages}
+          orders={orders?.data?.order || []}
+          loading={isLoadingAllOrders}
         />
       )}
     </>

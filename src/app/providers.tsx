@@ -1,5 +1,6 @@
 'use client'
 
+import { SocketProvider } from '@/contexts/SocketContext'
 import {
   isServer,
   QueryClient,
@@ -33,6 +34,6 @@ export default function Providers({ children }: {
   const queryClient = getQueryClient()
 
   return (
-    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}><SocketProvider>{children}</SocketProvider></QueryClientProvider>
   )
 }

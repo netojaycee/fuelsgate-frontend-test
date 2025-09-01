@@ -11,13 +11,13 @@ const RoleSelect = () => {
     {
       id: 'buyer',
       name: 'Trader',
-      description: 'Find product/price direct from suppliers',
+      description: 'Search, Find & Negotiate exact trucks you need',
     },
-    {
-      id: 'seller',
-      name: 'Supplier',
-      description: 'Post product/price at any depot location',
-    },
+    // {
+    //   id: 'seller',
+    //   name: 'Supplier',
+    //   description: 'Post product/price at any depot location',
+    // },
     {
       id: 'transporter',
       name: 'Transporter',

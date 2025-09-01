@@ -16,16 +16,27 @@ const useTruckListingHook = () => {
     `?profileId=${profile?._id}&status=available&limit=15&page=`,
   );
 
-  const {
-    data: userTrucks,
-    isFetching: isLoadingUserTrucks,
-    fetchNextPage: fetchNextUserTruckPage,
-    hasNextPage: userTruckHasNextPage,
-    isFetchingNextPage: loadingFetchNextUserTruckPage,
-  } = useFetchUserTrucks(
-    `?status=available,pending&limit=15&page=`,
-    'USER_TRUCKS',
-  );
+  // const {
+  //   data: userTrucks,
+  //   isFetching: isLoadingUserTrucks,
+  //   fetchNextPage: fetchNextUserTruckPage,
+  //   hasNextPage: userTruckHasNextPage,
+  //   isFetchingNextPage: loadingFetchNextUserTruckPage,
+  // } = useFetchUserTrucks(
+  //   `?status=available,pending&limit=15&page=`,
+  //   'USER_TRUCKS',
+  // );
+
+   const {
+     data: userTrucks,
+     isFetching: isLoadingUserTrucks,
+     fetchNextPage: fetchNextUserTruckPage,
+     hasNextPage: userTruckHasNextPage,
+     isFetchingNextPage: loadingFetchNextUserTruckPage,
+   } = useFetchUserTrucks(
+     `?limit=15&page=`,
+     'USER_TRUCKS',
+   );
 
   const {
     data: lockedUserTrucks,
@@ -43,7 +54,7 @@ const useTruckListingHook = () => {
     isFetchingNextPage: loadingFetchNextLockedTruckPage,
   } = useFetchTrucks(
     `?profileId=${profile?._id}&status=locked&limit=15&page=`,
-    'LOCKED_TRUCKS',
+    { queryKey: 'LOCKED_TRUCKS' },
   );
 
   return {

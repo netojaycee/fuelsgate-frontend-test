@@ -10,6 +10,8 @@ type BuyerProviderValueType = {
   depot?: CustomSelectOption;
   selectedSize?: CustomSelectOption;
   selectedProduct?: CustomSelectOption;
+  selectedLoadStatus?: CustomSelectOption;
+  handleLoadStatusChange?: (newValue: unknown) => void;
   handleDepotChange?: (newValue: unknown) => void;
   handleStateChange?: (newValue: unknown) => void;
   handleProductsChange?: (newValue: unknown) => void;
@@ -37,6 +39,7 @@ const BuyerProvider = ({ children }: BuyerProviderProps) => {
   const [selectedSize, setSelectedSize] = useState<
     CustomSelectOption | undefined
   >(undefined);
+  const [selectedLoadStatus, setSelectedLoadStatus] = useState<CustomSelectOption | undefined>(undefined);
   const [selectedProduct, setSelectedProduct] = useState<
     CustomSelectOption | undefined
   >(undefined);
@@ -51,6 +54,10 @@ const BuyerProvider = ({ children }: BuyerProviderProps) => {
 
   const handleProductsChange = useCallback((value: unknown) => {
     setSelectedProduct(value as CustomSelectOption);
+  }, []);
+
+  const handleLoadStatusChange = useCallback((value: unknown) => {
+    setSelectedLoadStatus(value as CustomSelectOption);
   }, []);
 
   const handleSizeChange = useCallback((value: unknown) => {
@@ -78,9 +85,11 @@ const BuyerProvider = ({ children }: BuyerProviderProps) => {
         depot,
         selectedSize,
         selectedProduct,
+        selectedLoadStatus,
         handleDepotChange,
         handleStateChange,
         handleProductsChange,
+        handleLoadStatusChange,
         handleSizeChange,
         handleLGAChange,
         handleVolumeChange,

@@ -46,6 +46,14 @@ const usePublicSearch = (isSearchPage = false) => {
     label: string;
     value: string;
   } | null>(null);
+
+
+  // Truck type state
+  const [truckType, setTruckType] = useState<{
+    label: string;
+    value: string;
+  } | null>(null);
+
   const [volume, setVolume] = useState<string>('');
   const [urlParamsInitialized, setUrlParamsInitialized] = useState(false);
 
@@ -70,6 +78,8 @@ const usePublicSearch = (isSearchPage = false) => {
     },
     [],
   );
+
+  
 
   const handleProductsChange = useCallback(
     (
@@ -108,6 +118,17 @@ const usePublicSearch = (isSearchPage = false) => {
     [],
   );
 
+  const handleTruckTypeChange = useCallback(
+    (value: { label: string; value: string } | null) => {
+      setTruckType(value);
+      // Reset other selections when truck type changes
+      setDepot(null);
+      setSelectedProduct(null);
+      setSelectedSize(null);
+    },
+    [],
+  );
+
   const handleVolumeChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setVolume(e.target.value);
@@ -115,6 +136,9 @@ const usePublicSearch = (isSearchPage = false) => {
     [],
   );
 
+
+
+ 
   // Validation functions
   const validateSearchProduct = useCallback(() => {
     if (!selectedProduct) {
@@ -130,36 +154,48 @@ const usePublicSearch = (isSearchPage = false) => {
     return true;
   }, [selectedProduct, depot, volume, showToast]);
 
-  // Check if all required fields are present
+  // Check if all required fields are present based on truck type
   const areRequiredFieldsPresent = useMemo(() => {
-    return !!(selectedProduct && depot && selectedSize);
-  }, [selectedProduct, depot, selectedSize]);
+    if (!truckType) return false;
+    
+    if (truckType.value === 'tanker') {
+      return !!(selectedProduct && depot && selectedSize);
+    } else if (truckType.value === 'flatbed') {
+      return !!depot; // Only location required for flatbed
+    }
+    return false;
+  }, [truckType, selectedProduct, depot, selectedSize]);
 
   const validateSearchTrucks = useCallback(() => {
-    if (!selectedProduct) {
-      showToast('Please select a product to search', 'error');
-      return false;
-    } else if (!depot) {
-      showToast('Please select a depot', 'error');
-      return false;
-    } else if (!selectedSize) {
-      showToast('Please select truck size', 'error');
+    if (!truckType) {
+      showToast('Please select a truck type', 'error');
       return false;
     }
-    // else if (!selectedState) {
-    //   showToast('Please select your destination state', 'error');
-    //   return false;
-    // } else if (!selectedLGA) {
-    //   showToast('Please select your destination LGA', 'error');
-    //   return false;
-    // }
+    
+    if (truckType.value === 'tanker') {
+      if (!selectedProduct) {
+        showToast('Please select a product to search', 'error');
+        return false;
+      } else if (!depot) {
+        showToast('Please select a depot', 'error');
+        return false;
+      } else if (!selectedSize) {
+        showToast('Please select truck size', 'error');
+        return false;
+      }
+    } else if (truckType.value === 'flatbed') {
+      if (!depot) {
+        showToast('Please select a location', 'error');
+        return false;
+      }
+    }
+    
     return true;
   }, [
+    truckType,
     selectedProduct,
     depot,
     selectedSize,
-    // selectedState,
-    // selectedLGA,
     showToast,
   ]);
 
@@ -178,7 +214,7 @@ const usePublicSearch = (isSearchPage = false) => {
 
   const states = useMemo(() => {
     if (stateRes) {
-      return stateRes?.map((item: string[]) => ({
+      return stateRes?.map((item: string) => ({
         label: item,
         value: item,
       }));
@@ -188,7 +224,7 @@ const usePublicSearch = (isSearchPage = false) => {
 
   const lgas = useMemo(() => {
     if (lgaRes) {
-      return lgaRes?.map((item: string[]) => ({
+      return lgaRes?.map((item: string) => ({
         label: item,
         value: item,
       }));
@@ -208,16 +244,31 @@ const usePublicSearch = (isSearchPage = false) => {
     return [];
   }, [productsRes]);
 
+
   // Initialize values from URL when on search page
   useEffect(() => {
     if (isSearchPage && searchParams) {
       // Get values from URL
       const productId = searchParams.get('productId');
       const depotHubId = searchParams.get('depotHubId');
+      const locationId = searchParams.get('locationId'); // For flatbed trucks
       const sizeValue = searchParams.get('size');
+      const truckTypeValue = searchParams.get('truckType');
 
       // If we have URL params, set the initial selections
-      if (productId || depotHubId || sizeValue) {
+      if (productId || depotHubId || locationId || sizeValue || truckTypeValue) {
+        // Set truck type first (this is critical for conditional rendering)
+        if (truckTypeValue) {
+          const truckTypeOptions = [
+            { label: 'Tanker', value: 'tanker' },
+            { label: 'Flat Bed', value: 'flatbed' },
+          ];
+          const truckTypeObj = truckTypeOptions.find(
+            (item) => item.value === truckTypeValue,
+          );
+          if (truckTypeObj) setTruckType(truckTypeObj);
+        }
+
         // Find the corresponding objects in our dropdown options
         if (productId && products?.length) {
           const product = products.find(
@@ -226,9 +277,10 @@ const usePublicSearch = (isSearchPage = false) => {
           if (product) setSelectedProduct(product);
         }
 
-        if (depotHubId && depots?.length) {
+        // Handle depot/location for both tanker (depotHubId) and flatbed (locationId)
+        if ((depotHubId || locationId) && depots?.length) {
           const depotObj = depots.find(
-            (item: any) => item.value === depotHubId,
+            (item: any) => item.value === (depotHubId || locationId),
           );
           if (depotObj) setDepot(depotObj);
         }
@@ -241,6 +293,7 @@ const usePublicSearch = (isSearchPage = false) => {
         }
 
         setUrlParamsInitialized(true);
+        setHasSearched(true); // Mark as searched since we have URL params
       } else {
         // If no URL params, reset selections
         setUrlParamsInitialized(true);
@@ -256,18 +309,19 @@ const usePublicSearch = (isSearchPage = false) => {
     if (
       isSearchPage &&
       urlParamsInitialized &&
-      areRequiredFieldsPresent &&
-      selectedProduct &&
-      depot &&
-      selectedSize
+      truckType
     ) {
-      return `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&status=available&limit=20&page=`;
+      if (truckType.value === 'tanker' && selectedProduct && depot && selectedSize) {
+        return `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker&status=available&limit=20&page=`;
+      } else if (truckType.value === 'flatbed' && depot) {
+        return `?locationId=${depot.value}&truckType=flatbed&status=available&limit=20&page=`;
+      }
     }
     return ''; // Empty query will prevent the hook from running
   }, [
     isSearchPage,
     urlParamsInitialized,
-    areRequiredFieldsPresent,
+    truckType,
     selectedProduct,
     depot,
     selectedSize,
@@ -279,27 +333,6 @@ const usePublicSearch = (isSearchPage = false) => {
       setHasSearched(true);
     }
   }, [constructedSearchQuery]);
-  // Run search if all required fields are present (separate effect)
-  useEffect(() => {
-    if (
-      isSearchPage &&
-      areRequiredFieldsPresent &&
-      selectedProduct &&
-      depot &&
-      selectedSize
-    ) {
-      // All required fields are present, construct query and trigger search
-      const query = `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&status=available&limit=20&page=`;
-      setSearchQuery(query);
-      setHasSearched(true);
-    }
-  }, [
-    isSearchPage,
-    areRequiredFieldsPresent,
-    selectedProduct,
-    depot,
-    selectedSize,
-  ]);
 
   // Fetch truck data based on search query
   const {
@@ -314,6 +347,31 @@ const usePublicSearch = (isSearchPage = false) => {
     'PUBLIC_SEARCH_TRUCKS',
   );
 
+  // Automatic search effect when URL params are loaded and all required fields are present
+  useEffect(() => {
+    if (
+      isSearchPage &&
+      urlParamsInitialized &&
+      truckType &&
+      constructedSearchQuery
+    ) {
+      // Automatically trigger search when URL parameters are present and initialized
+      const timeoutId = setTimeout(() => {
+        if (refetchTrucks) {
+          refetchTrucks();
+        }
+      }, 100); // Small delay to ensure everything is properly initialized
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [
+    isSearchPage,
+    urlParamsInitialized,
+    truckType,
+    constructedSearchQuery,
+    refetchTrucks,
+  ]);
+
   // Search handler
   const handleSearchTruckClick = useCallback(() => {
     if (!areRequiredFieldsPresent) {
@@ -323,40 +381,56 @@ const usePublicSearch = (isSearchPage = false) => {
     }
 
     // At this point, all required fields are present due to areRequiredFieldsPresent check
-    // But TypeScript doesn't know this, so we need to add null checks
-    if (!selectedProduct || !depot || !selectedSize) {
+    if (!truckType) {
       return; // This should never execute, but satisfies TypeScript
     }
 
     if (isSearchPage) {
       // On search page - perform search directly
       setIsSearching(true);
-      const query = `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&status=available&limit=20&page=`;
-      setSearchQuery(query);
-      setHasSearched(true);
+      let query = '';
+      let url = '';
+      
+      if (truckType.value === 'tanker' && selectedProduct && depot && selectedSize) {
+        query = `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker&status=available&limit=20&page=`;
+        url = `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker`;
+      } else if (truckType.value === 'flatbed' && depot) {
+        query = `?locationId=${depot.value}&truckType=flatbed&status=available&limit=20&page=`;
+        url = `/truck-search?locationId=${depot.value}&truckType=flatbed`;
+      }
+      
+      if (query && url) {
+        setSearchQuery(query);
+        setHasSearched(true);
 
-      // Update URL without navigation
-      window.history.pushState(
-        {},
-        '',
-        `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}`,
-      );
+        // Update URL without navigation
+        window.history.pushState({}, '', url);
 
-      // Refetch data with new query
-      setTimeout(() => {
-        refetchTrucks();
-        setIsSearching(false);
-      }, 500);
+        // Refetch data with new query
+        setTimeout(() => {
+          refetchTrucks();
+          setIsSearching(false);
+        }, 500);
+      }
     } else {
       // On landing page - navigate to search page
-      router.push(
-        `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}`,
-      );
+      let url = '';
+      
+      if (truckType.value === 'tanker' && selectedProduct && depot && selectedSize) {
+        url = `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker`;
+      } else if (truckType.value === 'flatbed' && depot) {
+        url = `/truck-search?locationId=${depot.value}&truckType=flatbed`;
+      }
+      
+      if (url) {
+        router.push(url);
+      }
     }
   }, [
     areRequiredFieldsPresent,
     validateSearchTrucks,
     router,
+    truckType,
     selectedProduct,
     depot,
     selectedSize,
@@ -366,6 +440,7 @@ const usePublicSearch = (isSearchPage = false) => {
 
   return {
     // Selection state
+    truckType,
     depot,
     selectedProduct,
     selectedSize,
@@ -400,6 +475,7 @@ const usePublicSearch = (isSearchPage = false) => {
     lgas,
 
     // Handlers
+    handleTruckTypeChange,
     handleDepotChange,
     handleProductsChange,
     handleSizeChange,

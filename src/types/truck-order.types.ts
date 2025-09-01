@@ -32,6 +32,7 @@ export interface TruckOrderDto {
   // loadingCity: string;
   // loadingAddress: string;
   createdAt?: Date | string;
+  updatedAt?: Date | string;
 }
 export type TruckOrderRFQStatus = 'pending' | 'sent' | 'accepted' | 'rejected';
 

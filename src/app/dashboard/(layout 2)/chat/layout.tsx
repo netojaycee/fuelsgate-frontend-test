@@ -1,6 +1,6 @@
 import React from 'react'
 import { Heading } from '@/components/atoms/heading';
-import { ChatList } from '@/components/organism/chat-list';
+import {ChatList}  from '@/components/organism/chat-list';
 
 export default function ChatLayout({
   children

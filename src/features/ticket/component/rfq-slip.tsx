@@ -23,19 +23,19 @@ import { useServiceFees } from '@/hooks/useServiceFees.hook';
 
 const sora = Sora({ subsets: ['latin'] });
 
-const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
+const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
   const ticketRef = React.useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState<boolean>(false);
   const { user } = useContext(AuthContext);
   const userRole = user?.data?.role;
   const { serviceFees, isLoading: isLoadingFees } = useServiceFees();
 
+  const truckOrder = ticketData?.order as TruckOrderDto;
+
   // Calculate platform service charges
-  const transportCost = truckOrder.price;
-  const transporterServiceCharge =
-    transportCost * serviceFees.transporterServiceFee;
-  const buyerServiceCharge =
-    transportCost * serviceFees.traderServiceFee;
+  const transportCost = ticketData?._doc?.transportFee;
+  const transporterServiceCharge = ticketData?._doc?.transporterServiceFee;
+  const buyerServiceCharge = ticketData?._doc?.buyerServiceFee;
 
   // Total amounts
   // const transporterTotal = transportCost + transporterServiceCharge;
@@ -44,6 +44,7 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
   const handleDownload = async () => {
     setIsDownloading(true);
     if (!ticketRef.current) {
+      setIsDownloading(false);
       return;
     }
 
@@ -64,19 +65,16 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
       // Create a wrapper with the background image explicitly set
       const wrapper = document.createElement('div');
       wrapper.style.position = 'relative';
-      wrapper.style.width = '100%';
+      // Make PDF ticket a little wider (e.g. 20% wider than web ticket)
+      const baseWidth = ticketRef.current.offsetWidth;
+      const widerWidth = Math.round(baseWidth * 1.2);
+      wrapper.style.width = widerWidth + 'px';
+      wrapper.style.maxWidth = widerWidth + 'px';
+      wrapper.style.minWidth = widerWidth + 'px';
       wrapper.style.padding = '24px';
-      wrapper.style.paddingBottom = '48px';
-      wrapper.style.borderRadius = '20px 20px 0 0';
+      wrapper.style.paddingBottom = '48px'; // Match the pb-12
+      wrapper.style.borderRadius = '20px 20px 0 0'; // Match rounded-t-[20px]
       wrapper.style.overflow = 'hidden';
-
-      // Define color variables
-      const goldColor = '#D4AF37';
-      const darkColor = '#1a1a1a';
-      const blackColor = '#000000';
-      const whiteColor = '#ffffff';
-      const whiteTransparentColor = 'rgba(255, 255, 255, 0.72)';
-      const greenCheckColor = '#41D195';
 
       // Explicitly load the background image and ensure it's rendered properly
       const bgImg = new Image();
@@ -96,7 +94,6 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
           console.error('Failed to load background image');
           resolve(); // Continue even if image fails
         };
-        // Set a timeout just in case
         setTimeout(resolve, 1000);
       });
 
@@ -105,292 +102,136 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
       container.appendChild(wrapper);
 
       // Wait for any images, fonts, and styles to fully apply
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       // Use html2canvas with advanced options to capture the complete design
       const canvas = await html2canvas(wrapper, {
-        scale: 4, // Higher scale for better quality
+        scale: 2, // Good quality, not too large
         useCORS: true,
-        allowTaint: true,
         backgroundColor: null,
         logging: false,
-        onclone: (clonedDoc, element) => {
-          // Fix element size and position
-          element.style.width = wrapper.offsetWidth + 'px';
-          element.style.height = wrapper.offsetHeight + 'px';
-          element.style.position = 'static';
-          element.style.transform = 'none';
-
-          // Enhance background visibility
-          const mainElement = element.querySelector('[class*="bg-\\[url"]');
-          if (mainElement instanceof HTMLElement) {
-            mainElement.style.backgroundImage = `url('/images/Subtract.svg')`;
-            mainElement.style.backgroundPosition = 'left bottom';
-            mainElement.style.backgroundSize = 'cover';
-            mainElement.style.backgroundRepeat = 'no-repeat';
-          }
-
-          // Apply inline styles to preserve appearance for dark background elements
-          const darkElements = element.querySelectorAll('.bg-dark-100');
-          darkElements.forEach((el) => {
-            if (el instanceof HTMLElement) {
-              el.style.backgroundColor = darkColor;
-              el.style.borderRadius = '24px';
-              el.style.padding = '20px';
-            }
-          });
-
-          // Black background elements
-          const blackElements = element.querySelectorAll('.bg-black');
-          blackElements.forEach((el) => {
-            if (el instanceof HTMLElement) {
-              el.style.backgroundColor = blackColor;
-              el.style.borderRadius = '24px';
-              el.style.padding = '16px';
-            }
-          });
-
-          // Ensure text colors are preserved
-          element.querySelectorAll('[class*="text-white"]').forEach((el) => {
-            if (el instanceof HTMLElement) el.style.color = whiteColor;
-          });
-
-          // Transparent white text
-          element
-            .querySelectorAll('[class*="text-\\[\\#FFFFFFB8\\]"]')
-            .forEach((el) => {
-              if (el instanceof HTMLElement)
-                el.style.color = whiteTransparentColor;
-            });
-
-          // Gold colored elements
-          element.querySelectorAll('[class*="text-gold"]').forEach((el) => {
-            if (el instanceof HTMLElement) el.style.color = goldColor;
-          });
-
-          // Border styles
-          element
-            .querySelectorAll('.border-white\\/20, [class*="border-white"]')
-            .forEach((el) => {
-              if (el instanceof HTMLElement)
-                el.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            });
-
-          // Border gold elements
-          element.querySelectorAll('[class*="border-gold"]').forEach((el) => {
-            if (el instanceof HTMLElement) {
-              el.style.borderColor = goldColor;
-              el.style.borderLeftWidth = '4px';
-              el.style.borderStyle = 'solid';
-            }
-          });
-
-          // Gold gradient backgrounds
-          element.querySelectorAll('[class*="from-gold"]').forEach((el) => {
-            if (el instanceof HTMLElement) {
-              el.style.background = `linear-gradient(to right, rgba(212, 175, 55, 0.1), transparent)`;
-              el.style.borderRadius = '12px';
-              el.style.padding = '12px';
-            }
-          });
-
-          // Fix SVG icons
-          element.querySelectorAll('svg').forEach((icon) => {
-            if (icon instanceof SVGElement) {
-              icon.querySelectorAll('path').forEach((path) => {
-                const parentColor = window.getComputedStyle(
-                  icon.parentElement!,
-                ).color;
-                if (
-                  !path.getAttribute('stroke') ||
-                  path.getAttribute('stroke') === 'currentColor'
-                ) {
-                  path.setAttribute('stroke', parentColor);
-                }
-                if (
-                  !path.getAttribute('fill') ||
-                  path.getAttribute('fill') === 'currentColor'
-                ) {
-                  path.setAttribute('fill', parentColor);
-                }
-              });
-            }
-          });
-
-          // Fix check icon color
-          element.querySelectorAll('[color="#41D195"]').forEach((el) => {
-            if (el instanceof SVGElement) {
-              el.querySelectorAll('path').forEach((path) => {
-                path.setAttribute('fill', greenCheckColor);
-                path.setAttribute('stroke', greenCheckColor);
-              });
-            }
-          });
-
-          // Ensure rounded corners
-          element.querySelectorAll('[class*="rounded"]').forEach((el) => {
-            if (el instanceof HTMLElement) {
-              const computedStyle = window.getComputedStyle(el);
-              el.style.borderRadius = computedStyle.borderRadius;
-            }
-          });
-
-          // Fix grid layouts for PDF rendering
-          element.querySelectorAll('.grid').forEach((grid) => {
-            if (grid instanceof HTMLElement) {
-              const columns = grid.classList.contains('grid-cols-2') ? 2 : 1;
-              grid.style.display = 'grid';
-              grid.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-              grid.style.gap = '1rem';
-            }
-          });
-
-          // Preserve flex layouts
-          element.querySelectorAll('.flex').forEach((flex) => {
-            if (flex instanceof HTMLElement) {
-              flex.style.display = 'flex';
-
-              if (flex.classList.contains('items-center')) {
-                flex.style.alignItems = 'center';
-              }
-
-              if (flex.classList.contains('justify-between')) {
-                flex.style.justifyContent = 'space-between';
-              }
-
-              if (flex.classList.contains('flex-col')) {
-                flex.style.flexDirection = 'column';
-              }
-
-              if (flex.classList.contains('flex-wrap')) {
-                flex.style.flexWrap = 'wrap';
-              }
-            }
-          });
-        },
       });
 
       // Clean up the temporary elements
       document.body.removeChild(container);
 
-      // Create a new PDF - using landscape orientation for more square appearance
-      const pdf = new jsPDF('l', 'mm', [220, 200]); // Custom landscape size for more square appearance
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-
       // Get canvas dimensions
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
 
-      // Calculate proper scaling to maintain aspect ratio
-      const aspectRatio = canvasWidth / canvasHeight;
-      let pdfWidth = pageWidth - 20; // 10mm margins on each side
-      let pdfHeight = pdfWidth / aspectRatio;
-
-      // If height exceeds page, scale down
-      if (pdfHeight > pageHeight - 30) {
-        pdfHeight = pageHeight - 30;
-        pdfWidth = pdfHeight * aspectRatio;
-      }
-
-      // Center the content
-      const xOffset = (pageWidth - pdfWidth) / 2;
-      const yOffset = 15; // Space at the top
-
-      // Convert canvas to image data with high quality
-      const imgData = canvas.toDataURL('image/png', 1.0);
-
-      // Load the logo for adding to the PDF - using the PNG version for better quality
-      const logoImg = new Image();
-      logoImg.crossOrigin = 'anonymous';
-      logoImg.src = '/images/logo_gold.png'; // Using PNG version for better quality
-
-      // Wait for logo to load
-      await new Promise<void>((resolve) => {
-        logoImg.onload = () => resolve();
-        logoImg.onerror = () => {
-          console.error('Failed to load logo image');
-          resolve(); // Continue even if logo fails
-        };
-        setTimeout(resolve, 1000); // Timeout as backup
+      // Create a PDF sized exactly to the ticket (no extra whitespace)
+      // Convert px to mm (1px = 0.264583 mm)
+      const pdfWidth = canvasWidth * 0.264583;
+      const pdfHeight = canvasHeight * 0.264583;
+      const pdf = new jsPDF({
+        orientation: pdfWidth > pdfHeight ? 'l' : 'p',
+        unit: 'mm',
+        format: [pdfWidth, pdfHeight],
       });
 
-      try {
-        // Create a canvas for the logo
-        const logoCanvas = document.createElement('canvas');
-        logoCanvas.width = logoImg.width;
-        logoCanvas.height = logoImg.height;
-        const logoCtx = logoCanvas.getContext('2d');
-        if (logoCtx) {
-          logoCtx.drawImage(logoImg, 0, 0);
-
-          // Add logo at the top center of the PDF
-          const logoWidth = 50; // mm - larger size for better quality
-          const logoHeight = logoWidth * (logoImg.height / logoImg.width);
-          const logoX = (pageWidth - logoWidth) / 2;
-          const logoY = 2; // Close to top
-
-          // Add the logo to PDF
-          pdf.addImage(
-            logoCanvas.toDataURL('image/png'),
-            'PNG',
-            logoX,
-            logoY,
-            logoWidth,
-            logoHeight,
-          );
-        }
-      } catch (logoError) {
-        console.error('Error adding logo:', logoError);
-        // Continue without logo if there's an error
-      }
-
-      // Add the main ticket content
-      pdf.addImage(imgData, 'PNG', xOffset, yOffset + 12, pdfWidth, pdfHeight);
-
-      // Add footer text for authenticity
-      pdf.setFontSize(8);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text(
-        'This document was generated by Fuels Gate Resources Ltd. and is an official record.',
-        pageWidth / 2,
-        pageHeight - 2, // Changed from pageHeight - 5 to pageHeight - 2 to shift down by 3px
-        { align: 'center' },
-      );
+      // Add the ticket image to the PDF, filling the page
+      const imgData = canvas.toDataURL('image/png', 1.0);
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
       // Save the PDF
-      pdf.save(`rfq-ticket-${truckOrder.trackingId}.pdf`);
+      pdf.save(`rfq-ticket-${truckOrder?.trackingId}.pdf`);
     } catch (error) {
       console.error('Error generating PDF:', error);
     } finally {
       setIsDownloading(false);
     }
   };
-  console.log(truckOrder, 'truckorderr');
-  console.log('Service Fees:', {
-    transporterServiceFee: serviceFees.transporterServiceFee,
-    traderServiceFee: serviceFees.traderServiceFee,
-    transporterCharge: transporterServiceCharge,
-    buyerCharge: buyerServiceCharge,
-  });
-
+  // console.log(truckOrder, 'truckorderr');
+  // console.log('Service Fees:', {
+  //   transporterServiceFee: serviceFees.transporterServiceFee,
+  //   traderServiceFee: serviceFees.traderServiceFee,
+  //   transporterCharge: transporterServiceCharge,
+  //   buyerCharge: buyerServiceCharge,
+  // });
+  // console.log(`truckOrder`, truckOrder);
+  const ticketOwnerLabel =
+    userRole === 'transporter'
+      ? 'TRANSPORTER'
+      : userRole === 'buyer'
+      ? 'BUYER'
+      : 'RFQ TICKET';
   return (
-    <div className="relative bg-[url('/images/Subtract.svg')] bg-left-bottom w-full bg-cover bg-no-repeat rounded-t-[20px] overflow-hidden p-6 max-sm:px-3 pb-12">
+    <div className="relative bg-[url('/images/Subtract.svg')] bg-left-bottom w-full bg-cover bg-no-repeat overflow-hidden p-6 max-sm:px-3 pb-10">
+      <div
+        className="absolute top-3 -right-2 z-10"
+        style={{ transform: 'rotate(15deg)' }}
+      >
+        <span
+          className="inline-block min-w-[140px] max-w-[180px] px-4 py-2 bg-gold text-black font-bold text-md shadow rounded-tl-xl rounded-bl-xl border-l-4 border-yellow-600 text-center truncate"
+          title={ticketOwnerLabel}
+        >
+          {ticketOwnerLabel}
+        </span>
+      </div>
       <div ref={ticketRef}>
+        <div className="flex justify-center items-center bg-black p-4">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/logo_gold.png"
+            alt="Fuelsgate Logo"
+            className="h-[60px] w-auto"
+          />
+        </div>
         {/* Black wrapper around all sections - More landscape-oriented layout */}
-        <div className="bg-black p-4 rounded-3xl">
+        <div className="bg-black p-4">
           <div className="flex items-center justify-between bg-dark-100 p-5 max-sm:px-3 rounded-3xl mb-2">
             <div className="flex items-center">
-              <span className="bg-blue-tone-900/10 border h-14 w-14 rounded-full flex items-center justify-center mr-4">
-                <FGTruckFill
-                  color={
-                    typeof truckOrder.truckId === 'object'
-                      ? (truckOrder.truckId as TruckDto)?.productId?.color
-                      : undefined
-                  }
-                  height={32}
-                  width={32}
-                />
+              <span className="h-14 w-14 rounded-full flex items-center justify-center mr-4 overflow-hidden relative border">
+                {typeof (truckOrder?.truckId as TruckDto)?.productId?.color ===
+                  'string' &&
+                (truckOrder?.truckId as TruckDto)?.productId?.color.includes(
+                  '-',
+                ) ? (
+                  <>
+                    <div
+                      className="absolute top-0 left-0 w-full h-1/2 rounded-t-full"
+                      style={{
+                        backgroundColor: (
+                          truckOrder?.truckId as TruckDto
+                        )?.productId?.color.split('-')[0],
+                      }}
+                    />
+                    <div
+                      className="absolute bottom-0 left-0 w-full h-1/2 rounded-b-full"
+                      style={{
+                        backgroundColor: (
+                          truckOrder?.truckId as TruckDto
+                        )?.productId?.color.split('-')[1],
+                      }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <FGTruckFill color="#fff" height={32} width={32} />
+                    </div>
+                  </>
+                ) : (
+                  <span
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      backgroundColor: (truckOrder?.truckId as TruckDto)
+                        ?.productId?.color,
+                    }}
+                  />
+                )}
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <FGTruckFill
+                    color={
+                      typeof (truckOrder?.truckId as TruckDto)?.productId
+                        ?.color === 'string' &&
+                      (
+                        truckOrder?.truckId as TruckDto
+                      )?.productId?.color.includes('-')
+                        ? '#fff'
+                        : '#fff'
+                    }
+                    height={32}
+                    width={32}
+                  />
+                </span>
               </span>
               <div>
                 <Text
@@ -408,7 +249,7 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                   color="text-white"
                 >
                   {
-                    ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
+                    ((truckOrder?.truckId as TruckDto)?.productId as ProductDto)
                       ?.value
                   }
                 </Heading>
@@ -419,7 +260,7 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                 Reference ID
               </Text>
               <Text variant="pm" color="text-white" fontWeight="medium">
-                {truckOrder.trackingId}
+                {truckOrder?.trackingId}
               </Text>
             </div>
           </div>
@@ -442,11 +283,11 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                 </Text>
                 <Text variant="pxs" color="text-white">
                   {
-                    ((truckOrder.buyerId as BuyerDto)?.userId as UserType)
+                    ((truckOrder?.buyerId as BuyerDto)?.userId as UserType)
                       ?.firstName
                   }{' '}
                   {
-                    ((truckOrder.buyerId as BuyerDto)?.userId as UserType)
+                    ((truckOrder?.buyerId as BuyerDto)?.userId as UserType)
                       ?.lastName
                   }
                 </Text>
@@ -457,7 +298,7 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                   Transporter
                 </Text>
                 <Text variant="pxs" color="text-white">
-                  {(truckOrder.profileId as TransporterDto)?.companyName}
+                  {(truckOrder?.profileId as TransporterDto)?.companyName}
                 </Text>
               </div>
 
@@ -467,7 +308,7 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                 </Text>
                 <Text variant="pxs" color="text-white uppercase">
                   {
-                    ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
+                    ((truckOrder?.truckId as TruckDto)?.productId as ProductDto)
                       ?.value
                   }
                 </Text>
@@ -478,7 +319,7 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                   Truck Number
                 </Text>
                 <Text variant="pxs" color="text-white">
-                  {(truckOrder.truckId as TruckDto)?.truckNumber}
+                  {(truckOrder?.truckId as TruckDto)?.truckNumber}
                 </Text>
               </div>
 
@@ -489,7 +330,7 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                 <Text variant="pxs" color="text-white">
                   {
                     (
-                      (truckOrder.truckId as TruckDto)
+                      (truckOrder?.truckId as TruckDto)
                         ?.depotHubId as DepotHubDto
                     )?.name
                   }
@@ -501,18 +342,46 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                   Loading Depot
                 </Text>
                 <Text variant="pxs" color="text-white">
-                  {truckOrder.loadingDepot}
+                  {truckOrder?.loadingDepot}
                 </Text>
               </div>
 
-              <div className="flex flex-col col-span-2">
+              <div className="flex flex-col">
                 <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
                   Destination
                 </Text>
                 <Text variant="pxs" color="text-white">
-                  {truckOrder.destination}, {truckOrder.city},{' '}
-                  {truckOrder.state}
+                  {truckOrder?.destination}, {truckOrder?.city},{' '}
+                  {truckOrder?.state}
                 </Text>
+              </div>
+              <div className="flex flex-col">
+                {/* Show contact of transporter if user is buyer, or buyer if user is transporter */}
+                {userRole === 'buyer' && (
+                  <>
+                    <Text
+                      variant="pxs"
+                      color="text-[#FFFFB8]"
+                      classNames="mb-1"
+                    >
+                      Transporter Contact
+                    </Text>
+                    <Text variant="pxs" color="text-white">
+                      {(truckOrder?.profileId as TransporterDto)?.phoneNumber ||
+                        'N/A'}
+                    </Text>
+                  </>
+                )}
+                {/* {userRole === 'transporter' || userRole === 'seller' && (
+                  <>
+                    <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                      Buyer Contact
+                    </Text>
+                    <Text variant="pxs" color="text-white">
+                      {((truckOrder?.buyerId as BuyerDto)?.userId as UserType)?.phoneNumber || 'N/A'}
+                    </Text>
+                  </>
+                )} */}
               </div>
 
               <div className="flex flex-col">
@@ -526,7 +395,7 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                 >
                   <FGCheckCircle height={16} width={16} color="#41D195" />
                   {formatNumber(
-                    (truckOrder.truckId as TruckDto)?.capacity,
+                    (truckOrder?.truckId as TruckDto)?.capacity,
                   )}{' '}
                   Ltrs
                 </Text>
@@ -537,8 +406,8 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                   Loading Date
                 </Text>
                 <Text variant="pxs" color="text-white">
-                  {truckOrder.loadingDate
-                    ? formatDateDashTime(truckOrder.loadingDate.toString())
+                  {truckOrder?.loadingDate
+                    ? formatDateDashTime(truckOrder?.loadingDate.toString())
                     : 'TBD'}
                 </Text>
               </div>
@@ -548,8 +417,37 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                   Status
                 </Text>
                 <Text variant="pxs" color="text-white capitalize">
-                  {truckOrder.status}
+                  {truckOrder?.status}
                 </Text>
+              </div>
+
+              <div className="flex flex-col">
+                <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
+                  Time
+                </Text>
+                <Text variant="pxs" color="text-white">
+                  {truckOrder?.updatedAt
+                    ? formatDateDashTime(truckOrder?.updatedAt.toString())
+                    : 'TBD'}
+                </Text>
+              </div>
+              <div className="flex flex-col">
+                {/* Completed time in second column, only if completed */}
+                {truckOrder?.status?.toLowerCase() === 'completed' &&
+                  truckOrder?.updatedAt && (
+                    <>
+                      <Text
+                        variant="pxs"
+                        color="text-[#FFFFFFB8]"
+                        classNames="mb-1"
+                      >
+                        Completed Time
+                      </Text>
+                      <Text variant="pxs" color="text-white">
+                        {formatDateDashTime(truckOrder?.updatedAt.toString())}
+                      </Text>
+                    </>
+                  )}
               </div>
             </div>
 
@@ -587,7 +485,6 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                     classNames="mb-1"
                   >
                     Platform Service Charge
-                    
                   </Text>
                   <Text
                     variant="pm"
@@ -595,9 +492,9 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                     fontFamily={sora.className}
                     fontWeight="medium"
                   >
-                    {isLoadingFees
-                      ? 'Loading...'
-                      : `₦${formatNumber(transporterServiceCharge, true)}`}
+                    {ticketData
+                      ? `₦${formatNumber(transporterServiceCharge, true)}`
+                      : 'Loading...'}
                   </Text>
                 </div>
               ) : (
@@ -608,7 +505,6 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                     classNames="mb-1"
                   >
                     Platform Service Charge
-                
                   </Text>
                   <Text
                     variant="pm"
@@ -616,9 +512,9 @@ const RfqSlip: React.FC<{ truckOrder: TruckOrderDto }> = ({ truckOrder }) => {
                     fontFamily={sora.className}
                     fontWeight="medium"
                   >
-                    {isLoadingFees
-                      ? 'Loading...'
-                      : `₦${formatNumber(buyerServiceCharge, true)}`}
+                    {ticketData
+                      ? `₦${formatNumber(buyerServiceCharge, true)}`
+                      : 'Loading...'}
                   </Text>
                 </div>
               )}

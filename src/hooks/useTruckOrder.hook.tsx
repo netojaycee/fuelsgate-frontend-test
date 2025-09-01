@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   useInfiniteQuery,
   useMutation,
@@ -12,6 +12,7 @@ import {
   fetchTruckOrderAnalyticsRequest,
   fetchTruckOrdersRequest,
   getTruckOrderDetailsRequest,
+  rejectTruckOrderRequest,
   saveTruckOrdersRequest,
   updateTruckOrderPriceRequest,
   updateTruckOrderRFQStatusRequest,
@@ -56,9 +57,11 @@ const useTruckOrderHook = () => {
       mutationFn: (data: unknown) => saveTruckOrdersRequest(data),
       onSuccess: (response) => {
         showToast(response.message, 'success');
-        queryClient.invalidateQueries({
-          queryKey: ['TRUCK_ORDERS'],
-        });
+                queryClient.invalidateQueries({
+                  queryKey: ['TRUCK_ORDERS'],
+                  exact: false,
+                });
+
         handleClose && handleClose();
         router.push('/dashboard/my-rfq');
       },
@@ -74,7 +77,11 @@ const useTruckOrderHook = () => {
         updateTruckOrderStatusRequest(data, id),
       onSuccess: (response) => {
         showToast(response.message, 'success');
-        queryClient.invalidateQueries({ queryKey: ['TRUCK_ORDERS'] });
+                queryClient.invalidateQueries({
+                  queryKey: ['TRUCK_ORDERS', `${id}_TRUCK_ORDER_DETAIL`],
+                  exact: false,
+                });
+
         handleClose && handleClose();
       },
       onError: (response) => {
@@ -88,9 +95,29 @@ const useTruckOrderHook = () => {
       mutationFn: (data: Pick<TruckOrderDto, 'rfqStatus'>) =>
         updateTruckOrderRFQStatusRequest(data, id),
       onSuccess: (response) => {
+        if (response.data.rfqStatus === 'accepted') {
+          showToast(response.message, 'success');
+        }
+        queryClient.invalidateQueries({
+          queryKey: ['TRUCK_ORDERS', `${id}_TRUCK_ORDER_DETAIL`],
+          exact: false,
+        });
+        handleClose && handleClose();
+      },
+      onError: (response) => {
+        showToast(response.message, 'error');
+      },
+    });
+  };
+  const useRejectTruckOrder = (id: string) => {
+    return useMutation({
+      mutationFn: (data: { price: string }) =>
+        rejectTruckOrderRequest(data, id),
+      onSuccess: (response) => {
         showToast(response.message, 'success');
         queryClient.invalidateQueries({
           queryKey: ['TRUCK_ORDERS', `${id}_TRUCK_ORDER_DETAIL`],
+          exact: false,
         });
         handleClose && handleClose();
       },
@@ -105,17 +132,20 @@ const useTruckOrderHook = () => {
       mutationFn: (data: Pick<TruckOrderDto, 'price'>) =>
         updateTruckOrderPriceRequest(data, id),
       onSuccess: (response) => {
-        showToast(response.message, 'success');
+        // showToast(response.message, 'success');
         queryClient.invalidateQueries({
           queryKey: ['TRUCK_ORDERS', `${id}_TRUCK_ORDER_DETAIL`],
+          exact: false,
         });
-        handleClose && handleClose();
+        // handleClose && handleClose();
       },
       onError: (response) => {
         showToast(response.message, 'error');
       },
     });
   };
+
+  
 
   const useGetTruckOrderDetails = (id: string) =>
     useQuery({
@@ -133,6 +163,7 @@ const useTruckOrderHook = () => {
     useUpdateTruckOrderPrice,
     useGetTruckOrderDetails,
     useFetchTruckOrderAnalytics,
+    useRejectTruckOrder,
   };
 };
 

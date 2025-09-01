@@ -50,6 +50,7 @@ const useAuthenticationHook = () => {
       } else if (response.data.user.role === 'buyer') {
         saveUserData(response.data.user);
         saveProfileData(response.data.buyerData);
+        console.log('Buyer registration successful:', response.data);
         router.push('/dashboard');
       } else {
         saveUserData(response.data.user);

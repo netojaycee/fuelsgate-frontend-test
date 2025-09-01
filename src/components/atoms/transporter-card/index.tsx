@@ -106,7 +106,7 @@ const TransporterCard = ({
             {formatNumber(truckSize)}
           </Text>
         </div>
-        <div className="bg-light-gray-400 border border-light-gray-600 px-3 py-2 rounded-[4px]">
+        {/* <div className="bg-light-gray-400 border border-light-gray-600 px-3 py-2 rounded-[4px]">
           <Text variant="ps" color="text-dark-gray-50">
             Contact
           </Text>
@@ -118,7 +118,7 @@ const TransporterCard = ({
           >
             {getPhoneNumber()}
           </Text>
-        </div>
+        </div> */}
       </div>
     </div>
   );

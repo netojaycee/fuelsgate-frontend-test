@@ -97,12 +97,22 @@ console.log(`data`, data);
             //       ? data.productId?.color
             //       : null) || '#50CD89',
             // }}
-            className={`h-[30px] w-[30px] rounded-[4px] flex items-center justify-center border  ${
-              (typeof data?.productId === 'object'
-                ? data?.productId?.color
-                : null) || 'bg-blue-tone-100'
-            }`}
-          >
+            className={`h-[30px] w-[30px] rounded-[4px] flex items-center justify-center border`}
+            style={
+              typeof data?.productId === 'object' &&
+              typeof data?.productId?.color === 'string' &&
+              /^#[0-9A-Fa-f]{6}-#[0-9A-Fa-f]{6}$/.test(data.productId.color)
+              ? {
+                background: `linear-gradient(to bottom, ${data.productId.color.split('-')[0]} 50%, ${data.productId.color.split('-')[1]} 50%)`,
+                }
+              : {
+                backgroundColor:
+                  (typeof data?.productId === 'object'
+                  ? data?.productId?.color
+                  : undefined) || '#50CD89',
+                }
+            }
+            >
             <FGFlask height={20} width={20} />
             {/* <FlaskConical className={`w-5 h-5 ${
               (typeof data?.productId === 'object'

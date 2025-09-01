@@ -33,7 +33,7 @@ const Buyer = () => {
         lineHeight="leading-[45px]"
       >
         Stop waiting for <span className="text-gold font-semibold">trucks</span>
-        . Start loading faster.
+        . Start loading <span className="text-gold font-semibold">faster</span>.
       </Heading>
       <Heading
         variant="h6"
@@ -59,8 +59,8 @@ const Buyer = () => {
             description="Request quotes, negotiate, meet & pay the driver directly"
           />
           <Checklist
-            title="Access key deposits"
-            description="Active at Lagos depots & Dangote refinery, Oghere Park & more locations launching soon."
+            title="Access key Terminals"
+            description="Active now in Lagos at all depot locations, Pinnacle/Dangote refinery location, truck Parks & more launching soon."
           />
           <div>
             <Link

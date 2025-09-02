@@ -11,6 +11,8 @@ type BuyerProviderValueType = {
   selectedSize?: CustomSelectOption;
   selectedProduct?: CustomSelectOption;
   selectedLoadStatus?: CustomSelectOption;
+  truckType?: CustomSelectOption;
+  flatbedLocation?: CustomSelectOption;
   handleLoadStatusChange?: (newValue: unknown) => void;
   handleDepotChange?: (newValue: unknown) => void;
   handleStateChange?: (newValue: unknown) => void;
@@ -18,6 +20,8 @@ type BuyerProviderValueType = {
   handleSizeChange?: (newValue: unknown) => void;
   handleLGAChange?: (newValue: unknown) => void;
   handleVolumeChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+  handleTruckTypeChange?: (newValue: unknown) => void;
+  handleFlatbedLocationChange?: (newValue: unknown) => void;
 };
 
 const BuyerContext = createContext<BuyerProviderValueType>({});
@@ -43,6 +47,10 @@ const BuyerProvider = ({ children }: BuyerProviderProps) => {
   const [selectedProduct, setSelectedProduct] = useState<
     CustomSelectOption | undefined
   >(undefined);
+  const [truckType, setTruckType] = useState<CustomSelectOption | undefined>(
+    { label: 'Tanker', value: 'tanker' } // Default to tanker
+  );
+  const [flatbedLocation, setFlatbedLocation] = useState<CustomSelectOption | undefined>(undefined);
 
   const handleDepotChange = useCallback((value: unknown) => {
     setDepot(value as CustomSelectOption);
@@ -76,6 +84,23 @@ const BuyerProvider = ({ children }: BuyerProviderProps) => {
     [],
   );
 
+  const handleTruckTypeChange = useCallback((value: unknown) => {
+    setTruckType(value as CustomSelectOption);
+    // Reset relevant fields when truck type changes
+    if ((value as CustomSelectOption)?.value === 'flatbed') {
+      setDepot(undefined);
+      setSelectedProduct(undefined);
+      setSelectedSize(undefined);
+      setSelectedLoadStatus(undefined);
+    } else {
+      setFlatbedLocation(undefined);
+    }
+  }, []);
+
+  const handleFlatbedLocationChange = useCallback((value: unknown) => {
+    setFlatbedLocation(value as CustomSelectOption);
+  }, []);
+
   return (
     <Provider
       value={{
@@ -86,6 +111,8 @@ const BuyerProvider = ({ children }: BuyerProviderProps) => {
         selectedSize,
         selectedProduct,
         selectedLoadStatus,
+        truckType,
+        flatbedLocation,
         handleDepotChange,
         handleStateChange,
         handleProductsChange,
@@ -93,6 +120,8 @@ const BuyerProvider = ({ children }: BuyerProviderProps) => {
         handleSizeChange,
         handleLGAChange,
         handleVolumeChange,
+        handleTruckTypeChange,
+        handleFlatbedLocationChange,
       }}
     >
       {children}

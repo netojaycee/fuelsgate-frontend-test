@@ -24,6 +24,18 @@ import { LOAD_STATUS_OPTIONS } from '@/modals/list-truck-modal';
 
 const sora = Sora({ subsets: ['latin'] });
 
+// Truck type options
+const TRUCK_TYPES = [
+  { label: 'Tanker', value: 'tanker' },
+  { label: 'Flat Bed', value: 'flatbed' },
+];
+
+// Flatbed location options (hardcoded Lagos for now)
+const FLATBED_LOCATIONS = [
+  { label: 'Lagos', value: 'lagos' },
+  // Add more states as needed
+];
+
 const BuyerDashboard = () => {
   const {
     isLoadingTrucks,
@@ -49,6 +61,8 @@ const BuyerDashboard = () => {
     selectedProduct,
     activeTab,
     isMounted,
+    truckType,
+    flatbedLocation,
     handleTabClick,
     depots,
     states,
@@ -67,6 +81,8 @@ const BuyerDashboard = () => {
     handleSizeChange,
     handleRefetchClick,
     handleLGAChange,
+    handleTruckTypeChange,
+    handleFlatbedLocationChange,
     selectedSize: selectedSizeHeader,
     selectedProduct: selectedProductHeader,
   } = useBuyerDashboardHook();
@@ -203,35 +219,67 @@ const BuyerDashboard = () => {
             )}
 
             <div className="grid grid-cols-12 gap-2 items-center justify-stretch bg-light-gray-200 p-3 px-4 rounded-[10px]">
+              {/* Truck Type Selection - Always shown first for transporter tab */}
+              {activeTab === 'transporter' && (
+                <div className="col-span-12 mb-3">
+                  <CustomSelect
+                    label="Truck Type"
+                    name="truckType"
+                    options={TRUCK_TYPES}
+                    value={truckType}
+                    onChange={handleTruckTypeChange}
+                  />
+                </div>
+              )}
+
               <div
                 className={cn(
                   'relative col-span-12 grid max-sm:grid-cols-1 items-center gap-2',
                   activeTab === 'transporter'
-                    ? 'grid-cols-4'
+                    ? truckType?.value === 'tanker' 
+                      ? 'grid-cols-4' 
+                      : 'grid-cols-1' // For flatbed, just show location
                     : 'grid-cols-[3fr_3fr_3fr_1fr]',
                 )}
               >
-                <CustomSelect
-                  label="Product"
-                  name="product"
-                  options={products}
-                  value={selectedProduct}
-                  onChange={handleProductsChange}
-                  Option={CustomProductOptionWrapper}
-                  ValueContainer={CustomValueContainerWrapper}
-                  isDisabled={loadingProducts}
-                />
+                {/* For both seller and tanker trucks */}
+                {(activeTab === 'seller' || (activeTab === 'transporter' && truckType?.value === 'tanker')) && (
+                  <>
+                    <CustomSelect
+                      label="Product"
+                      name="product"
+                      options={products}
+                      value={selectedProduct}
+                      onChange={handleProductsChange}
+                      Option={CustomProductOptionWrapper}
+                      ValueContainer={CustomValueContainerWrapper}
+                      isDisabled={loadingProducts}
+                    />
 
-                <CustomSelect
-                  label="Depot Hub"
-                  name="depot"
-                  options={depots}
-                  value={depot}
-                  onChange={handleDepotChange}
-                  isDisabled={loadingDepots}
-                />
+                    <CustomSelect
+                      label={truckType?.value === 'tanker' ? "Depot Hub" : "Depot Hub"}
+                      name="depot"
+                      options={depots}
+                      value={depot}
+                      onChange={handleDepotChange}
+                      isDisabled={loadingDepots}
+                    />
+                  </>
+                )}
 
-                {activeTab === 'transporter' ? (
+                {/* For flatbed trucks - show location instead of depot */}
+                {activeTab === 'transporter' && truckType?.value === 'flatbed' && (
+                  <CustomSelect
+                    label="Location"
+                    name="flatbedLocation"
+                    options={FLATBED_LOCATIONS}
+                    value={flatbedLocation}
+                    onChange={handleFlatbedLocationChange}
+                  />
+                )}
+
+                {/* For tanker trucks only */}
+                {activeTab === 'transporter' && truckType?.value === 'tanker' && (
                   <>
                     <CustomSelect
                       label="Truck Size"
@@ -248,7 +296,10 @@ const BuyerDashboard = () => {
                       onChange={handleLoadStatusChange}
                     />
                   </>
-                ) : (
+                )}
+
+                {/* For seller only */}
+                {activeTab === 'seller' && (
                   <>
                     <CustomInput
                       type="number"

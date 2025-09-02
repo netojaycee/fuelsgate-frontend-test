@@ -47,7 +47,6 @@ const usePublicSearch = (isSearchPage = false) => {
     value: string;
   } | null>(null);
 
-
   // Truck type state
   const [truckType, setTruckType] = useState<{
     label: string;
@@ -78,8 +77,6 @@ const usePublicSearch = (isSearchPage = false) => {
     },
     [],
   );
-
-  
 
   const handleProductsChange = useCallback(
     (
@@ -136,9 +133,6 @@ const usePublicSearch = (isSearchPage = false) => {
     [],
   );
 
-
-
- 
   // Validation functions
   const validateSearchProduct = useCallback(() => {
     if (!selectedProduct) {
@@ -157,7 +151,7 @@ const usePublicSearch = (isSearchPage = false) => {
   // Check if all required fields are present based on truck type
   const areRequiredFieldsPresent = useMemo(() => {
     if (!truckType) return false;
-    
+
     if (truckType.value === 'tanker') {
       return !!(selectedProduct && depot && selectedSize);
     } else if (truckType.value === 'flatbed') {
@@ -171,7 +165,7 @@ const usePublicSearch = (isSearchPage = false) => {
       showToast('Please select a truck type', 'error');
       return false;
     }
-    
+
     if (truckType.value === 'tanker') {
       if (!selectedProduct) {
         showToast('Please select a product to search', 'error');
@@ -189,15 +183,9 @@ const usePublicSearch = (isSearchPage = false) => {
         return false;
       }
     }
-    
+
     return true;
-  }, [
-    truckType,
-    selectedProduct,
-    depot,
-    selectedSize,
-    showToast,
-  ]);
+  }, [truckType, selectedProduct, depot, selectedSize, showToast]);
 
   // Format data for dropdowns
   const depots = useMemo(() => {
@@ -212,15 +200,27 @@ const usePublicSearch = (isSearchPage = false) => {
     return [];
   }, [depotsRes]);
 
+  // total states
+  // const states = useMemo(() => {
+  //   if (stateRes) {
+  //     return stateRes?.map((item: string) => ({
+  //       label: item,
+  //       value: item,
+  //     }));
+  //   }
+  //   return [];
+  // }, [stateRes]);
+
+  // lagos only
   const states = useMemo(() => {
-    if (stateRes) {
-      return stateRes?.map((item: string) => ({
-        label: item,
-        value: item,
-      }));
-    }
-    return [];
-  }, [stateRes]);
+    // Only return Lagos as the state option
+    return [
+      {
+        label: 'Lagos',
+        value: 'Lagos',
+      },
+    ];
+  }, []);
 
   const lgas = useMemo(() => {
     if (lgaRes) {
@@ -244,7 +244,6 @@ const usePublicSearch = (isSearchPage = false) => {
     return [];
   }, [productsRes]);
 
-
   // Initialize values from URL when on search page
   useEffect(() => {
     if (isSearchPage && searchParams) {
@@ -256,7 +255,13 @@ const usePublicSearch = (isSearchPage = false) => {
       const truckTypeValue = searchParams.get('truckType');
 
       // If we have URL params, set the initial selections
-      if (productId || depotHubId || locationId || sizeValue || truckTypeValue) {
+      if (
+        productId ||
+        depotHubId ||
+        locationId ||
+        sizeValue ||
+        truckTypeValue
+      ) {
         // Set truck type first (this is critical for conditional rendering)
         if (truckTypeValue) {
           const truckTypeOptions = [
@@ -304,14 +309,14 @@ const usePublicSearch = (isSearchPage = false) => {
     }
   }, [isSearchPage, searchParams, products, depots]);
 
-
   const constructedSearchQuery = useMemo(() => {
-    if (
-      isSearchPage &&
-      urlParamsInitialized &&
-      truckType
-    ) {
-      if (truckType.value === 'tanker' && selectedProduct && depot && selectedSize) {
+    if (isSearchPage && urlParamsInitialized && truckType) {
+      if (
+        truckType.value === 'tanker' &&
+        selectedProduct &&
+        depot &&
+        selectedSize
+      ) {
         return `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker&status=available&limit=20&page=`;
       } else if (truckType.value === 'flatbed' && depot) {
         return `?locationId=${depot.value}&truckType=flatbed&status=available&limit=20&page=`;
@@ -390,15 +395,20 @@ const usePublicSearch = (isSearchPage = false) => {
       setIsSearching(true);
       let query = '';
       let url = '';
-      
-      if (truckType.value === 'tanker' && selectedProduct && depot && selectedSize) {
+
+      if (
+        truckType.value === 'tanker' &&
+        selectedProduct &&
+        depot &&
+        selectedSize
+      ) {
         query = `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker&status=available&limit=20&page=`;
         url = `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker`;
       } else if (truckType.value === 'flatbed' && depot) {
         query = `?locationId=${depot.value}&truckType=flatbed&status=available&limit=20&page=`;
         url = `/truck-search?locationId=${depot.value}&truckType=flatbed`;
       }
-      
+
       if (query && url) {
         setSearchQuery(query);
         setHasSearched(true);
@@ -415,13 +425,18 @@ const usePublicSearch = (isSearchPage = false) => {
     } else {
       // On landing page - navigate to search page
       let url = '';
-      
-      if (truckType.value === 'tanker' && selectedProduct && depot && selectedSize) {
+
+      if (
+        truckType.value === 'tanker' &&
+        selectedProduct &&
+        depot &&
+        selectedSize
+      ) {
         url = `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker`;
       } else if (truckType.value === 'flatbed' && depot) {
         url = `/truck-search?locationId=${depot.value}&truckType=flatbed`;
       }
-      
+
       if (url) {
         router.push(url);
       }

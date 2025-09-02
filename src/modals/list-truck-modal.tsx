@@ -336,16 +336,29 @@ const ListTruckModal = () => {
     return [];
   }, [depotHub, depotHubsRes]);
 
-  const states = useMemo(() => {
-    if (stateRes) {
-      return stateRes?.map((item: string) => ({
-        label: item,
-        value: item,
-      }));
-    }
-    return [];
-  }, [stateRes]);
+  // const states = useMemo(() => {
+  //   if (stateRes) {
+  //     return stateRes?.map((item: string) => ({
+  //       label: item,
+  //       value: item,
+  //     }));
+  //   }
+  //   return [];
+  // }, [stateRes]);
 
+
+    // lagos only
+    const states = useMemo(() => {
+      // Only return Lagos as the state option
+      return [
+        {
+          label: 'Lagos',
+          value: 'Lagos',
+        },
+      ];
+    }, []);
+
+    
   const lgas = useMemo(() => {
     if (lgaRes) {
       return lgaRes?.map((item: string) => ({

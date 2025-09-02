@@ -23,7 +23,10 @@ const SearchFilterLoader = () => {
     <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="animate-pulse bg-white/20 h-14 rounded-xl"></div>
+          <div
+            key={i}
+            className="animate-pulse bg-white/20 h-14 rounded-xl"
+          ></div>
         ))}
       </div>
       <div className="mt-6 flex justify-center">
@@ -61,19 +64,18 @@ const SearchFilterContent = ({
     isSearching,
   } = usePublicSearch(search);
 
-
   return (
     <div className="relative bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/20 shadow-2xl overflow-visible">
       {/* Background pattern */}
       <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/5 to-orange-400/5 opacity-50 rounded-3xl"></div>
       <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400/10 rounded-full blur-xl"></div>
       <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-orange-400/10 rounded-full blur-xl"></div>
-      
+
       <div className="relative z-10">
         {/* Header */}
         <div className="mb-8 text-center">
           <h3 className="text-white text-xl md:text-2xl font-bold mb-3 leading-tight">
-            Find Your Perfect Truck
+            Where do you need a truck to load?{' '}
           </h3>
           <p className="text-white/80 text-sm md:text-base">
             Select your truck type and requirements to get started
@@ -88,17 +90,17 @@ const SearchFilterContent = ({
                 key={type.value}
                 onClick={() => handleTruckTypeChange(type)}
                 className={cn(
-                  "group p-6 rounded-2xl border-2 transition-all duration-500 flex flex-col items-center gap-3 relative overflow-hidden",
+                  'group p-6 rounded-2xl border-2 transition-all duration-500 flex flex-col items-center gap-3 relative overflow-hidden',
                   truckType?.value === type.value
-                    ? "border-yellow-400 bg-gradient-to-br from-yellow-400/30 to-orange-400/20 text-white shadow-2xl transform scale-105 shadow-yellow-400/20"
-                    : "border-white/30 bg-white/10 text-white/90 hover:border-yellow-400/50 hover:bg-white/15 hover:transform hover:scale-105 hover:shadow-lg"
+                    ? 'border-yellow-400 bg-gradient-to-br from-yellow-400/30 to-orange-400/20 text-white shadow-2xl transform scale-105 shadow-yellow-400/20'
+                    : 'border-white/30 bg-white/10 text-white/90 hover:border-yellow-400/50 hover:bg-white/15 hover:transform hover:scale-105 hover:shadow-lg',
                 )}
               >
                 {/* Background glow effect for selected */}
                 {truckType?.value === type.value && (
                   <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/20 to-orange-400/10 animate-pulse"></div>
                 )}
-                
+
                 <div className="relative z-10 flex flex-col items-center gap-3">
                   <span className="text-3xl md:text-4xl transition-transform duration-300 group-hover:scale-110">
                     {type.icon}
@@ -120,7 +122,8 @@ const SearchFilterContent = ({
               <div className="space-y-4">
                 <div className="text-center mb-4">
                   <p className="text-white/80 text-sm">
-                    Configure your tanker truck requirements
+                    Start searching to compare, book and manage your frieght,
+                    all in one platform{' '}
                   </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
@@ -210,7 +213,8 @@ const SearchFilterContent = ({
               <div className="space-y-4">
                 <div className="text-center mb-4">
                   <p className="text-white/80 text-sm">
-                    Select your destination state for flatbed delivery
+                    Start searching to compare, book and manage your frieght,
+                    all in one platform
                   </p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -274,10 +278,10 @@ const SearchFilterContent = ({
                   loading={isSearching || isLoading}
                   disabled={!areRequiredFieldsPresent}
                   classNames={cn(
-                    "relative text-lg font-bold transition-all duration-300 rounded-2xl",
+                    'relative text-lg font-bold transition-all duration-300 rounded-2xl',
                     areRequiredFieldsPresent
-                      ? "hover:scale-105 hover:shadow-2xl transform"
-                      : "opacity-60 cursor-not-allowed"
+                      ? 'hover:scale-105 hover:shadow-2xl transform'
+                      : 'opacity-60 cursor-not-allowed',
                   )}
                 />
               </div>

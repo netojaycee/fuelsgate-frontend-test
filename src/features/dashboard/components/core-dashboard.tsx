@@ -12,13 +12,14 @@ import TruckRequest from '@/features/transporter-dashboard/components/truck-requ
 import Trucks from '@/features/transporter-dashboard/components/trucks';
 import { Roles } from '@/features/authentication/types/authentication.types';
 import Settings from './settings';
+import Calculator from '@/features/transporter-dashboard/components/calculator';
 
-type TabTypes = 'home' | 'truck-request' | 'settings' | 'trucks';
+type TabTypes = 'home' | 'truck-request' | 'settings' | 'trucks' | 'calculator';
 
 const CoreDashboard = () => {
   const _activeTab = Cookies.get('active-tab') as TabTypes;
   const isTabType = (tab: string): tab is TabTypes => {
-    return ['home', 'truck-request', 'settings', 'trucks'].includes(tab);
+    return ['home', 'truck-request', 'settings', 'trucks', 'calculator'].includes(tab);
   };
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const { user } = useContext(AuthContext);
@@ -28,18 +29,18 @@ const CoreDashboard = () => {
     isTabType(_activeTab)
       ? _activeTab
       : role === 'seller'
-        ? 'home'
-        : 'truck-request',
+      ? 'home'
+      : 'truck-request',
   );
 
   const displayRole =
     role === 'buyer'
       ? 'Trader'
       : role === 'seller'
-        ? 'Supplier'
-        : role === 'transporter'
-          ? 'Transporter'
-          : '';
+      ? 'Supplier'
+      : role === 'transporter'
+      ? 'Transporter'
+      : '';
 
   useEffect(() => {
     setIsMounted(true);
@@ -175,6 +176,31 @@ const CoreDashboard = () => {
                   />
                 )}
 
+                {role === 'transporter' && (
+                  <CustomButton
+                    variant="plain"
+                    fontSize="text-base"
+                    onClick={() => handleTabClick('calculator')}
+                    height="h-11"
+                    width="w-fit"
+                    classNames="rounded-[9px] px-5"
+                    color={cn(
+                      activeTab === 'calculator'
+                        ? 'text-dark-300'
+                        : 'text-dark-gray-250',
+                    )}
+                    bgColor={cn(
+                      activeTab === 'calculator' ? 'bg-light-gray-250' : 'bg-white',
+                    )}
+                    border={cn(
+                      activeTab === 'calculator'
+                        ? 'border-mid-gray-250'
+                        : 'border-light-gray-200',
+                    )}
+                    fontWeight="semibold"
+                    label="Fare Calculator"
+                  />
+                )}
                 <CustomButton
                   variant="plain"
                   onClick={() => handleTabClick('settings')}
@@ -204,6 +230,7 @@ const CoreDashboard = () => {
                 {activeTab === 'home' && <Home />}
                 {activeTab === 'truck-request' && <TruckRequest />}
                 {activeTab === 'trucks' && <Trucks />}
+                {activeTab === 'calculator' && <Calculator />}
                 {activeTab === 'settings' && <Settings />}
               </div>
             </div>

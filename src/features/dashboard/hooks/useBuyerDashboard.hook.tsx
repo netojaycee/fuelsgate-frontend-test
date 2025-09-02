@@ -27,6 +27,8 @@ const useBuyerDashboardHook = () => {
     selectedSize,
     selectedProduct,
     selectedLoadStatus,
+    truckType,
+    flatbedLocation,
     handleLoadStatusChange,
     handleDepotChange,
     handleStateChange,
@@ -34,6 +36,8 @@ const useBuyerDashboardHook = () => {
     handleSizeChange,
     handleLGAChange,
     handleVolumeChange,
+    handleTruckTypeChange,
+    handleFlatbedLocationChange,
   } = useContext(BuyerContext);
 
   const { useFetchDepotHubs } = useDepotHubHook();
@@ -51,7 +55,10 @@ const useBuyerDashboardHook = () => {
   const [totalProducts, setTotalProducts] = useState<number>(0);
 
   const { useFetchTrucks } = useTruckHook();
-  const shouldFetchTrucks =
+  
+  // Different conditions for tanker vs flatbed trucks
+  const shouldFetchTankerTrucks =
+    truckType?.value === 'tanker' &&
     selectedProduct?.value &&
     depot?.value &&
     selectedLoadStatus?.value &&
@@ -61,6 +68,29 @@ const useBuyerDashboardHook = () => {
     selectedSize?.value !== '' &&
     selectedLoadStatus?.value !== '';
 
+  const shouldFetchFlatbedTrucks =
+    truckType?.value === 'flatbed' &&
+    flatbedLocation?.value &&
+    selectedState?.value &&
+    selectedLGA?.value &&
+    flatbedLocation?.value !== '' &&
+    selectedState?.value !== '' &&
+    selectedLGA?.value !== '';
+
+  const shouldFetchTrucks = shouldFetchTankerTrucks || shouldFetchFlatbedTrucks;
+
+  // Construct query based on truck type
+  const getTruckQuery = () => {
+    if (truckType?.value === 'tanker') {
+      return `?productId=${selectedProduct?.value ?? ''}&depotHubId=${
+        depot?.value ?? ''
+      }&size=${selectedSize?.value ?? ''}&loadStatus=${selectedLoadStatus?.value ?? ''}&truckType=tanker&status=available&limit=20&page=`;
+    } else if (truckType?.value === 'flatbed') {
+      return `?locationId=${flatbedLocation?.value ?? ''}&currentState=${selectedState?.value ?? ''}&currentCity=${selectedLGA?.value ?? ''}&truckType=flatbed&status=available&limit=20&page=`;
+    }
+    return '';
+  };
+
   const {
     data: trucks,
     isFetching: isLoadingTrucks,
@@ -69,9 +99,7 @@ const useBuyerDashboardHook = () => {
     isFetchingNextPage: loadingFetchNextTruckPage,
     refetch: refetchTrucks,
   } = useFetchTrucks(
-    `?productId=${selectedProduct?.value ?? ''}&depotHubId=${
-      depot?.value ?? ''
-    }&size=${selectedSize?.value ?? ''}&loadStatus=${selectedLoadStatus?.value ?? ''}&status=available&limit=20&page=`,
+    getTruckQuery(),
     { enabled: !!shouldFetchTrucks }
   );
 
@@ -104,35 +132,55 @@ const useBuyerDashboardHook = () => {
   }, [selectedProduct, depot, volume, showToast]);
 
   const validateSearchTrucks = useCallback(() => {
-    if (!selectedProduct) {
-      showToast('Please select a product to search', 'error');
-      return false;
-    } else if (!depot) {
-      showToast('Please select a depot', 'error');
-      return false;
-    } else if (!selectedSize) {
-      showToast('Please select truck size', 'error');
-      return false;
-    } else if (!selectedState) {
-      showToast('Please select your destination state', 'error');
-      return false;
-    } else if (!selectedLGA) {
-      showToast('Please select your destination LGA', 'error');
+    if (!truckType) {
+      showToast('Please select a truck type', 'error');
       return false;
     }
-    if (!selectedLoadStatus) {
-      showToast('Please select load status', 'error');
-      return false;
+    
+    if (truckType.value === 'tanker') {
+      if (!selectedProduct) {
+        showToast('Please select a product to search', 'error');
+        return false;
+      } else if (!depot) {
+        showToast('Please select a depot', 'error');
+        return false;
+      } else if (!selectedSize) {
+        showToast('Please select truck size', 'error');
+        return false;
+      } else if (!selectedLoadStatus) {
+        showToast('Please select load status', 'error');
+        return false;
+      } else if (!selectedState) {
+        showToast('Please select your destination state', 'error');
+        return false;
+      } else if (!selectedLGA) {
+        showToast('Please select your destination LGA', 'error');
+        return false;
+      }
+    } else if (truckType.value === 'flatbed') {
+      if (!flatbedLocation) {
+        showToast('Please select a location', 'error');
+        return false;
+      } else if (!selectedState) {
+        showToast('Please select your destination state', 'error');
+        return false;
+      } else if (!selectedLGA) {
+        showToast('Please select your destination LGA', 'error');
+        return false;
+      }
     }
+    
     return true;
   }, [
+    truckType,
     selectedProduct,
     depot,
     selectedSize,
     selectedState,
     selectedLGA,
-    showToast,
     selectedLoadStatus,
+    flatbedLocation,
+    showToast,
   ]);
 
   const { useFetchBuyerAnalytics, useFetchBuyerScrollData } = useBuyerHook();
@@ -289,6 +337,8 @@ const useBuyerDashboardHook = () => {
     productsData,
     totalProducts,
     isMounted,
+    truckType,
+    flatbedLocation,
     handleTabClick,
     depots,
     states,
@@ -305,6 +355,8 @@ const useBuyerDashboardHook = () => {
     handleLoadStatusChange,
     handleSizeChange,
     handleLGAChange,
+    handleTruckTypeChange,
+    handleFlatbedLocationChange,
     buyerScrollData,
     loadingBuyerScrollData,
   };

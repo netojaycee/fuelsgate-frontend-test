@@ -40,7 +40,12 @@ const truckListPublicColumns = [
   // },
   {
     accessorKey: 'depot',
-    header: 'Terminal',
+    header: 'Location',
+    cell: ({ row }: { row: any }) => {
+      const depot = row.getValue('depot');
+      const currentState = row.original?.currentState;
+      return depot ? depot : currentState || '';
+    },
   },
   // {
   //   accessorKey: 'capacity',

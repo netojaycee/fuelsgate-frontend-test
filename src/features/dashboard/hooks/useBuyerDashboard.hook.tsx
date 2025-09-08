@@ -14,7 +14,7 @@ import { BuyerContext } from '../contexts/BuyerContext';
 import useBuyerHook from '@/hooks/useBuyer.hook';
 import useToastConfig from '@/hooks/useToastConfig.hook';
 
-type TabTypes = 'seller' | 'transporter';
+type TabTypes = 'seller' | 'transporter' | 'calculator';
 
 const useBuyerDashboardHook = () => {
   const { user } = useContext(AuthContext);
@@ -69,7 +69,7 @@ const useBuyerDashboardHook = () => {
     selectedLoadStatus?.value !== '';
 
   const shouldFetchFlatbedTrucks =
-    truckType?.value === 'flatbed' &&
+    truckType?.value !== 'tanker' &&
     flatbedLocation?.value &&
     selectedState?.value &&
     selectedLGA?.value &&
@@ -85,8 +85,8 @@ const useBuyerDashboardHook = () => {
       return `?productId=${selectedProduct?.value ?? ''}&depotHubId=${
         depot?.value ?? ''
       }&size=${selectedSize?.value ?? ''}&loadStatus=${selectedLoadStatus?.value ?? ''}&truckType=tanker&status=available&limit=20&page=`;
-    } else if (truckType?.value === 'flatbed') {
-      return `?locationId=${flatbedLocation?.value ?? ''}&currentState=${selectedState?.value ?? ''}&currentCity=${selectedLGA?.value ?? ''}&truckType=flatbed&status=available&limit=20&page=`;
+    } else if (truckType?.value !== 'tanker') {
+      return `?locationId=${flatbedLocation?.value ?? ''}&truckType=${truckType?.value}&status=available&limit=20&page=`;
     }
     return '';
   };
@@ -205,7 +205,7 @@ const useBuyerDashboardHook = () => {
   const _activeTab = Cookies.get('active-tab') as TabTypes;
 
   const isTabType = (tab: string): tab is TabTypes => {
-    return ['transporter', 'seller'].includes(tab);
+    return ['transporter', 'seller', 'calculator'].includes(tab);
   };
 
   const [activeTab, setActive] = useState<TabTypes>(

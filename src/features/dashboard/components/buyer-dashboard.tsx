@@ -1,6 +1,6 @@
 import { Count } from './count';
 import { cn } from '@/lib/utils';
-import { ArrowDownToLine, Search } from 'lucide-react';
+import { ArrowDownToLine, Calculator, Search } from 'lucide-react';
 import { Sora } from 'next/font/google';
 import { TruckTableList } from './truck-list';
 import { Text } from '@/components/atoms/text';
@@ -21,6 +21,7 @@ import { TRUCK_SIZES } from '@/data/truck-sizes';
 import { formatNumber } from '@/utils/formatNumber';
 import Marquee from 'react-fast-marquee';
 import { LOAD_STATUS_OPTIONS } from '@/modals/list-truck-modal';
+import BuyerCalculator from './BuyerCalculator';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -172,6 +173,30 @@ const BuyerDashboard = () => {
               label="Transporters"
             />
 
+             <CustomButton
+              variant="plain"
+              onClick={() => handleTabClick('calculator')}
+              width="w-fit"
+              classNames="rounded-[9px]"
+              color={cn(
+                activeTab === 'calculator'
+                  ? 'text-dark-300'
+                  : 'text-dark-gray-250',
+              )}
+              bgColor={cn(
+                activeTab === 'calculator' ? 'bg-light-gray-250' : 'bg-white',
+              )}
+              border={cn(
+                'border',
+                activeTab === 'calculator'
+                  ? 'border-mid-gray-250'
+                  : 'border-light-gray-200',
+              )}
+              fontWeight="semibold"
+              leftIcon={<Calculator className="text-[#666666]" />}
+              label="Fare Calculator"
+            />
+
             <Text
               variant="pm"
               classNames="ml-auto flex flex-wrap items-center gap-1"
@@ -204,6 +229,10 @@ const BuyerDashboard = () => {
                   What volume are we buying today?
                 </Text>
               </>
+            )}
+
+            {activeTab === 'calculator' && (
+             <BuyerCalculator />
             )}
             {activeTab === 'transporter' && (
               <>

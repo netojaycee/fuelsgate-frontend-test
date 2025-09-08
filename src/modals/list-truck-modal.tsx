@@ -43,13 +43,58 @@ const LIST_TRUCK = 'list_truck';
 // Truck type options
 const TRUCK_TYPES = [
   { label: 'Tanker', value: 'tanker' },
-  { label: 'Flat Bed', value: 'flatbed' },
+  { label: 'Flatbed', value: 'flatbed' },
+  { label: 'Step Deck', value: 'stepdeck' },
+  { label: 'Drop Deck', value: 'dropdeck' },
 ];
 
+const TRUCK_FUEL_TYPES = [
+  { label: 'CNG Powered', value: 'cng' },
+  { label: 'Diesel Powered', value: 'diesel' },
+];
 // Delivery type options
 const DELIVERY_TYPES = [
   { label: 'Bridging', value: 'bridging' },
   { label: 'Local', value: 'local' },
+];
+
+// Flatbed delivery options
+const FLATBED_DELIVERY_TYPES = [
+  { label: 'In Country', value: 'in_country' },
+  { label: 'Up Country', value: 'up_country' },
+];
+
+// Flatbed specific options
+const FLATBED_SUBTYPES = [
+  { label: "Standard (48-53')", value: 'standard' },
+  { label: 'Step-deck', value: 'step-deck' },
+  { label: 'Double-drop', value: 'double-drop' },
+  { label: 'Extendable', value: 'extendable' },
+  { label: 'Conestoga', value: 'conestoga' },
+  { label: 'Side-kit', value: 'side-kit' },
+];
+
+const EQUIPMENT_OPTIONS = [
+  { label: 'Tarps', value: 'tarps' },
+  { label: 'Chains', value: 'chains' },
+  { label: 'Straps', value: 'straps' },
+  { label: 'Binders', value: 'binders' },
+  { label: 'Winches', value: 'winches' },
+];
+
+const CARGO_TYPES = [
+  { label: 'Lumber', value: 'lumber' },
+  { label: 'Steel', value: 'steel' },
+  { label: 'Machinery', value: 'machinery' },
+  { label: 'Pipes', value: 'pipes' },
+  { label: 'Building materials', value: 'building_materials' },
+];
+
+// Minimal country list (expand via backend endpoint later)
+const COUNTRY_OPTIONS = [
+  { label: 'Nigeria', value: 'Nigeria' },
+  { label: 'Ghana', value: 'Ghana' },
+  { label: 'Kenya', value: 'Kenya' },
 ];
 
 // Load status options
@@ -69,6 +114,34 @@ const ListTruckModal = () => {
   const [truckType, setTruckType] = useState<CustomSelectOption | undefined>(
     undefined,
   );
+  const [truckFuelType, setTruckFuelType] = useState<
+    CustomSelectOption | undefined
+  >(undefined);
+  // Truck age state
+  const [truckAge, setTruckAge] = useState<string>('');
+
+  // Flatbed specific state
+  const [flatbedSubtype, setFlatbedSubtype] = useState<
+    CustomSelectOption | undefined
+  >(undefined);
+  const [deckLengthFt, setDeckLengthFt] = useState<string>('');
+  const [deckWidthFt, setDeckWidthFt] = useState<string>('8.5');
+  const [maxPayloadKg, setMaxPayloadKg] = useState<string>('');
+  const [equipment, setEquipment] = useState<CustomSelectOption[] | undefined>(
+    undefined,
+  );
+  const [preferredCargoTypes, setPreferredCargoTypes] = useState<
+    CustomSelectOption[] | undefined
+  >(undefined);
+  const [permitRequired, setPermitRequired] = useState<
+    CustomSelectOption | undefined
+  >(undefined);
+  const [notes, setNotes] = useState<string>('');
+  const [country, setCountry] = useState<CustomSelectOption | undefined>(
+    COUNTRY_OPTIONS[0],
+  );
+  const [city, setCity] = useState<CustomSelectOption | undefined>(undefined);
+  const [address, setAddress] = useState<string>('');
   const [selectedState, setSelectedState] = useState<
     CustomSelectOption | undefined
   >(undefined);
@@ -117,8 +190,24 @@ const ListTruckModal = () => {
       productId?: string;
       deliveryType?: string;
       truckType: string;
+      truckFuelType?: string;
+      truckAge?: string;
       currentState?: string;
       currentCity?: string;
+      // flatbed fields
+      flatbedSubtype?: string;
+      deckLengthFt?: string;
+      deckWidthFt?: string;
+      maxPayloadKg?: string;
+      equipment?: string[];
+      preferredCargoTypes?: string[];
+      permitRequired?: string;
+      baseRateType?: string;
+      baseRate?: string;
+      notes?: string;
+      country?: string;
+      city?: string;
+      address?: string;
     }
   >({
     resolver: yupResolver(truckFormSchema) as any,
@@ -130,7 +219,10 @@ const ListTruckModal = () => {
       currentState: openModal?.data?.truck?.currentState || '',
       currentCity: openModal?.data?.truck?.currentCity || '',
       deliveryType: '',
-      truckType: '',
+
+      truckType: openModal?.data?.truck?.truckType || '',
+      truckFuelType: openModal?.data?.truck?.truckFuelType || '',
+      truckAge: openModal?.data?.truck?.truckAge || '',
       loadStatus: 'unloaded',
     },
   });
@@ -138,6 +230,8 @@ const ListTruckModal = () => {
     data: Omit<TruckDto, '_id' | 'profileId' | 'status'> & {
       deliveryType?: string;
       truckType: string;
+      truckFuelType?: string;
+      truckAge?: string;
     },
   ) => {
     try {
@@ -177,17 +271,26 @@ const ListTruckModal = () => {
           data.capacity = customCapacity;
         }
 
-        // Format truck number based on delivery type
-        if (data.deliveryType && data.truckNumber) {
-          const rawTruckNumber = data.truckNumber
-            .replace(/^B\/L-/, '') // Remove existing B/L- prefix
-            .replace(/^L-/, ''); // Remove existing L- prefix
+        // (tanker-specific validation completed here)
+      }
 
-          if (data.deliveryType === 'bridging') {
-            data.truckNumber = `B/L-${rawTruckNumber}`;
-          } else if (data.deliveryType === 'local') {
-            data.truckNumber = `L-${rawTruckNumber}`;
-          }
+      // Normalize truck number prefix for all truck types so deliveryType is encoded
+      if (data.deliveryType && data.truckNumber) {
+        const rawTruckNumber = data.truckNumber
+          .toString()
+          .replace(/^B\/L-/, '') // Remove existing B/L- prefix
+          .replace(/^B-L-/, '')
+          .replace(/^L-/, ''); // Remove existing L- prefix
+
+        // bridging and up_country should have B/L- prefix
+        if (
+          data.deliveryType === 'bridging' ||
+          data.deliveryType === 'up_country'
+        ) {
+          data.truckNumber = `B/L-${rawTruckNumber}`;
+        } else {
+          // local and in_country use L-
+          data.truckNumber = `L-${rawTruckNumber}`;
         }
       }
 
@@ -196,7 +299,7 @@ const ListTruckModal = () => {
 
       // Build truck data based on truck type
       let truckData;
-      if (truckType === 'flatbed') {
+      if (truckType !== 'tanker') {
         // For flatbed trucks, exclude tanker-specific fields
         const {
           productId,
@@ -211,6 +314,18 @@ const ListTruckModal = () => {
         truckData = {
           ...flatbedData,
           truckType,
+          // explicit flatbed fields (if present in form data)
+          flatbedSubtype: rest.flatbedSubtype || undefined,
+          deckLengthFt: rest.deckLengthFt || undefined,
+          deckWidthFt: rest.deckWidthFt || undefined,
+          maxPayloadKg: rest.maxPayloadKg || undefined,
+          equipment: rest.equipment || undefined,
+          preferredCargoTypes: rest.preferredCargoTypes || undefined,
+          // permitRequired: rest.permitRequired || undefined,
+          notes: rest.notes || undefined,
+          country: rest.country || undefined,
+          city: rest.city || undefined,
+          address: rest.address || undefined,
           ...(profileType ? { profileType: profileType.toLowerCase() } : {}),
         };
       } else {
@@ -233,11 +348,22 @@ const ListTruckModal = () => {
     }
   };
 
+  const handleTruckFuelTypeChange = useCallback((value: unknown) => {
+    setTruckFuelType(value as CustomSelectOption);
+  }, []);
+
+  const handleTruckAgeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTruckAge(e.target.value);
+    },
+    [],
+  );
+
   const handleTruckTypeChange = useCallback((value: unknown) => {
     console.log('Truck type changed:', value);
     setTruckType(value as CustomSelectOption);
     // Reset relevant fields when truck type changes
-    if ((value as CustomSelectOption)?.value === 'flatbed') {
+    if ((value as CustomSelectOption)?.value !== 'tanker') {
       // Reset tanker-specific fields
       setDepotHub(undefined);
       setDepot(undefined);
@@ -247,11 +373,45 @@ const ListTruckModal = () => {
       setLoadStatus(LOAD_STATUS_OPTIONS[1]); // Reset to default
       setShowCustomCapacity(false);
       setCustomCapacity('');
+      // initialize flatbed defaults
+      setFlatbedSubtype(undefined);
+      setDeckLengthFt('');
+      setDeckWidthFt('8.5');
+      setMaxPayloadKg('');
+      setEquipment(undefined);
+      setPreferredCargoTypes(undefined);
+      setPermitRequired(undefined);
+      setNotes('');
+      setCountry(COUNTRY_OPTIONS[0]);
+      setCity(undefined);
+      setAddress('');
     } else {
       // Reset flatbed-specific fields
       setSelectedState(undefined);
       setSelectedLGA(undefined);
     }
+  }, []);
+
+  // Flatbed handlers
+  const handleFlatbedSubtypeChange = useCallback((value: unknown) => {
+    setFlatbedSubtype(value as CustomSelectOption);
+  }, []);
+
+  const handleEquipmentChange = useCallback((value: unknown) => {
+    setEquipment(value as CustomSelectOption[]);
+  }, []);
+
+  const handlePreferredCargoChange = useCallback((value: unknown) => {
+    setPreferredCargoTypes(value as CustomSelectOption[]);
+  }, []);
+
+  const handleCountryChange = useCallback((value: unknown) => {
+    setCountry(value as CustomSelectOption);
+    setCity(undefined);
+  }, []);
+
+  const handleCityChange = useCallback((value: unknown) => {
+    setCity(value as CustomSelectOption);
   }, []);
 
   const handleStateChange = useCallback((value: unknown) => {
@@ -346,19 +506,17 @@ const ListTruckModal = () => {
   //   return [];
   // }, [stateRes]);
 
+  // lagos only
+  const states = useMemo(() => {
+    // Only return Lagos as the state option
+    return [
+      {
+        label: 'Lagos',
+        value: 'Lagos',
+      },
+    ];
+  }, []);
 
-    // lagos only
-    const states = useMemo(() => {
-      // Only return Lagos as the state option
-      return [
-        {
-          label: 'Lagos',
-          value: 'Lagos',
-        },
-      ];
-    }, []);
-
-    
   const lgas = useMemo(() => {
     if (lgaRes) {
       return lgaRes?.map((item: string) => ({
@@ -387,10 +545,49 @@ const ListTruckModal = () => {
   );
 
   useEffect(() => {
-    if (truckType) {
-      setValue('truckType', truckType.value as 'tanker' | 'flatbed');
-    }
-  }, [truckType, setValue]);
+    if (truckType)
+      setValue('truckType', truckType.value as 'tanker' | 'flatbed' | 'stepdeck' | 'dropdeck');
+
+    if (truckFuelType) setValue('truckFuelType', truckFuelType.value as 'diesel' | 'cng');
+    if (truckAge !== undefined) setValue('truckAge', truckAge);
+  }, [truckType, truckFuelType, truckAge, setValue]);
+
+
+  // bind flatbed fields to form values
+  useEffect(() => {
+    if (flatbedSubtype) setValue('flatbedSubtype', flatbedSubtype.value);
+    if (deckLengthFt !== undefined) setValue('deckLengthFt', deckLengthFt);
+    if (deckWidthFt !== undefined) setValue('deckWidthFt', deckWidthFt);
+    if (maxPayloadKg !== undefined) setValue('maxPayloadKg', maxPayloadKg);
+    if (equipment)
+      setValue(
+        'equipment',
+        equipment.map((e) => e.value),
+      );
+    if (preferredCargoTypes)
+      setValue(
+        'preferredCargoTypes',
+        preferredCargoTypes.map((c) => c.value),
+      );
+    if (permitRequired) setValue('permitRequired', permitRequired.value);
+    if (notes !== undefined) setValue('notes', notes);
+    if (country) setValue('country', country.value);
+    if (city) setValue('city', city?.value || '');
+    if (address !== undefined) setValue('address', address);
+  }, [
+    flatbedSubtype,
+    deckLengthFt,
+    deckWidthFt,
+    maxPayloadKg,
+    equipment,
+    preferredCargoTypes,
+    permitRequired,
+    notes,
+    country,
+    city,
+    address,
+    setValue,
+  ]);
 
   useEffect(() => {
     if (selectedState) {
@@ -515,14 +712,20 @@ const ListTruckModal = () => {
       const truckNumber = truckNumberRaw ? truckNumberRaw.toString() : '';
       let _selectedDeliveryType;
 
-      if (truckNumber.startsWith('B/L-')) {
-        _selectedDeliveryType = DELIVERY_TYPES.find(
-          (item) => item.value === 'bridging',
-        );
+      // determine which option set to prefer based on truckType value (if available)
+      const currentTruckType = getValues('truckType') || truckType?.value;
+      const preferFlatbed = currentTruckType !== 'tanker';
+
+      if (truckNumber.startsWith('B/L-') || truckNumber.startsWith('B-L-')) {
+        // prefer flatbed up_country when editing a flatbed, otherwise tanker bridging
+        _selectedDeliveryType = preferFlatbed
+          ? FLATBED_DELIVERY_TYPES.find((i) => i.value === 'up_country')
+          : DELIVERY_TYPES.find((i) => i.value === 'bridging');
       } else if (truckNumber.startsWith('L-')) {
-        _selectedDeliveryType = DELIVERY_TYPES.find(
-          (item) => item.value === 'local',
-        );
+        // prefer flatbed in_country when editing a flatbed, otherwise tanker local
+        _selectedDeliveryType = preferFlatbed
+          ? FLATBED_DELIVERY_TYPES.find((i) => i.value === 'in_country')
+          : DELIVERY_TYPES.find((i) => i.value === 'local');
       }
 
       if (_selectedDeliveryType) {
@@ -530,7 +733,151 @@ const ListTruckModal = () => {
         setValue('deliveryType', _selectedDeliveryType.value);
       }
     }
-  }, [depotHubs, depots, products, states, lgas, getValues, setValue]);
+  }, [
+    depotHubs,
+    depots,
+    products,
+    states,
+    lgas,
+    getValues,
+    setValue,
+    truckType,
+  ]);
+
+  // If we're editing, load truck values into local state (so selects display correctly)
+  useEffect(() => {
+    const editingTruck = openModal?.data?.truck;
+    if (openModal?.data?.edit && editingTruck) {
+      // truck type
+      const _selectedTruckType = TRUCK_TYPES.find(
+        (item: CustomSelectOption) => item.value === editingTruck.truckType,
+      );
+      if (_selectedTruckType) setTruckType(_selectedTruckType);
+
+      // infer or use deliveryType - prefer explicit truckNumber prefix if present
+      let inferredDeliveryType: string | undefined = editingTruck.deliveryType;
+
+      if (editingTruck.truckNumber) {
+        const tn = editingTruck.truckNumber.toString();
+        if (tn.startsWith('B/L-') || tn.startsWith('B-L-')) {
+          inferredDeliveryType =
+            editingTruck.truckType !== 'tanker' ? 'up_country' : 'bridging';
+        } else if (tn.startsWith('L-')) {
+          inferredDeliveryType =
+            editingTruck.truckType !== 'tanker' ? 'in_country' : 'local';
+        }
+      }
+
+      if (!inferredDeliveryType) {
+        if (editingTruck.currentState || editingTruck.currentCity) {
+          inferredDeliveryType = 'in_country';
+        } else if (editingTruck.country) {
+          inferredDeliveryType = 'up_country';
+        }
+      }
+
+      if (inferredDeliveryType) {
+        const opt = (
+          editingTruck.truckType !== 'tanker'
+            ? FLATBED_DELIVERY_TYPES
+            : DELIVERY_TYPES
+        ).find((d) => d.value === inferredDeliveryType);
+        if (opt) {
+          setDeliveryType(opt);
+          setValue('deliveryType', opt.value);
+        }
+      }
+
+      // state / city
+      if (editingTruck.currentState) {
+        const sOpt = {
+          label: editingTruck.currentState,
+          value: editingTruck.currentState,
+        } as CustomSelectOption;
+        setSelectedState(sOpt);
+        setValue('currentState', editingTruck.currentState);
+      }
+
+      if (editingTruck.currentCity) {
+        const cOpt = {
+          label: editingTruck.currentCity,
+          value: editingTruck.currentCity,
+        } as CustomSelectOption;
+        setSelectedLGA(cOpt);
+        setValue('currentCity', editingTruck.currentCity);
+      }
+
+      // country / address / notes
+      if (editingTruck.country) {
+        const countryOpt = COUNTRY_OPTIONS.find(
+          (c) => c.value === editingTruck.country,
+        ) || { label: editingTruck.country, value: editingTruck.country };
+        setCountry(countryOpt as CustomSelectOption);
+        setValue('country', editingTruck.country);
+      }
+      if (editingTruck.address) {
+        setAddress(editingTruck.address);
+        setValue('address', editingTruck.address);
+      }
+      if (editingTruck.notes) {
+        setNotes(editingTruck.notes);
+        setValue('notes', editingTruck.notes);
+      }
+
+      // flatbed-specific
+      if (editingTruck.flatbedSubtype) {
+        const fOpt = FLATBED_SUBTYPES.find(
+          (f) => f.value === editingTruck.flatbedSubtype,
+        );
+        if (fOpt) {
+          setFlatbedSubtype(fOpt as CustomSelectOption);
+          setValue('flatbedSubtype', editingTruck.flatbedSubtype);
+        }
+      }
+      if (editingTruck.deckLengthFt !== undefined) {
+        setDeckLengthFt(editingTruck.deckLengthFt?.toString() || '');
+        setValue('deckLengthFt', editingTruck.deckLengthFt?.toString() || '');
+      }
+      if (editingTruck.deckWidthFt !== undefined) {
+        setDeckWidthFt(editingTruck.deckWidthFt?.toString() || '');
+        setValue('deckWidthFt', editingTruck.deckWidthFt?.toString() || '');
+      }
+      if (editingTruck.maxPayloadKg !== undefined) {
+        setMaxPayloadKg(editingTruck.maxPayloadKg?.toString() || '');
+        setValue('maxPayloadKg', editingTruck.maxPayloadKg?.toString() || '');
+      }
+      if (editingTruck.equipment) {
+        const eq = editingTruck.equipment.map((e: string) => ({
+          label: e,
+          value: e,
+        }));
+        setEquipment(eq as CustomSelectOption[]);
+        setValue('equipment', editingTruck.equipment);
+      }
+      if (editingTruck.preferredCargoTypes) {
+        const pc = editingTruck.preferredCargoTypes.map((c: string) => ({
+          label: c,
+          value: c,
+        }));
+        setPreferredCargoTypes(pc as CustomSelectOption[]);
+        setValue('preferredCargoTypes', editingTruck.preferredCargoTypes);
+      }
+
+      // ensure truckNumber is prefixed to carry deliveryType info (B/L- or L-)
+      if (editingTruck.truckNumber) {
+        const raw = editingTruck.truckNumber
+          .toString()
+          .replace(/^B\/L-/, '')
+          .replace(/^L-/, '');
+        const prefix =
+          inferredDeliveryType === 'bridging' ||
+          inferredDeliveryType === 'up_country'
+            ? 'B/L-'
+            : 'L-';
+        setValue('truckNumber', `${prefix}${raw}`);
+      }
+    }
+  }, [openModal, setValue]);
 
   return (
     <>
@@ -629,16 +976,50 @@ const ListTruckModal = () => {
                 error={errors.truckNumber?.message}
               />
             </div>
-            <div className="relative z-30">
+
+            <div className="relative z-35">
               <CustomSelect
                 name="deliveryType"
                 label="Delivery Type"
-                options={DELIVERY_TYPES}
+                options={
+                  truckType?.value !== 'tanker'
+                    ? FLATBED_DELIVERY_TYPES
+                    : DELIVERY_TYPES
+                }
                 value={deliveryType}
                 onChange={handleDeliveryTypeChange}
                 error={errors.deliveryType?.message}
-                classNames="relative z-30"
+                classNames="relative z-35"
               />
+            </div>
+
+            <div className="relative z-30">
+              <CustomSelect
+                name="truckFuelType"
+                label="Truck Fuel Type"
+                options={TRUCK_FUEL_TYPES}
+                value={truckFuelType}
+                onChange={handleTruckFuelTypeChange}
+                error={errors.truckFuelType?.message}
+                classNames="relative z-30 mt-2"
+                placeholder="Select fuel type"
+              />
+            </div>
+            <div className="relative z-30">
+              <CustomInput
+                type="number"
+                name="truckAge"
+                label="Truck Age (years)"
+                value={truckAge}
+                onChange={handleTruckAgeChange}
+                error={errors.truckAge?.message}
+                min="0"
+                placeholder="Enter truck age in years"
+                classNames="mt-2"
+              />
+              <div className="text-xs text-gray-500 mt-1">
+                Note: Older trucks tend to consume more fuel.
+              </div>
             </div>
             {truckType?.value === 'tanker' && (
               <>
@@ -717,30 +1098,206 @@ const ListTruckModal = () => {
                 </>
               ) : (
                 <>
-                  <div className="relative z-30">
-                    <CustomSelect
-                      label="Current State"
-                      name="state"
-                      options={states}
-                      value={selectedState}
-                      isDisabled={loadingState}
-                      onChange={handleStateChange}
-                      error={errors.currentState?.message}
-                      classNames="relative z-30"
-                    />
-                  </div>
-                  <div className="relative z-20">
-                    <CustomSelect
-                      label="Current City"
-                      name="lga"
-                      options={lgas}
-                      isDisabled={loadingLGA}
-                      value={selectedLGA}
-                      onChange={handleLGAChange}
-                      error={errors.currentCity?.message}
-                      classNames="relative z-20"
-                    />
-                  </div>
+                  {truckType?.value !== 'tanker' ? (
+                    <>
+                      <div className="relative z-25">
+                        <CustomSelect
+                          label="Flatbed Subtype"
+                          name="flatbedSubtype"
+                          options={FLATBED_SUBTYPES}
+                          value={flatbedSubtype}
+                          onChange={handleFlatbedSubtypeChange}
+                          error={errors.flatbedSubtype?.message}
+                          classNames="relative z-25"
+                        />
+                      </div>
+
+                      <div className="relative z-20">
+                        <CustomInput
+                          type="number"
+                          name="deckLengthFt"
+                          label="Deck length (ft)"
+                          value={deckLengthFt}
+                          onChange={(e) => setDeckLengthFt(e.target.value)}
+                          error={errors.deckLengthFt?.message}
+                        />
+                      </div>
+
+                      <div className="relative z-20">
+                        <CustomInput
+                          type="number"
+                          name="deckWidthFt"
+                          label="Deck width (ft)"
+                          value={deckWidthFt}
+                          onChange={(e) => setDeckWidthFt(e.target.value)}
+                          error={errors.deckWidthFt?.message}
+                        />
+                      </div>
+
+                      <div className="relative z-20">
+                        <CustomInput
+                          type="number"
+                          name="maxPayloadKg"
+                          label="Max payload (kg)"
+                          value={maxPayloadKg}
+                          onChange={(e) => setMaxPayloadKg(e.target.value)}
+                          error={errors.maxPayloadKg?.message}
+                        />
+                      </div>
+
+                      <div className="relative z-30">
+                        <CustomSelect
+                          label="Equipment"
+                          name="equipment"
+                          options={EQUIPMENT_OPTIONS}
+                          multiple
+                          value={equipment}
+                          onChange={handleEquipmentChange}
+                          error={errors.equipment?.message}
+                          classNames="relative z-30"
+                        />
+                      </div>
+
+                      <div className="relative z-30">
+                        <CustomSelect
+                          label="Preferred Cargo Types"
+                          name="preferredCargoTypes"
+                          options={CARGO_TYPES}
+                          multiple
+                          value={preferredCargoTypes}
+                          onChange={handlePreferredCargoChange}
+                          error={errors.preferredCargoTypes?.message}
+                          classNames="relative z-30"
+                        />
+                      </div>
+
+                      {/* delivery type uses the shared select above (shows in-country/up-country for flatbed) */}
+
+                      {deliveryType?.value === 'in_country' && (
+                        <>
+                          <div className="relative z-25">
+                            <CustomSelect
+                              label="State"
+                              name="state"
+                              options={
+                                stateRes?.map((s: string) => ({
+                                  label: s,
+                                  value: s,
+                                })) || []
+                              }
+                              value={selectedState}
+                              onChange={handleStateChange}
+                              error={errors.currentState?.message}
+                              classNames="relative z-25"
+                            />
+                          </div>
+                          <div className="relative z-25">
+                            <CustomSelect
+                              label="City (LGA)"
+                              name="city"
+                              options={
+                                lgaRes?.map((l: string) => ({
+                                  label: l,
+                                  value: l,
+                                })) || []
+                              }
+                              value={selectedLGA}
+                              onChange={handleLGAChange}
+                              error={errors.currentCity?.message}
+                              classNames="relative z-25"
+                            />
+                          </div>
+                          <div className="col-span-full relative z-20">
+                            <CustomInput
+                              type="text"
+                              name="address"
+                              label="Address / Location"
+                              placeholder="Optional: include full address or landmark"
+                              value={address}
+                              onChange={(e) => setAddress(e.target.value)}
+                              error={errors.address?.message}
+                            />
+                          </div>
+                          <div className="col-span-full relative z-20">
+                            <CustomInput
+                              type="text"
+                              name="notes"
+                              label="Notes"
+                              placeholder="Optional: extra details or restrictions"
+                              value={notes}
+                              onChange={(e) => setNotes(e.target.value)}
+                              error={errors.notes?.message}
+                            />
+                          </div>
+                        </>
+                      )}
+
+                      {deliveryType?.value === 'up_country' && (
+                        <>
+                          <div className="relative z-25">
+                            <CustomSelect
+                              label="Country"
+                              name="country"
+                              options={COUNTRY_OPTIONS}
+                              value={country}
+                              onChange={handleCountryChange}
+                              error={errors.country?.message}
+                              classNames="relative z-25"
+                            />
+                          </div>
+                          <div className="col-span-full relative z-20">
+                            <CustomInput
+                              type="text"
+                              name="address"
+                              label="Address / Location"
+                              placeholder="Enter full address or landmark"
+                              value={address}
+                              onChange={(e) => setAddress(e.target.value)}
+                              error={errors.address?.message}
+                            />
+                          </div>
+                          <div className="col-span-full relative z-20">
+                            <CustomInput
+                              type="text"
+                              name="notes"
+                              label="Notes"
+                              placeholder="Optional: extra details or restrictions"
+                              value={notes}
+                              onChange={(e) => setNotes(e.target.value)}
+                              error={errors.notes?.message}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <div className="relative z-30">
+                        <CustomSelect
+                          label="Current State"
+                          name="state"
+                          options={states}
+                          value={selectedState}
+                          isDisabled={loadingState}
+                          onChange={handleStateChange}
+                          error={errors.currentState?.message}
+                          classNames="relative z-30"
+                        />
+                      </div>
+                      <div className="relative z-20">
+                        <CustomSelect
+                          label="Current City"
+                          name="lga"
+                          options={lgas}
+                          isDisabled={loadingLGA}
+                          value={selectedLGA}
+                          onChange={handleLGAChange}
+                          error={errors.currentCity?.message}
+                          classNames="relative z-20"
+                        />
+                      </div>
+                    </>
+                  )}
                 </>
               )}
             </div>

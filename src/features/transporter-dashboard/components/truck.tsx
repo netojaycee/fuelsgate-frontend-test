@@ -102,13 +102,13 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
       <div className="absolute -top-2 -left-2 z-10">
         <span 
           className={`flex items-center justify-center border-2 border-white px-2 py-1 rounded-full shadow-lg ${
-            data?.truckType === 'flatbed' 
+            data?.truckType !== 'tanker' 
               ? 'bg-purple-500' 
               : 'bg-blue-500'
           }`}
         >
           <Text variant="pxs" fontWeight="semibold" color="text-white">
-            {data?.truckType === 'flatbed' ? 'Flatbed' : 'Tanker'}
+            {data?.truckType}
           </Text>
         </span>
       </div>
@@ -118,7 +118,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
         <div className="flex items-center gap-3">
           <span
             className={`h-8 w-10 rounded-full flex items-center justify-center shadow-sm relative overflow-hidden ${
-              data?.truckType === 'flatbed' || !(typeof data?.productId === 'object' && data?.productId?.color)
+              data?.truckType !== 'tanker' || !(typeof data?.productId === 'object' && data?.productId?.color)
                 ? 'bg-blue-tone-100'
                 : ''
             }`}
@@ -134,7 +134,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
                 : undefined
             }
           >
-            {data?.truckType === 'flatbed' ? (
+            {data?.truckType !== 'tanker' ? (
               <TruckIcon color="#ffffff" size={20} />
             ) : (
               <FGTruckFill color="#ffffff" height={20} width={20} />
@@ -155,7 +155,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
                 ? (typeof data?.productId === 'object'
                     ? data?.productId?.name
                     : 'Unknown Product')
-                : 'Flatbed Truck'
+                : `${data?.truckType} Truck`
               }
             </Text>
           </div>
@@ -230,7 +230,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
         )}
 
         {/* Location - For flatbed trucks, show current state and city */}
-        {data?.truckType === 'flatbed' && (data?.currentState || data?.currentCity) && (
+        {data?.truckType !== 'tanker' && (data?.currentState || data?.currentCity) && (
           <>
             {data?.currentState && (
               <div className="flex items-center justify-between">

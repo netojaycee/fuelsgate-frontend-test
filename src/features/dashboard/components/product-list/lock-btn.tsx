@@ -56,7 +56,7 @@ const LockBtn = ({
     truckId = truck?._id;
     truckNumber = truck?.truckNumber;
     truckSize = truck?.capacity;
-    depotHub = (truck?.depotHubId as DepotHubDto).name;
+    depotHub = (truck?.depotHubId as DepotHubDto)?.name;
     product = truck?.productId as ProductDto;
   }
 

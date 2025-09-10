@@ -154,7 +154,7 @@ const usePublicSearch = (isSearchPage = false) => {
 
     if (truckType.value === 'tanker') {
       return !!(selectedProduct && depot && selectedSize);
-    } else if (truckType.value === 'flatbed') {
+    } else if (truckType.value !== 'tanker') {
       return !!depot; // Only location required for flatbed
     }
     return false;
@@ -177,7 +177,7 @@ const usePublicSearch = (isSearchPage = false) => {
         showToast('Please select truck size', 'error');
         return false;
       }
-    } else if (truckType.value === 'flatbed') {
+    } else if (truckType.value !== 'tanker') {
       if (!depot) {
         showToast('Please select a location', 'error');
         return false;
@@ -267,6 +267,8 @@ const usePublicSearch = (isSearchPage = false) => {
           const truckTypeOptions = [
             { label: 'Tanker', value: 'tanker' },
             { label: 'Flat Bed', value: 'flatbed' },
+            { label: 'Step Deck', value: 'stepdeck' },
+            { label: 'Drop Deck', value: 'dropdeck' },
           ];
           const truckTypeObj = truckTypeOptions.find(
             (item) => item.value === truckTypeValue,
@@ -318,8 +320,8 @@ const usePublicSearch = (isSearchPage = false) => {
         selectedSize
       ) {
         return `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker&status=available&limit=20&page=`;
-      } else if (truckType.value === 'flatbed' && depot) {
-        return `?locationId=${depot.value}&truckType=flatbed&status=available&limit=20&page=`;
+      } else if (truckType.value !== 'tanker' && depot) {
+        return `?locationId=${depot.value}&truckType=${truckType.value}&status=available&limit=20&page=`;
       }
     }
     return ''; // Empty query will prevent the hook from running
@@ -404,9 +406,9 @@ const usePublicSearch = (isSearchPage = false) => {
       ) {
         query = `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker&status=available&limit=20&page=`;
         url = `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker`;
-      } else if (truckType.value === 'flatbed' && depot) {
-        query = `?locationId=${depot.value}&truckType=flatbed&status=available&limit=20&page=`;
-        url = `/truck-search?locationId=${depot.value}&truckType=flatbed`;
+      } else if (truckType.value !== 'tanker' && depot) {
+        query = `?locationId=${depot.value}&truckType=${truckType.value}&status=available&limit=20&page=`;
+        url = `/truck-search?locationId=${depot.value}&truckType=${truckType.value}`;
       }
 
       if (query && url) {
@@ -433,8 +435,8 @@ const usePublicSearch = (isSearchPage = false) => {
         selectedSize
       ) {
         url = `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker`;
-      } else if (truckType.value === 'flatbed' && depot) {
-        url = `/truck-search?locationId=${depot.value}&truckType=flatbed`;
+      } else if (truckType.value !== 'tanker' && depot) {
+        url = `/truck-search?locationId=${depot.value}&truckType=${truckType.value}`;
       }
 
       if (url) {

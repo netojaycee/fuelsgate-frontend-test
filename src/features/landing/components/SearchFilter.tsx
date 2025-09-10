@@ -13,8 +13,10 @@ import React, { Suspense } from 'react';
 
 // Truck type options
 const TRUCK_TYPES = [
-  { label: 'Tanker', value: 'tanker', icon: '🚚' },
-  { label: 'Flat Bed', value: 'flatbed', icon: '🚛' },
+  { label: 'Tanker', value: 'tanker', icon: <Truck className="w-7 h-7 text-yellow-400" /> },
+  { label: 'Flat Bed', value: 'flatbed', icon: <Truck className="w-7 h-7 text-orange-400" /> },
+  { label: 'Step Deck', value: 'stepdeck', icon: <Package className="w-7 h-7 text-blue-400" /> },
+  { label: 'Drop Deck', value: 'dropdeck', icon: <Gauge className="w-7 h-7 text-purple-400" /> },
 ];
 
 // Search filter loader placeholder for Suspense fallback
@@ -115,179 +117,178 @@ const SearchFilterContent = ({
         </div>
 
         {/* Conditional Fields Based on Truck Type */}
-        {truckType && (
-          <div className="space-y-6 transition-all duration-500 ease-in-out">
-            {/* For Tanker: Show Product, Location, Size */}
-            {truckType.value === 'tanker' && (
-              <div className="space-y-4">
-                <div className="text-center mb-4">
-                  <p className="text-white/80 text-sm">
-                    Start searching to compare, book and manage your frieght,
-                    all in one platform{' '}
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                  <div className="space-y-3 group">
-                    <div className="flex items-center gap-2 text-white/90 text-sm font-semibold">
-                      <div className="p-1.5 bg-blue-500/20 rounded-lg">
-                        <Package className="w-4 h-4 text-blue-400" />
-                      </div>
-                      Product
-                    </div>
-                    <div className="transform transition-all duration-300 group-hover:scale-105 relative z-50">
-                      <CustomSelect
-                        placeholder="Select Product"
-                        classNames="bg-white/95 text-gray-800 border-0 text-left shadow-lg relative z-50 text-left"
-                        name="product"
-                        options={products}
-                        value={selectedProduct || undefined}
-                        onChange={(newValue) =>
-                          handleProductsChange(
-                            newValue as {
-                              label: string;
-                              value: string;
-                              color?: string;
-                              slug?: string;
-                            } | null,
-                          )
-                        }
-                        Option={CustomProductOptionWrapper}
-                        ValueContainer={CustomValueContainerWrapper}
-                        isDisabled={loadingProducts}
-                      />
-                    </div>
+          {truckType && (
+            <div className="space-y-6 transition-all duration-500 ease-in-out">
+              {/* Render Tanker UI for 'tanker', Flatbed UI for all other truck types */}
+              {truckType.value === 'tanker' ? (
+                // ...existing Tanker JSX...
+                <div className="space-y-4">
+                  <div className="text-center mb-4">
+                    <p className="text-white/80 text-sm">
+                      Start searching to compare, book and manage your frieght,
+                      all in one platform{' '}
+                    </p>
                   </div>
-
-                  <div className="space-y-3 group">
-                    <div className="flex items-center gap-2 text-white/90 text-sm font-semibold">
-                      <div className="p-1.5 bg-green-500/20 rounded-lg">
-                        <MapPin className="w-4 h-4 text-green-400" />
-                      </div>
-                      Location
-                    </div>
-                    <div className="transform transition-all duration-300 group-hover:scale-105 relative z-40">
-                      <CustomSelect
-                        placeholder="Select Location"
-                        classNames="bg-white/95 text-gray-800 border-0 text-left shadow-lg relative z-40"
-                        name="depot"
-                        options={depots}
-                        value={depot || undefined}
-                        onChange={(newValue) =>
-                          handleDepotChange(
-                            newValue as { label: string; value: string } | null,
-                          )
-                        }
-                        isDisabled={loadingDepots}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 group">
-                    <div className="flex items-center gap-2 text-white/90 text-sm font-semibold">
-                      <div className="p-1.5 bg-purple-500/20 rounded-lg">
-                        <Gauge className="w-4 h-4 text-purple-400" />
-                      </div>
-                      Truck Size
-                    </div>
-                    <div className="transform transition-all duration-300 group-hover:scale-105 relative z-30">
-                      <CustomSelect
-                        placeholder="Select Size"
-                        classNames="bg-white/95 text-gray-800 border-0 text-left shadow-lg relative z-30"
-                        name="truckSize"
-                        options={TRUCK_SIZES}
-                        value={selectedSize || undefined}
-                        onChange={(newValue) =>
-                          handleSizeChange(
-                            newValue as { label: string; value: string } | null,
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* For Flatbed: Show only Location (using states data) */}
-            {truckType.value === 'flatbed' && (
-              <div className="space-y-4">
-                <div className="text-center mb-4">
-                  <p className="text-white/80 text-sm">
-                    Start searching to compare, book and manage your frieght,
-                    all in one platform
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3 group">
-                    <div className="flex items-center gap-2 text-white/90 text-sm font-semibold">
-                      <div className="p-1.5 bg-green-500/20 rounded-lg">
-                        <MapPin className="w-4 h-4 text-green-400" />
-                      </div>
-                      State/Location
-                    </div>
-                    <div className="transform transition-all duration-300 group-hover:scale-105 relative z-50">
-                      <CustomSelect
-                        placeholder="Select State"
-                        classNames="bg-white/95 text-gray-800 border-0 text-left shadow-lg relative z-50"
-                        name="location"
-                        options={states}
-                        value={selectedState || undefined}
-                        onChange={(newValue) =>
-                          handleDepotChange(
-                            newValue as { label: string; value: string } | null,
-                          )
-                        }
-                        isDisabled={loadingState}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-end">
-                    <div className="w-full p-5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl border border-blue-400/30 backdrop-blur-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-400/20 rounded-lg">
-                          <Truck className="w-5 h-5 text-blue-300" />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                    <div className="space-y-3 group">
+                      <div className="flex items-center gap-2 text-white/90 text-sm font-semibold">
+                        <div className="p-1.5 bg-blue-500/20 rounded-lg">
+                          <Package className="w-4 h-4 text-blue-400" />
                         </div>
-                        <div>
-                          <p className="text-blue-200 text-sm font-medium">
-                            Versatile Transport
-                          </p>
-                          <p className="text-blue-300/80 text-xs">
-                            Perfect for any cargo type
-                          </p>
+                        Product
+                      </div>
+                      <div className="transform transition-all duration-300 group-hover:scale-105 relative z-50">
+                        <CustomSelect
+                          placeholder="Product"
+                          classNames="bg-white/95 text-gray-800 border-0 text-left shadow-lg relative z-50 text-left"
+                          name="product"
+                          options={products}
+                          value={selectedProduct || undefined}
+                          onChange={(newValue) =>
+                            handleProductsChange(
+                              newValue as {
+                                label: string;
+                                value: string;
+                                color?: string;
+                                slug?: string;
+                              } | null,
+                            )
+                          }
+                          Option={CustomProductOptionWrapper}
+                          ValueContainer={CustomValueContainerWrapper}
+                          isDisabled={loadingProducts}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 group">
+                      <div className="flex items-center gap-2 text-white/90 text-sm font-semibold">
+                        <div className="p-1.5 bg-green-500/20 rounded-lg">
+                          <MapPin className="w-4 h-4 text-green-400" />
+                        </div>
+                        Location
+                      </div>
+                      <div className="transform transition-all duration-300 group-hover:scale-105 relative z-40">
+                        <CustomSelect
+                          placeholder="Location"
+                          classNames="bg-white/95 text-gray-800 border-0 text-left shadow-lg relative z-40"
+                          name="depot"
+                          options={depots}
+                          value={depot || undefined}
+                          onChange={(newValue) =>
+                            handleDepotChange(
+                              newValue as { label: string; value: string } | null,
+                            )
+                          }
+                          isDisabled={loadingDepots}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 group">
+                      <div className="flex items-center gap-2 text-white/90 text-sm font-semibold">
+                        <div className="p-1.5 bg-purple-500/20 rounded-lg">
+                          <Gauge className="w-4 h-4 text-purple-400" />
+                        </div>
+                        Truck Size
+                      </div>
+                      <div className="transform transition-all duration-300 group-hover:scale-105 relative z-30">
+                        <CustomSelect
+                          placeholder="Select Size"
+                          classNames="bg-white/95 text-gray-800 border-0 text-left shadow-lg relative z-30"
+                          name="truckSize"
+                          options={TRUCK_SIZES}
+                          value={selectedSize || undefined}
+                          onChange={(newValue) =>
+                            handleSizeChange(
+                              newValue as { label: string; value: string } | null,
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                // ...existing Flatbed JSX, now for all non-tanker types...
+                <div className="space-y-4">
+                  <div className="text-center mb-4">
+                    <p className="text-white/80 text-sm">
+                      Start searching to compare, book and manage your frieght,
+                      all in one platform
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-3 group">
+                      <div className="flex items-center gap-2 text-white/90 text-sm font-semibold">
+                        <div className="p-1.5 bg-green-500/20 rounded-lg">
+                          <MapPin className="w-4 h-4 text-green-400" />
+                        </div>
+                        State/Location
+                      </div>
+                      <div className="transform transition-all duration-300 group-hover:scale-105 relative z-50">
+                        <CustomSelect
+                          placeholder="Select State"
+                          classNames="bg-white/95 text-gray-800 border-0 text-left shadow-lg relative z-50"
+                          name="location"
+                          options={states}
+                          value={selectedState || undefined}
+                          onChange={(newValue) =>
+                            handleDepotChange(
+                              newValue as { label: string; value: string } | null,
+                            )
+                          }
+                          isDisabled={loadingState}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-end">
+                      <div className="w-full p-5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl border border-blue-400/30 backdrop-blur-sm">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-400/20 rounded-lg">
+                            <Truck className="w-5 h-5 text-blue-300" />
+                          </div>
+                          <div>
+                            <p className="text-blue-200 text-sm font-medium">
+                              Versatile Transport
+                            </p>
+                            <p className="text-blue-300/80 text-xs">
+                              Perfect for any cargo type
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Search Button */}
-            <div className="pt-6 flex justify-center relative z-10">
-              <div className="relative group">
-                {areRequiredFieldsPresent && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-                )}
-                <CustomButton
-                  variant="glow"
-                  onClick={handleSearchTruckClick}
-                  leftIcon={<Search className="w-5 h-5" />}
-                  label="Search Trucks"
-                  width="w-full md:w-[320px]"
-                  height="h-16"
-                  loading={isSearching || isLoading}
-                  disabled={!areRequiredFieldsPresent}
-                  classNames={cn(
-                    'relative text-lg font-bold transition-all duration-300 rounded-2xl',
-                    areRequiredFieldsPresent
-                      ? 'hover:scale-105 hover:shadow-2xl transform'
-                      : 'opacity-60 cursor-not-allowed',
+              {/* Search Button */}
+              <div className="pt-6 flex justify-center relative z-10">
+                <div className="relative group">
+                  {areRequiredFieldsPresent && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
                   )}
-                />
+                  <CustomButton
+                    variant="glow"
+                    onClick={handleSearchTruckClick}
+                    leftIcon={<Search className="w-5 h-5" />}
+                    label="Search Trucks"
+                    width="w-full md:w-[320px]"
+                    height="h-16"
+                    loading={isSearching || isLoading}
+                    disabled={!areRequiredFieldsPresent}
+                    classNames={cn(
+                      'relative text-lg font-bold transition-all duration-300 rounded-2xl',
+                      areRequiredFieldsPresent
+                        ? 'hover:scale-105 hover:shadow-2xl transform'
+                        : 'opacity-60 cursor-not-allowed',
+                    )}
+                  />
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* Default State when no truck type selected */}
         {!truckType && (

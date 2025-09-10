@@ -2,6 +2,7 @@ import { requestHandler } from "@/utils/requestHandler"
 
 export interface FareCalculationRequest {
   truckCapacity: number;
+  truckCategory: string;
   truckType: string;
   deliveryState: string;
   deliveryLGA: string;

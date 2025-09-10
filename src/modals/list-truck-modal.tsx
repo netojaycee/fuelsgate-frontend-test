@@ -36,6 +36,7 @@ import {
   CustomProductOptionWrapper,
   CustomValueContainerWrapper,
 } from '@/features/dashboard/components/product-select-components';
+import { TRUCK_CATEGORY_OPTIONS } from '@/features/dashboard/components/BuyerCalculator';
 
 const sora = Sora({ subsets: ['latin'] });
 const LIST_TRUCK = 'list_truck';
@@ -118,7 +119,9 @@ const ListTruckModal = () => {
     CustomSelectOption | undefined
   >(undefined);
   // Truck age state
-  const [truckAge, setTruckAge] = useState<string>('');
+  const [truckCategory, setTruckCategory] = useState<
+    CustomSelectOption | undefined
+  >();
 
   // Flatbed specific state
   const [flatbedSubtype, setFlatbedSubtype] = useState<
@@ -177,6 +180,8 @@ const ListTruckModal = () => {
   const { mutateAsync: saveTruck, isPending: isSavingData } = useSaveTruck();
   const { mutateAsync: updateTruck, isPending: isSavingUpdatedData } =
     useUpdateTruck(openModal?.data?.truck?._id);
+
+  console.log(openModal?.data?.truck);
   const {
     setError,
     register,
@@ -191,7 +196,7 @@ const ListTruckModal = () => {
       deliveryType?: string;
       truckType: string;
       truckFuelType?: string;
-      truckAge?: string;
+      truckCategory?: string;
       currentState?: string;
       currentCity?: string;
       // flatbed fields
@@ -222,7 +227,7 @@ const ListTruckModal = () => {
 
       truckType: openModal?.data?.truck?.truckType || '',
       truckFuelType: openModal?.data?.truck?.truckFuelType || '',
-      truckAge: openModal?.data?.truck?.truckAge || '',
+      truckCategory: openModal?.data?.truck?.truckCategory || '',
       loadStatus: 'unloaded',
     },
   });
@@ -231,7 +236,7 @@ const ListTruckModal = () => {
       deliveryType?: string;
       truckType: string;
       truckFuelType?: string;
-      truckAge?: string;
+      truckCategory?: string;
     },
   ) => {
     try {
@@ -352,12 +357,9 @@ const ListTruckModal = () => {
     setTruckFuelType(value as CustomSelectOption);
   }, []);
 
-  const handleTruckAgeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setTruckAge(e.target.value);
-    },
-    [],
-  );
+  const handleTruckCategoryChange = useCallback((value: unknown) => {
+    setTruckCategory(value as CustomSelectOption);
+  }, []);
 
   const handleTruckTypeChange = useCallback((value: unknown) => {
     console.log('Truck type changed:', value);
@@ -546,12 +548,16 @@ const ListTruckModal = () => {
 
   useEffect(() => {
     if (truckType)
-      setValue('truckType', truckType.value as 'tanker' | 'flatbed' | 'stepdeck' | 'dropdeck');
+      setValue(
+        'truckType',
+        truckType.value as 'tanker' | 'flatbed' | 'stepdeck' | 'dropdeck',
+      );
 
-    if (truckFuelType) setValue('truckFuelType', truckFuelType.value as 'diesel' | 'cng');
-    if (truckAge !== undefined) setValue('truckAge', truckAge);
-  }, [truckType, truckFuelType, truckAge, setValue]);
-
+    if (truckFuelType)
+      setValue('truckFuelType', truckFuelType.value as 'diesel' | 'cng');
+    if (truckCategory)
+      setValue('truckCategory', truckCategory.value as 'A++' | 'A' | 'B' | 'C');
+  }, [truckType, truckFuelType, truckCategory, setValue]);
 
   // bind flatbed fields to form values
   useEffect(() => {
@@ -754,6 +760,19 @@ const ListTruckModal = () => {
       );
       if (_selectedTruckType) setTruckType(_selectedTruckType);
 
+      // truck fuel type
+      const _selectedTruckFuelType = TRUCK_FUEL_TYPES.find(
+        (item: CustomSelectOption) => item.value === editingTruck.truckFuelType,
+      );
+
+      if (_selectedTruckFuelType) setTruckFuelType(_selectedTruckFuelType);
+
+      // truck category
+      const _selectedTruckCategory = TRUCK_CATEGORY_OPTIONS.find(
+        (item: CustomSelectOption) => item.value === editingTruck.truckCategory,
+      );
+      if (_selectedTruckCategory) setTruckCategory(_selectedTruckCategory);
+
       // infer or use deliveryType - prefer explicit truckNumber prefix if present
       let inferredDeliveryType: string | undefined = editingTruck.deliveryType;
 
@@ -942,7 +961,7 @@ const ListTruckModal = () => {
                 onChange={handleTruckTypeChange}
                 error={errors.truckType?.message}
                 classNames="relative z-50"
-                placeholder="Select truck type"
+                placeholder="truck type"
               />
             </div>
 
@@ -990,6 +1009,7 @@ const ListTruckModal = () => {
                 onChange={handleDeliveryTypeChange}
                 error={errors.deliveryType?.message}
                 classNames="relative z-35"
+                placeholder="delivery type"
               />
             </div>
 
@@ -1002,20 +1022,34 @@ const ListTruckModal = () => {
                 onChange={handleTruckFuelTypeChange}
                 error={errors.truckFuelType?.message}
                 classNames="relative z-30 mt-2"
-                placeholder="Select fuel type"
+                placeholder="fuel type"
               />
             </div>
             <div className="relative z-30">
-              <CustomInput
+              {/* <CustomInput
                 type="number"
-                name="truckAge"
-                label="Truck Age (years)"
-                value={truckAge}
-                onChange={handleTruckAgeChange}
-                error={errors.truckAge?.message}
+                name="truckCategory"
+                label="Truck Category"
+                value={truckCategory}
+                onChange={handleTruckCategoryChange}
+                error={errors.truckCategory?.message}
                 min="0"
-                placeholder="Enter truck age in years"
+                placeholder="Enter truck category"
                 classNames="mt-2"
+              /> */}
+              <CustomSelect
+                label="Truck Category"
+                name="truckCategory"
+                options={TRUCK_CATEGORY_OPTIONS.map((opt) => ({
+                  label: `${opt.label} — ${opt.description} (${opt.ageRange})`,
+                  value: opt.value,
+                }))}
+                value={truckCategory}
+                onChange={(value) =>
+                  setTruckCategory(value as CustomSelectOption)
+                }
+                placeholder="Truck category"
+                classNames="border-gray-300 mt-2 relative z-30"
               />
               <div className="text-xs text-gray-500 mt-1">
                 Note: Older trucks tend to consume more fuel.
@@ -1023,7 +1057,7 @@ const ListTruckModal = () => {
             </div>
             {truckType?.value === 'tanker' && (
               <>
-                <div className="relative z-30">
+                <div className="relative z-25">
                   <CustomSelect
                     name="loadStatus"
                     label="Load Status"
@@ -1033,10 +1067,10 @@ const ListTruckModal = () => {
                       setLoadStatus(value as CustomSelectOption)
                     }
                     error={errors.loadStatus?.message}
-                    classNames="relative z-30"
+                    classNames="relative z-25"
                   />
                 </div>
-                <div className="relative z-30">
+                <div className="relative z-25">
                   <CustomSelect
                     name="size"
                     label="Capacity"
@@ -1045,7 +1079,7 @@ const ListTruckModal = () => {
                     onChange={handleCapacityChange}
                     error={errors.capacity?.message}
                     ValueContainer={LitreValueContainerWrapper}
-                    classNames="relative z-30"
+                    classNames="relative z-25"
                   />
                 </div>
                 {showCustomCapacity && (
@@ -1158,7 +1192,7 @@ const ListTruckModal = () => {
                         />
                       </div>
 
-                      <div className="relative z-30">
+                      <div className="relative z-25">
                         <CustomSelect
                           label="Preferred Cargo Types"
                           name="preferredCargoTypes"
@@ -1167,7 +1201,7 @@ const ListTruckModal = () => {
                           value={preferredCargoTypes}
                           onChange={handlePreferredCargoChange}
                           error={errors.preferredCargoTypes?.message}
-                          classNames="relative z-30"
+                          classNames="relative z-25"
                         />
                       </div>
 

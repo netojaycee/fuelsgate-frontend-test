@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import useTruckListingHook from '../hooks/useTruckListing.hook';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/atoms/text';
 import { Heading } from '@/components/atoms/heading';
@@ -44,13 +45,10 @@ const Calculator = () => {
   const { useFetchStates, useFetchStateLGA } = useStateHook();
 
   // State management
-  const [truckType, setTruckType] = useState<CustomSelectOption>({
-    label: 'Tanker',
-    value: 'tanker',
-  });
-  const [truckCapacity, setTruckCapacity] = useState<
-    CustomSelectOption | undefined
-  >();
+  const [selectedTruck, setSelectedTruck] = useState<any>(undefined);
+  const [truckType, setTruckType] = useState<string | undefined>(undefined);
+  const [truckCategory, setTruckCategory] = useState<string | undefined>(undefined);
+  const [truckCapacity, setTruckCapacity] = useState<number | undefined>(undefined);
   const [deliveryState, setDeliveryState] = useState<
     CustomSelectOption | undefined
   >();
@@ -61,14 +59,14 @@ const Calculator = () => {
   const [calculationResult, setCalculationResult] = useState<any>(null);
 
   // Fetch data
-  const { data: loadPointsRes, isLoading: loadingLoadPoints } =
-    useFetchLoadPoints;
+  const { data: loadPointsRes, isLoading: loadingLoadPoints } = useFetchLoadPoints;
   const { data: stateRes, isLoading: loadingStates } = useFetchStates;
-  const { data: lgaRes, isLoading: loadingLGA } = useFetchStateLGA(
-    deliveryState?.value,
-  );
-  const { mutateAsync: calculateFare, isPending: isCalculating } =
-    useCalculateFare();
+  const { data: lgaRes, isLoading: loadingLGA } = useFetchStateLGA(deliveryState?.value);
+  const { mutateAsync: calculateFare, isPending: isCalculating } = useCalculateFare();
+  const {
+    userTrucks,
+    isLoadingUserTrucks,
+  } = useTruckListingHook();
 
   // Formatted data for dropdowns
   const loadPoints = useMemo(() => {
@@ -101,50 +99,88 @@ const Calculator = () => {
     return [];
   }, [lgaRes]);
 
+  //   const truckOptions = useMemo(() => {
+  //   if (!userTrucks?.pages) return [];
+  //   // Flatten all pages
+  //   return userTrucks.pages.flatMap((page: any) =>
+  //     (page.data.trucks || []).map((truck: any) => ({
+  //       label: `${truck.truckNumber} (${truck.truckType})`,
+  //       value: truck._id,
+  //       truckType: truck.truckType,
+  //       truckCategory: truck.truckCategory,
+  //       truckCapacity: truck.truckCapacity,
+  //       raw: truck,
+  //     }))
+  //   );
+  // }, [userTrucks]);
+
+  // Trucks dropdown options
+  const truckOptions = useMemo(() => {
+    if (!userTrucks?.pages) return [];
+    // Flatten all pages and filter only tanker trucks
+    return userTrucks.pages.flatMap((page: any) =>
+      (page.data.trucks || [])
+        .filter((truck: any) => truck.truckType === 'tanker')
+        .map((truck: any) => ({
+          label: `${truck.truckNumber} (${truck.truckType})`,
+          value: truck._id,
+          truckType: truck.truckType,
+          truckCategory: truck.truckCategory,
+          truckCapacity: truck.truckCapacity,
+          raw: truck,
+        }))
+    );
+  }, [userTrucks]);
+
   // Handlers
   const handleStateChange = useCallback((value: unknown) => {
     setDeliveryState(value as CustomSelectOption | undefined);
-    setDeliveryLGA(undefined); // Reset LGA when state changes
+    setDeliveryLGA(undefined);
   }, []);
 
   const handleLGAChange = useCallback((value: unknown) => {
     setDeliveryLGA(value as CustomSelectOption | undefined);
   }, []);
 
+  // When truck changes, update truckType, truckCategory, truckCapacity
+  const handleTruckChange = useCallback((option: any) => {
+    setSelectedTruck(option);
+    setTruckType(option?.truckType);
+    setTruckCategory(option?.truckCategory);
+    setTruckCapacity(option?.raw?.capacity);
+  }, []);
+
   const handleCalculate = useCallback(async () => {
-    if (!truckCapacity || !deliveryState || !deliveryLGA || !loadPoint) {
+    if (!selectedTruck || !deliveryState || !deliveryLGA || !loadPoint) {
       return;
     }
-
     try {
+      // console.log({
+      //   truckCapacity: truckCapacity,
+      //   truckType: truckType,
+      //   truckCategory: truckCategory,
+      //   deliveryState: deliveryState.value,
+      //   deliveryLGA: deliveryLGA.value,
+      //   loadPoint: loadPoint.value,
+      // })
       const result = await calculateFare({
-        truckCapacity: parseInt(truckCapacity.value),
-        truckType: truckType.value,
+        truckCapacity: truckCapacity as number,
+        truckType: truckType as string,
+        truckCategory: truckCategory as string,
         deliveryState: deliveryState.value,
         deliveryLGA: deliveryLGA.value,
         loadPoint: loadPoint.value,
       });
-
-      //   console.log(result, "Gg")
-
       if (result.statusCode === 200) {
         setCalculationResult(result.data);
       }
     } catch (error) {
       console.error('Calculation failed:', error);
     }
-  }, [
-    truckCapacity,
-    deliveryState,
-    deliveryLGA,
-    loadPoint,
-    truckType,
-    calculateFare,
-  ]);
+  }, [selectedTruck, truckCapacity, truckType, truckCategory, deliveryState, deliveryLGA, loadPoint, calculateFare]);
 
-  const isFormValid =
-    truckCapacity && deliveryState && deliveryLGA && loadPoint;
-
+  const isFormValid = selectedTruck && deliveryState && deliveryLGA && loadPoint;
+// console.log(selectedTruck)
   return (
     <div className="space-y-6 p-4">
       {/* Header */}
@@ -173,31 +209,23 @@ const Calculator = () => {
               </Text>
             </div>
 
-            {/* Truck Type */}
+            {/* Truck Select */}
             <div>
               <CustomSelect
-                label="Truck Type"
-                name="truckType"
-                options={TRUCK_TYPES}
-                value={truckType}
-                onChange={(value) => setTruckType(value as any)}
+                label="Truck"
+                name="selectedTruck"
+                options={truckOptions}
+                value={selectedTruck}
+                onChange={handleTruckChange}
+                placeholder={isLoadingUserTrucks ? "Loading trucks..." : "truck"}
+                isDisabled={isLoadingUserTrucks}
                 classNames="border-gray-300"
               />
-            </div>
-
-            {/* Truck Capacity */}
-            <div>
-              <CustomSelect
-                label="Truck Capacity"
-                name="truckCapacity"
-                options={TRUCK_SIZES}
-                value={truckCapacity}
-                onChange={(value) =>
-                  setTruckCapacity(value as CustomSelectOption | undefined)
-                }
-                placeholder="Select truck capacity"
-                classNames="border-gray-300"
-              />
+              {selectedTruck && (
+                <div className="mt-2 text-xs text-gray-600">
+                  <span className="font-semibold">Type:</span> {truckType} | <span className="font-semibold">Category:</span> {truckCategory} | <span className="font-semibold">Capacity:</span> {truckCapacity} Ltrs
+                </div>
+              )}
             </div>
 
             {/* Delivery Location */}
@@ -209,7 +237,7 @@ const Calculator = () => {
                   options={states}
                   value={deliveryState}
                   onChange={handleStateChange}
-                  placeholder="Select state"
+                  placeholder="state"
                   isDisabled={loadingStates}
                   classNames="border-gray-300"
                 />
@@ -221,7 +249,7 @@ const Calculator = () => {
                   options={lgas}
                   value={deliveryLGA}
                   onChange={handleLGAChange}
-                  placeholder="Select LGA"
+                  placeholder="LGA"
                   isDisabled={loadingLGA || !deliveryState}
                   classNames="border-gray-300"
                 />
@@ -238,7 +266,7 @@ const Calculator = () => {
                 onChange={(value) =>
                   setLoadPoint(value as CustomSelectOption | undefined)
                 }
-                placeholder="Select load point"
+                placeholder="load point"
                 isDisabled={loadingLoadPoints}
                 classNames="border-gray-300"
               />
@@ -286,7 +314,7 @@ const Calculator = () => {
                       ₦{formatNumber(calculationResult.maxFarePerLitre)}
                     </span>
                   </div>
-                  <Text variant="pxs" color="text-green-600">
+                  <Text variant="ps" color="text-green-600">
                     Total: ₦{formatNumber(calculationResult.totalMin)} - ₦
                     {formatNumber(calculationResult.totalMax)}
                   </Text>
@@ -308,7 +336,7 @@ const Calculator = () => {
 
                 <div className="grid grid-cols-1 gap-3">
                   {/* Distance */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex md:flex-row flex-col md:items-center md:justify-between p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Route className="w-4 h-4 text-gray-500" />
                       <Text variant="ps" color="text-gray-700">
@@ -318,110 +346,79 @@ const Calculator = () => {
                     <Text
                       variant="ps"
                       fontWeight="semibold"
-                      color="text-gray-900"
+                      color="text-gray-900 whitespace-nowrap text-right"
                     >
                       {formatNumber(calculationResult.breakdowns.distance)} km
                     </Text>
                   </div>
 
                   {/* Freight Rate */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex md:flex-row flex-col md:items-center md:justify-between p-3 bg-gray-50 rounded-lg">
                     <Text variant="ps" color="text-gray-700">
                       Freight Rate
                     </Text>
                     <Text
                       variant="ps"
                       fontWeight="semibold"
-                      color="text-gray-900"
+                      color="text-gray-900 whitespace-nowrap text-right"
                     >
-                      ₦
-                      {formatNumber(
-                        calculationResult.breakdowns.freightRateMin,
-                      )}{' '}
-                      - ₦
-                      {formatNumber(
-                        calculationResult.breakdowns.freightRateMax,
-                      )}
+                      ₦{formatNumber(calculationResult.breakdowns.freightRateMin)} - ₦{formatNumber(calculationResult.breakdowns.freightRateMax)}
                     </Text>
                   </div>
 
                   {/* Diesel Delivery Cost */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex md:flex-row flex-col md:items-center md:justify-between p-3 bg-gray-50 rounded-lg">
                     <Text variant="ps" color="text-gray-700">
                       Diesel Delivery Cost
                     </Text>
                     <Text
                       variant="ps"
                       fontWeight="semibold"
-                      color="text-gray-900"
+                      color="text-gray-900 whitespace-nowrap text-right"
                     >
-                      ₦
-                      {formatNumber(
-                        calculationResult.breakdowns.dieselDeliveryCostMin,
-                      )}{' '}
-                      - ₦
-                      {formatNumber(
-                        calculationResult.breakdowns.dieselDeliveryCostMax,
-                      )}
+                      ₦{formatNumber(calculationResult.breakdowns.dieselDeliveryCostMin)} - ₦{formatNumber(calculationResult.breakdowns.dieselDeliveryCostMax)}
                     </Text>
                   </div>
 
                   {/* Diesel Quantity */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex md:flex-row flex-col md:items-center md:justify-between p-3 bg-gray-50 rounded-lg">
                     <Text variant="ps" color="text-gray-700">
                       Diesel Quantity (Round Trip)
                     </Text>
                     <Text
                       variant="ps"
                       fontWeight="semibold"
-                      color="text-gray-900"
+                      color="text-gray-900 whitespace-nowrap text-right"
                     >
-                      {formatNumber(
-                        calculationResult.breakdowns.dieselQuantityMin,
-                      )}{' '}
-                      -{' '}
-                      {formatNumber(
-                        calculationResult.breakdowns.dieselQuantityMax,
-                      )}{' '}
-                      Ltrs
+                      {formatNumber(calculationResult.breakdowns.dieselQuantityMin)} - {formatNumber(calculationResult.breakdowns.dieselQuantityMax)} Ltrs
                     </Text>
                   </div>
 
                   {/* Variable Cost per KM */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex md:flex-row flex-col md:items-center md:justify-between p-3 bg-gray-50 rounded-lg">
                     <Text variant="ps" color="text-gray-700">
                       Variable Cost/KM
                     </Text>
                     <Text
                       variant="ps"
                       fontWeight="semibold"
-                      color="text-gray-900"
+                      color="text-gray-900 whitespace-nowrap text-right"
                     >
-                      ₦
-                      {formatNumber(
-                        calculationResult.breakdowns.variableCostPerKmMin,
-                      )}{' '}
-                      - ₦
-                      {formatNumber(
-                        calculationResult.breakdowns.variableCostPerKmMax,
-                      )}
+                      ₦{formatNumber(calculationResult.breakdowns.variableCostPerKmMin)} - ₦{formatNumber(calculationResult.breakdowns.variableCostPerKmMax)}
                     </Text>
                   </div>
 
                   {/* Fixed Cost per KM */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex md:flex-row flex-col md:items-center md:justify-between p-3 bg-gray-50 rounded-lg">
                     <Text variant="ps" color="text-gray-700">
                       Fixed Cost/KM
                     </Text>
                     <Text
                       variant="ps"
                       fontWeight="semibold"
-                      color="text-gray-900"
+                      color="text-gray-900 whitespace-nowrap text-right"
                     >
-                      ₦
-                      {formatNumber(
-                        calculationResult.breakdowns.fixedCostPerKm,
-                      )}
+                      ₦{formatNumber(calculationResult.breakdowns.fixedCostPerKm)}
                     </Text>
                   </div>
                 </div>

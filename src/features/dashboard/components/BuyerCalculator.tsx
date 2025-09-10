@@ -21,12 +21,41 @@ const TRUCK_TYPES = [
   { label: 'Drop Deck', value: 'drop_deck' },
 ];
 
+// Truck category options
+export const TRUCK_CATEGORY_OPTIONS = [
+  {
+    label: 'Category A++',
+    value: 'A++',
+    description: 'CNG Trucks',
+    ageRange: 'CNG only',
+  },
+  {
+    label: 'Category A',
+    value: 'A',
+    description: 'Modern Trucks',
+    ageRange: 'Less than 7 years old',
+  },
+  {
+    label: 'Category B',
+    value: 'B',
+    description: 'Mid-Age Trucks',
+    ageRange: '7 to 15 years old',
+  },
+  {
+    label: 'Category C',
+    value: 'C',
+    description: 'Older Trucks',
+    ageRange: '15+ years old',
+  },
+];
+
 export default function BuyerCalculator() {
   const { useFetchLoadPoints, useCalculateFare } = useTransportFareHook();
   const { useFetchStates, useFetchStateLGA } = useStateHook();
 
   // State management
   const [truckType, setTruckType] = useState<CustomSelectOption | undefined>();
+  const [truckCategory, setTruckCategory] = useState<CustomSelectOption | undefined>();
   const [truckCapacity, setTruckCapacity] = useState<CustomSelectOption | undefined>();
   const [destinationState, setDestinationState] = useState<CustomSelectOption | undefined>();
   const [destinationLGA, setDestinationLGA] = useState<CustomSelectOption | undefined>();
@@ -81,13 +110,14 @@ export default function BuyerCalculator() {
   }, []);
 
   const handleCalculate = useCallback(async () => {
-    if (!truckCapacity || !destinationState || !destinationLGA || !loadPoint || !truckType) {
+    if (!truckCapacity || !destinationState || !truckCategory || !destinationLGA || !loadPoint || !truckType) {
       return;
     }
     try {
       const result = await calculateFare({
         truckCapacity: parseInt(truckCapacity.value),
         truckType: truckType.value,
+        truckCategory: truckCategory.value,
         deliveryState: destinationState.value,
         deliveryLGA: destinationLGA.value,
         loadPoint: loadPoint.value,
@@ -98,9 +128,9 @@ export default function BuyerCalculator() {
     } catch (error) {
       setFareRange(null);
     }
-  }, [truckCapacity, destinationState, destinationLGA, loadPoint, truckType, calculateFare]);
+  }, [truckCapacity, truckCategory, destinationState, destinationLGA, loadPoint, truckType, calculateFare]);
 
-  const isFormValid = truckCapacity && destinationState && destinationLGA && loadPoint && truckType;
+  const isFormValid = truckCapacity && destinationState && destinationLGA && loadPoint && truckType && truckCategory;
 
   return (
     <div className="space-y-6 p-4">
@@ -137,6 +167,20 @@ export default function BuyerCalculator() {
             classNames="border-gray-300"
           />
 
+          {/* Truck Category */}
+          <CustomSelect
+            label="Truck Category"
+            name="truckCategory"
+            options={TRUCK_CATEGORY_OPTIONS.map(opt => ({
+              label: `${opt.label} — ${opt.description} (${opt.ageRange})`,
+              value: opt.value,
+            }))}
+            value={truckCategory}
+            onChange={(value) => setTruckCategory(value as CustomSelectOption)}
+            placeholder="truck category"
+            classNames="border-gray-300"
+          />
+
           {/* Truck Capacity */}
           <CustomSelect
             label="Truck Capacity"
@@ -144,7 +188,7 @@ export default function BuyerCalculator() {
             options={TRUCK_SIZES}
             value={truckCapacity}
             onChange={(value) => setTruckCapacity(value as CustomSelectOption)}
-            placeholder="Select truck capacity"
+            placeholder="truck capacity"
             classNames="border-gray-300"
           />
 

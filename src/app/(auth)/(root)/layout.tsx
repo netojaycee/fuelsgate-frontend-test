@@ -20,12 +20,13 @@ export default function AuthLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="relative flex items-center gap-3 w-full">
+    <div className="relative flex md:flex-row flex-col md:items-center gap-3 w-full">
       <div className="relative w-1/2 hidden lg:block h-full bg-white p-3">
         <div className="relative bg-[url('/images/AuthBg.svg')] bg-cover bg-no-repeat bg-top-center h-fit min-h-full w-full rounded-[30px]">
           <div className="relative flex flex-col gap-5 bg-[url('/images/card.svg')] bg-cover bg-no-repeat bg-top-center h-fit !min-h-screen w-full p-14 pb-10">
-            <Image src={whiteLogo} alt="White Logo" width={99} height={66} />
-
+            <Link href={'/'} className="text-blue-tone-400 hover:underline">
+              <Image src={whiteLogo} alt="White Logo" width={99} height={66} />
+            </Link>
             <div className="max-w-[562px] mt-20">
               <Heading
                 variant="dl"
@@ -62,6 +63,9 @@ export default function AuthLayout({
           </div>
         </div>
       </div>
+       <Link href={'/'} className="text-blue-tone-400 hover:underline p-4 md:hidden ">
+              <Image src={GoldLogo} alt="White Logo" width={99} height={66} />
+            </Link>
       <div className="relative h-full flex flex-col w-full lg:w-1/2 py-10 px-3.5">
         {children}
         <div className="flex items-center justify-end gap-7 mt-14 lg:mr-14">

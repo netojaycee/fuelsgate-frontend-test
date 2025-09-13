@@ -24,7 +24,10 @@ import {
 import { cn } from '@/lib/utils';
 
 // Truck type options (only tanker for now)
-const TRUCK_TYPES = [{ label: 'Tanker', value: 'tanker' }];
+const TRUCK_TYPES = [ { label: 'Tanker', value: 'tanker' },
+  { label: 'Flatbed', value: 'flatbed' },
+  { label: 'SideWall', value: 'sidewall' },
+  { label: 'Lowbed', value: 'lowbed' }];
 
 interface CalculationBreakdown {
   freightRateMin: number;
@@ -57,6 +60,7 @@ const Calculator = () => {
   >();
   const [loadPoint, setLoadPoint] = useState<CustomSelectOption | undefined>();
   const [calculationResult, setCalculationResult] = useState<any>(null);
+  const [fuelPrice, setFuelPrice] = useState<number | undefined>(undefined);
 
   // Fetch data
   const { data: loadPointsRes, isLoading: loadingLoadPoints } = useFetchLoadPoints;
@@ -99,38 +103,38 @@ const Calculator = () => {
     return [];
   }, [lgaRes]);
 
-  //   const truckOptions = useMemo(() => {
-  //   if (!userTrucks?.pages) return [];
-  //   // Flatten all pages
-  //   return userTrucks.pages.flatMap((page: any) =>
-  //     (page.data.trucks || []).map((truck: any) => ({
-  //       label: `${truck.truckNumber} (${truck.truckType})`,
-  //       value: truck._id,
-  //       truckType: truck.truckType,
-  //       truckCategory: truck.truckCategory,
-  //       truckCapacity: truck.truckCapacity,
-  //       raw: truck,
-  //     }))
-  //   );
-  // }, [userTrucks]);
-
-  // Trucks dropdown options
-  const truckOptions = useMemo(() => {
+    const truckOptions = useMemo(() => {
     if (!userTrucks?.pages) return [];
-    // Flatten all pages and filter only tanker trucks
+    // Flatten all pages
     return userTrucks.pages.flatMap((page: any) =>
-      (page.data.trucks || [])
-        .filter((truck: any) => truck.truckType === 'tanker')
-        .map((truck: any) => ({
-          label: `${truck.truckNumber} (${truck.truckType})`,
-          value: truck._id,
-          truckType: truck.truckType,
-          truckCategory: truck.truckCategory,
-          truckCapacity: truck.truckCapacity,
-          raw: truck,
-        }))
+      (page.data.trucks || []).map((truck: any) => ({
+        label: `${truck.truckNumber} (${truck.truckType})`,
+        value: truck._id,
+        truckType: truck.truckType,
+        truckCategory: truck.truckCategory,
+        truckCapacity: truck.truckCapacity,
+        raw: truck,
+      }))
     );
   }, [userTrucks]);
+
+  // Trucks dropdown options
+  // const truckOptions = useMemo(() => {
+  //   if (!userTrucks?.pages) return [];
+  //   // Flatten all pages and filter only tanker trucks
+  //   return userTrucks.pages.flatMap((page: any) =>
+  //     (page.data.trucks || [])
+  //       .filter((truck: any) => truck.truckType === 'tanker')
+  //       .map((truck: any) => ({
+  //         label: `${truck.truckNumber} (${truck.truckType})`,
+  //         value: truck._id,
+  //         truckType: truck.truckType,
+  //         truckCategory: truck.truckCategory,
+  //         truckCapacity: truck.truckCapacity,
+  //         raw: truck,
+  //       }))
+  //   );
+  // }, [userTrucks]);
 
   // Handlers
   const handleStateChange = useCallback((value: unknown) => {
@@ -144,10 +148,11 @@ const Calculator = () => {
 
   // When truck changes, update truckType, truckCategory, truckCapacity
   const handleTruckChange = useCallback((option: any) => {
-    setSelectedTruck(option);
-    setTruckType(option?.truckType);
-    setTruckCategory(option?.truckCategory);
-    setTruckCapacity(option?.raw?.capacity);
+  setSelectedTruck(option);
+  setTruckType(option?.truckType);
+  setTruckCategory(option?.truckCategory);
+  setTruckCapacity(option?.raw?.capacity);
+  setFuelPrice(undefined); // reset fuel price when truck changes
   }, []);
 
   const handleCalculate = useCallback(async () => {
@@ -155,14 +160,6 @@ const Calculator = () => {
       return;
     }
     try {
-      // console.log({
-      //   truckCapacity: truckCapacity,
-      //   truckType: truckType,
-      //   truckCategory: truckCategory,
-      //   deliveryState: deliveryState.value,
-      //   deliveryLGA: deliveryLGA.value,
-      //   loadPoint: loadPoint.value,
-      // })
       const result = await calculateFare({
         truckCapacity: truckCapacity as number,
         truckType: truckType as string,
@@ -170,6 +167,7 @@ const Calculator = () => {
         deliveryState: deliveryState.value,
         deliveryLGA: deliveryLGA.value,
         loadPoint: loadPoint.value,
+        fuelPricePerLitre: fuelPrice as number,
       });
       if (result.statusCode === 200) {
         setCalculationResult(result.data);
@@ -177,7 +175,7 @@ const Calculator = () => {
     } catch (error) {
       console.error('Calculation failed:', error);
     }
-  }, [selectedTruck, truckCapacity, truckType, truckCategory, deliveryState, deliveryLGA, loadPoint, calculateFare]);
+  }, [selectedTruck, truckCapacity, truckType, truckCategory, deliveryState, deliveryLGA, loadPoint, fuelPrice, calculateFare]);
 
   const isFormValid = selectedTruck && deliveryState && deliveryLGA && loadPoint;
 // console.log(selectedTruck)
@@ -217,15 +215,52 @@ const Calculator = () => {
                 options={truckOptions}
                 value={selectedTruck}
                 onChange={handleTruckChange}
-                placeholder={isLoadingUserTrucks ? "Loading trucks..." : "truck"}
+                placeholder={isLoadingUserTrucks ? "Loading trucks..." : "Truck"}
                 isDisabled={isLoadingUserTrucks}
                 classNames="border-gray-300"
               />
               {selectedTruck && (
                 <div className="mt-2 text-xs text-gray-600">
-                  <span className="font-semibold">Type:</span> {truckType} | <span className="font-semibold">Category:</span> {truckCategory} | <span className="font-semibold">Capacity:</span> {truckCapacity} Ltrs
+                  <span className="font-semibold">Type:</span> {truckType} |{" "}
+                  <span className="font-semibold">Category:</span> {truckCategory} |{" "}
+                  <span className="font-semibold">Capacity:</span> {truckCapacity}{" "}
+                  {truckType === "tanker" ? "Ltrs" : "T"}
                 </div>
               )}
+            </div>
+
+            {/* Fuel Price Input */}
+            {selectedTruck && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {selectedTruck?.raw?.fuelType === 'cng' ? 'CNG Price (₦/Litre)' : 'Diesel Price (₦/Litre)'}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  step="any"
+                  value={fuelPrice === undefined ? '' : fuelPrice}
+                  onChange={e => setFuelPrice(e.target.value ? Number(e.target.value) : undefined)}
+                  placeholder={selectedTruck?.raw?.fuelType === 'cng' ? 'Enter CNG price' : 'Enter diesel price'}
+                  className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            )}
+
+              {/* Load Point */}
+            <div>
+              <CustomSelect
+                label="Load Point"
+                name="loadPoint"
+                options={loadPoints}
+                value={loadPoint}
+                onChange={(value) =>
+                  setLoadPoint(value as CustomSelectOption | undefined)
+                }
+                placeholder="Load point"
+                isDisabled={loadingLoadPoints}
+                classNames="border-gray-300"
+              />
             </div>
 
             {/* Delivery Location */}
@@ -237,7 +272,7 @@ const Calculator = () => {
                   options={states}
                   value={deliveryState}
                   onChange={handleStateChange}
-                  placeholder="state"
+                  placeholder="State"
                   isDisabled={loadingStates}
                   classNames="border-gray-300"
                 />
@@ -256,21 +291,7 @@ const Calculator = () => {
               </div>
             </div>
 
-            {/* Load Point */}
-            <div>
-              <CustomSelect
-                label="Load Point (Destination)"
-                name="loadPoint"
-                options={loadPoints}
-                value={loadPoint}
-                onChange={(value) =>
-                  setLoadPoint(value as CustomSelectOption | undefined)
-                }
-                placeholder="load point"
-                isDisabled={loadingLoadPoints}
-                classNames="border-gray-300"
-              />
-            </div>
+          
 
             {/* Calculate Button */}
             <CustomButton

@@ -45,8 +45,8 @@ const LIST_TRUCK = 'list_truck';
 const TRUCK_TYPES = [
   { label: 'Tanker', value: 'tanker' },
   { label: 'Flatbed', value: 'flatbed' },
-  { label: 'Step Deck', value: 'stepdeck' },
-  { label: 'Drop Deck', value: 'dropdeck' },
+  { label: 'SideWall', value: 'sidewall' },
+  { label: 'Lowbed', value: 'lowbed' },
 ];
 
 const TRUCK_FUEL_TYPES = [

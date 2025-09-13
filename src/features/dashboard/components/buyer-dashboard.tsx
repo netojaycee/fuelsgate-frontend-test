@@ -27,8 +27,10 @@ const sora = Sora({ subsets: ['latin'] });
 
 // Truck type options
 const TRUCK_TYPES = [
-  { label: 'Tanker', value: 'tanker' },
-  { label: 'Flat Bed', value: 'flatbed' },
+   { label: 'Tanker', value: 'tanker' },
+  { label: 'Flatbed', value: 'flatbed' },
+  { label: 'SideWall', value: 'sidewall' },
+  { label: 'Lowbed', value: 'lowbed' },
 ];
 
 // Flatbed location options (hardcoded Lagos for now)

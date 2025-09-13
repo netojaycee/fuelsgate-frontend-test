@@ -15,10 +15,10 @@ import { Calculator as CalculatorIcon, Package } from 'lucide-react';
 
 // Truck type options (same as transporter)
 const TRUCK_TYPES = [
-  { label: 'Tanker', value: 'tanker' },
+   { label: 'Tanker', value: 'tanker' },
   { label: 'Flatbed', value: 'flatbed' },
-  { label: 'Step Deck', value: 'step_deck' },
-  { label: 'Drop Deck', value: 'drop_deck' },
+  { label: 'SideWall', value: 'sidewall' },
+  { label: 'Lowbed', value: 'lowbed' },
 ];
 
 // Truck category options

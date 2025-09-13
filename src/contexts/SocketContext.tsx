@@ -415,7 +415,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log('Order status updated:', order);
       });
     },
-    [userId, userToken, clearReconnectInterval],
+    // [userId, userToken, clearReconnectInterval],
+    [userId, clearReconnectInterval],
   );
 
   // Rest of your socket connection logic...

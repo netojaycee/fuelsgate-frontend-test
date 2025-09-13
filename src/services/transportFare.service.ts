@@ -4,6 +4,7 @@ export interface FareCalculationRequest {
   truckCapacity: number;
   truckCategory: string;
   truckType: string;
+  fuelPricePerLitre?: number;
   deliveryState: string;
   deliveryLGA: string;
   loadPoint: string;

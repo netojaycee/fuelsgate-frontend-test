@@ -15,8 +15,8 @@ import React, { Suspense } from 'react';
 const TRUCK_TYPES = [
   { label: 'Tanker', value: 'tanker', icon: <Truck className="w-7 h-7 text-yellow-400" /> },
   { label: 'Flat Bed', value: 'flatbed', icon: <Truck className="w-7 h-7 text-orange-400" /> },
-  { label: 'Step Deck', value: 'stepdeck', icon: <Package className="w-7 h-7 text-blue-400" /> },
-  { label: 'Drop Deck', value: 'dropdeck', icon: <Gauge className="w-7 h-7 text-purple-400" /> },
+  { label: 'Sidewall', value: 'sidewall', icon: <Package className="w-7 h-7 text-blue-400" /> },
+  { label: 'Lowbed', value: 'lowbed', icon: <Gauge className="w-7 h-7 text-purple-400" /> },
 ];
 
 // Search filter loader placeholder for Suspense fallback

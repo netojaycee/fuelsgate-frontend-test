@@ -7,7 +7,7 @@ import { ProductDto } from '@/types/product.types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useToastConfig from '@/hooks/useToastConfig.hook';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { TRUCK_SIZES } from '@/data/truck-sizes';
+import { TRUCK_SIZES, NON_TANKER_SIZES } from '@/data/truck-sizes';
 
 /**
  * A public-friendly hook for search functionality that doesn't require authentication.
@@ -189,8 +189,11 @@ const usePublicSearch = (isSearchPage = false) => {
 
   // Format data for dropdowns
   const depots = useMemo(() => {
-    if (depotsRes) {
+    if (depotsRes && truckType) {
       return depotsRes?.data
+        ?.filter((item: DepotHubDto) =>
+          truckType.value === 'tanker' ? item.type === 'tanker' : item.type === 'others'
+        )
         ?.sort((a: DepotHubDto, b: DepotHubDto) => a.name.localeCompare(b.name))
         ?.map((item: DepotHubDto) => ({
           label: item.name,
@@ -198,7 +201,7 @@ const usePublicSearch = (isSearchPage = false) => {
         }));
     }
     return [];
-  }, [depotsRes]);
+  }, [depotsRes, truckType]);
 
   // total states
   // const states = useMemo(() => {
@@ -250,7 +253,6 @@ const usePublicSearch = (isSearchPage = false) => {
       // Get values from URL
       const productId = searchParams.get('productId');
       const depotHubId = searchParams.get('depotHubId');
-      const locationId = searchParams.get('locationId'); // For flatbed trucks
       const sizeValue = searchParams.get('size');
       const truckTypeValue = searchParams.get('truckType');
 
@@ -258,7 +260,6 @@ const usePublicSearch = (isSearchPage = false) => {
       if (
         productId ||
         depotHubId ||
-        locationId ||
         sizeValue ||
         truckTypeValue
       ) {
@@ -267,8 +268,8 @@ const usePublicSearch = (isSearchPage = false) => {
           const truckTypeOptions = [
             { label: 'Tanker', value: 'tanker' },
             { label: 'Flat Bed', value: 'flatbed' },
-            { label: 'Step Deck', value: 'stepdeck' },
-            { label: 'Drop Deck', value: 'dropdeck' },
+            { label: 'SideWall', value: 'sidewall' },
+            { label: 'Lowbed', value: 'lowbed' },
           ];
           const truckTypeObj = truckTypeOptions.find(
             (item) => item.value === truckTypeValue,
@@ -285,15 +286,21 @@ const usePublicSearch = (isSearchPage = false) => {
         }
 
         // Handle depot/location for both tanker (depotHubId) and flatbed (locationId)
-        if ((depotHubId || locationId) && depots?.length) {
+        if ((depotHubId) && depots?.length) {
           const depotObj = depots.find(
-            (item: any) => item.value === (depotHubId || locationId),
+            (item: any) => item.value === (depotHubId),
           );
           if (depotObj) setDepot(depotObj);
         }
 
-        if (sizeValue && TRUCK_SIZES?.length) {
-          const size = TRUCK_SIZES.find(
+        if (sizeValue) {
+          let sizeOptions = [];
+          if (truckType && truckType.value === 'tanker') {
+            sizeOptions = TRUCK_SIZES;
+          } else {
+            sizeOptions = NON_TANKER_SIZES;
+          }
+          const size = sizeOptions.find(
             (item: any) => item.value === sizeValue,
           );
           if (size) setSelectedSize(size);
@@ -320,8 +327,8 @@ const usePublicSearch = (isSearchPage = false) => {
         selectedSize
       ) {
         return `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker&status=available&limit=20&page=`;
-      } else if (truckType.value !== 'tanker' && depot) {
-        return `?locationId=${depot.value}&truckType=${truckType.value}&status=available&limit=20&page=`;
+      } else if (truckType.value !== 'tanker' && depot && selectedSize) {
+        return `?depotHubId=${depot.value}&truckType=${truckType.value}&size=${selectedSize.value}&status=available&limit=20&page=`;
       }
     }
     return ''; // Empty query will prevent the hook from running
@@ -406,9 +413,9 @@ const usePublicSearch = (isSearchPage = false) => {
       ) {
         query = `?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker&status=available&limit=20&page=`;
         url = `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker`;
-      } else if (truckType.value !== 'tanker' && depot) {
-        query = `?locationId=${depot.value}&truckType=${truckType.value}&status=available&limit=20&page=`;
-        url = `/truck-search?locationId=${depot.value}&truckType=${truckType.value}`;
+      } else if (truckType.value !== 'tanker' && depot && selectedSize) {
+        query = `?depotHubId=${depot.value}&truckType=${truckType.value}&size=${selectedSize.value}&status=available&limit=20&page=`;
+        url = `/truck-search?depotHubId=${depot.value}&truckType=${truckType.value}&size=${selectedSize.value}`;
       }
 
       if (query && url) {
@@ -435,8 +442,8 @@ const usePublicSearch = (isSearchPage = false) => {
         selectedSize
       ) {
         url = `/truck-search?productId=${selectedProduct.value}&depotHubId=${depot.value}&size=${selectedSize.value}&truckType=tanker`;
-      } else if (truckType.value !== 'tanker' && depot) {
-        url = `/truck-search?locationId=${depot.value}&truckType=${truckType.value}`;
+      } else if (truckType.value !== 'tanker' && depot && selectedSize) {
+        url = `/truck-search?depotHubId=${depot.value}&truckType=${truckType.value}&size=${selectedSize.value}`;
       }
 
       if (url) {

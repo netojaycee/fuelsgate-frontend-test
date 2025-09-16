@@ -27,6 +27,7 @@ type CustomSelectOption = {
 
 type CustomSelectProps = {
   label?: string;
+  unit?: string;
   multiple?: boolean;
   name: string;
   classNames?: string;

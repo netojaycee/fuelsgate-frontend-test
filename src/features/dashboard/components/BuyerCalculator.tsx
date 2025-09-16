@@ -9,17 +9,19 @@ import {
 } from '@/components/atoms/custom-select';
 import useTransportFareHook from '@/hooks/useTransportFare.hook';
 import useStateHook from '@/hooks/useState.hook';
-import { TRUCK_SIZES } from '@/data/truck-sizes';
+import { NON_TANKER_SIZES, TRUCK_SIZES } from '@/data/truck-sizes';
 import { formatNumber } from '@/utils/formatNumber';
 import { Calculator as CalculatorIcon, Package } from 'lucide-react';
 
 // Truck type options (same as transporter)
 const TRUCK_TYPES = [
-   { label: 'Tanker', value: 'tanker' },
+  { label: 'Tanker', value: 'tanker' },
   { label: 'Flatbed', value: 'flatbed' },
   { label: 'SideWall', value: 'sidewall' },
   { label: 'Lowbed', value: 'lowbed' },
 ];
+
+
 
 // Truck category options
 export const TRUCK_CATEGORY_OPTIONS = [
@@ -165,6 +167,7 @@ export default function BuyerCalculator() {
             value={truckType}
             onChange={(value) => setTruckType(value as CustomSelectOption)}
             classNames="border-gray-300"
+            placeholder='Truck type'
           />
 
           {/* Truck Category */}
@@ -177,7 +180,7 @@ export default function BuyerCalculator() {
             }))}
             value={truckCategory}
             onChange={(value) => setTruckCategory(value as CustomSelectOption)}
-            placeholder="truck category"
+            placeholder="Truck category"
             classNames="border-gray-300"
           />
 
@@ -185,10 +188,10 @@ export default function BuyerCalculator() {
           <CustomSelect
             label="Truck Capacity"
             name="truckCapacity"
-            options={TRUCK_SIZES}
+            options={truckType?.value === 'tanker' ? TRUCK_SIZES : NON_TANKER_SIZES}
             value={truckCapacity}
             onChange={(value) => setTruckCapacity(value as CustomSelectOption)}
-            placeholder="truck capacity"
+            placeholder="Truck capacity"
             classNames="border-gray-300"
           />
 
@@ -199,7 +202,7 @@ export default function BuyerCalculator() {
             options={loadPoints}
             value={loadPoint}
             onChange={(value) => setLoadPoint(value as CustomSelectOption)}
-            placeholder="Select load point"
+            placeholder="Load point"
             isDisabled={loadingLoadPoints}
             classNames="border-gray-300"
           />
@@ -212,7 +215,7 @@ export default function BuyerCalculator() {
               options={states}
               value={destinationState}
               onChange={handleStateChange}
-              placeholder="Select state"
+              placeholder="State"
               isDisabled={loadingStates}
               classNames="border-gray-300"
             />
@@ -222,7 +225,7 @@ export default function BuyerCalculator() {
               options={lgas}
               value={destinationLGA}
               onChange={handleLGAChange}
-              placeholder="Select LGA"
+              placeholder="LGA"
               isDisabled={loadingLGA || !destinationState}
               classNames="border-gray-300"
             />

@@ -1,5 +1,5 @@
 import { DepotHubDto } from "@/types/depot-hub.types";
-import { ProductDto } from "@/types/product.types";
+// import { ProductDto } from "@/types/product.types";
 
 export type TruckStatus = 'available' | 'locked' | 'pending';
 
@@ -13,22 +13,7 @@ export interface TruckDto {
   depotHubId?: string | DepotHubDto // Optional for flatbed trucks
   depot?: string // Optional for flatbed trucks
   loadStatus?: 'loaded' | 'unloaded' // Optional for flatbed trucks
-  truckType: 'tanker' | 'flatbed' | 'stepdeck' | 'dropdeck'
-  currentState?: string
-  currentCity?: string
-  // Flatbed specific (optional)
-  flatbedSubtype?: string
-  deckLengthFt?: string
-  deckWidthFt?: string
-  maxPayloadKg?: string
-  equipment?: string[]
-  preferredCargoTypes?: string[]
-  permitRequired?: string
-  // baseRateType and baseRate removed - RFQ negotiation uses RFQ pricing
-  notes?: string
-  country?: string
-  city?: string
-  address?: string
+  truckType: 'tanker' | 'flatbed' | 'sidewall' | 'lowbed'
   status?: TruckStatus
   truckOrderId?: string
   profileType?: string | undefined

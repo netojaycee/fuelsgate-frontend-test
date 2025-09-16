@@ -114,10 +114,10 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
       </div>
 
       {/* Header with Action Buttons */}
-      <div className="flex items-start justify-between mb-2">
+      <div className="flex items-start justify-between mb-1">
         <div className="flex items-center gap-3">
           <span
-            className={`h-8 w-10 rounded-full flex items-center justify-center shadow-sm relative overflow-hidden ${
+            className={`h-7 w-10 rounded-full flex items-center justify-center shadow-sm relative overflow-hidden ${
               data?.truckType !== 'tanker' || !(typeof data?.productId === 'object' && data?.productId?.color)
                 ? 'bg-blue-tone-100'
                 : ''
@@ -184,8 +184,8 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
         )}
       </div>
 
-      {/* Truck Details */}
-      <div className="flex-1 space-y-2">
+      {/* Truck Details - Unified for all types */}
+      <div className="flex-1 space-y-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Text variant="pxs" color="text-gray-500">
@@ -206,113 +206,83 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
           {/* Load Status Badge - Only for tanker trucks */}
           {data?.truckType === 'tanker' && data?.loadStatus && (
             <span
-              className={`flex items-center justify-center ml-2 px-2 py-1 rounded-full shadow-none border border-white ${
+              className={`flex items-center justify-center ml-2 px-2 rounded-full shadow-none border border-white ${
                 data.loadStatus === 'loaded' ? 'bg-blue-500' : 'bg-gray-400'
               }`}
             >
-              <Text variant="pxs" fontWeight="medium" color="text-white">
+              <p className='text-[9px] text-white p-0'>
                 {data.loadStatus === 'loaded' ? 'Loaded' : 'Unloaded'}
-              </Text>
+              </p>
             </span>
           )}
         </div>
-        
-        {/* Capacity - Only for tanker trucks */}
-        {data?.truckType === 'tanker' && data?.capacity && (
+
+        {/* Product - Only for tanker trucks */}
+        {data?.truckType === 'tanker' && data?.productId && (
+          <div className="flex items-center justify-between">
+            <Text variant="pxs" color="text-gray-500">
+              Product
+            </Text>
+            <Text variant="pxs" color="text-gray-700">
+              {typeof data?.productId === 'object' ? data?.productId?.name : data?.productId}
+            </Text>
+          </div>
+        )}
+
+        {/* Capacity - All trucks */}
+        {data?.capacity && (
           <div className="flex items-center justify-between">
             <Text variant="pxs" color="text-gray-500">
               Capacity
             </Text>
             <Text variant="ps" fontWeight="semibold" color="text-gray-900">
-              {formatNumber(data.capacity)} Ltrs
+              {formatNumber(data.capacity)} {data?.truckType === 'tanker' ? 'Ltrs' : 'Tons'}
             </Text>
           </div>
         )}
 
-        {/* Location - For flatbed trucks, show current state and city */}
-        {data?.truckType !== 'tanker' && (data?.currentState || data?.currentCity) && (
-          <>
-            {data?.currentState && (
-              <div className="flex items-center justify-between">
-                <Text variant="pxs" color="text-gray-500">
-                  State
-                </Text>
-                <div title={data?.currentState}>
-                  <Text
-                    variant="pxs"
-                    color="text-gray-700"
-                    classNames="text-right truncate max-w-[140px]"
-                  >
-                    {data?.currentState}
-                  </Text>
-                </div>
-              </div>
-            )}
-            
-            {data?.currentCity && (
-              <div className="flex items-center justify-between">
-                <Text variant="pxs" color="text-gray-500">
-                  City
-                </Text>
-                <div title={data?.currentCity}>
-                  <Text
-                    variant="pxs"
-                    color="text-gray-700"
-                    classNames="text-right truncate max-w-[140px]"
-                  >
-                    {data?.currentCity}
-                  </Text>
-                </div>
-              </div>
-            )}
-          </>
+        {/* Depot - All trucks */}
+        {data?.depot && (
+          <div className="flex items-center justify-between">
+            <Text variant="pxs" color="text-gray-500">
+              Depot
+            </Text>
+            <div title={data?.depot}>
+              <Text
+                variant="pxs"
+                color="text-gray-700"
+                classNames="text-right truncate max-w-[140px]"
+              >
+                {data?.depot}
+              </Text>
+            </div>
+          </div>
         )}
 
-        {/* Depot and Hub - Only for tanker trucks */}
-        {data?.truckType === 'tanker' && (
-          <>
-            {data?.depot && (
-              <div className="flex items-center justify-between">
-                <Text variant="pxs" color="text-gray-500">
-                  Depot
-                </Text>
-                <div title={data?.depot}>
-                  <Text
-                    variant="pxs"
-                    color="text-gray-700"
-                    classNames="text-right truncate max-w-[140px]"
-                  >
-                    {data?.depot}
-                  </Text>
-                </div>
-              </div>
-            )}
-
-            {data?.depotHubId && (
-              <div className="flex items-center justify-between">
-                <Text variant="pxs" color="text-gray-500">
-                  Hub
-                </Text>
-                <div
-                  title={
-                    typeof data?.depotHubId === 'object'
-                      ? data?.depotHubId?.name
-                      : 'Unknown Hub'
-                  }
-                >
-                  <Text
-                    variant="pxs"
-                    color="text-gray-700"
-                    classNames="text-right truncate max-w-[140px]"
-                  >
-                    {typeof data?.depotHubId === 'object'
-                      ? data?.depotHubId?.name
-                      : 'Unknown Hub'}
-                  </Text>
-                </div>
-              </div>
-            )}
-          </>
+        {/* Hub - All trucks */}
+        {data?.depotHubId && (
+          <div className="flex items-center justify-between">
+            <Text variant="pxs" color="text-gray-500">
+              Hub
+            </Text>
+            <div
+              title={
+                typeof data?.depotHubId === 'object'
+                  ? data?.depotHubId?.name
+                  : 'Unknown Hub'
+              }
+            >
+              <Text
+                variant="pxs"
+                color="text-gray-700"
+                classNames="text-right truncate max-w-[140px]"
+              >
+                {typeof data?.depotHubId === 'object'
+                  ? data?.depotHubId?.name
+                  : 'Unknown Hub'}
+              </Text>
+            </div>
+          </div>
         )}
       </div>
     </div>

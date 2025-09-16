@@ -21,13 +21,9 @@ import {
   TrendingUp,
   Info,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
-// Truck type options (only tanker for now)
-const TRUCK_TYPES = [ { label: 'Tanker', value: 'tanker' },
-  { label: 'Flatbed', value: 'flatbed' },
-  { label: 'SideWall', value: 'sidewall' },
-  { label: 'Lowbed', value: 'lowbed' }];
+
+
 
 interface CalculationBreakdown {
   freightRateMin: number;
@@ -233,7 +229,7 @@ const Calculator = () => {
             {selectedTruck && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {selectedTruck?.raw?.fuelType === 'cng' ? 'CNG Price (₦/Litre)' : 'Diesel Price (₦/Litre)'}
+                  {(truckCategory === 'A++' || selectedTruck?.raw?.fuelType === 'cng') ? 'CNG Price (₦/Litre)' : 'Diesel Price (₦/Litre)'}
                 </label>
                 <input
                   type="number"
@@ -241,7 +237,7 @@ const Calculator = () => {
                   step="any"
                   value={fuelPrice === undefined ? '' : fuelPrice}
                   onChange={e => setFuelPrice(e.target.value ? Number(e.target.value) : undefined)}
-                  placeholder={selectedTruck?.raw?.fuelType === 'cng' ? 'Enter CNG price' : 'Enter diesel price'}
+                  placeholder={(truckCategory === 'A++' || selectedTruck?.raw?.truckFuelType === 'cng') ? 'Enter CNG price' : 'Enter diesel price'}
                   className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

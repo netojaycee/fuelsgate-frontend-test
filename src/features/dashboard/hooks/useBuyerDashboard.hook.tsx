@@ -251,16 +251,31 @@ const useBuyerDashboardHook = () => {
     });
   }, [queryClient, refetchProducts]);
 
-  const depots = useMemo(() => {
-    if (depotsRes) {
-      return depotsRes?.data
-        ?.sort((a: DepotHubDto, b: DepotHubDto) => a.name.localeCompare(b.name))
-        ?.map((item: DepotHubDto) => ({
-          label: item.name,
-          value: item._id,
-        }));
-    }
-  }, [depotsRes]);
+  // const depots = useMemo(() => {
+  //   if (depotsRes) {
+  //     return depotsRes?.data
+  //       ?.sort((a: DepotHubDto, b: DepotHubDto) => a.name.localeCompare(b.name))
+  //       ?.map((item: DepotHubDto) => ({
+  //         label: item.name,
+  //         value: item._id,
+  //       }));
+  //   }
+  // }, [depotsRes]);
+
+    const depots = useMemo(() => {
+      if (depotsRes && truckType) {
+        return depotsRes?.data
+          ?.filter((item: DepotHubDto) =>
+            truckType.value === 'tanker' ? item.type === 'tanker' : item.type === 'others'
+          )
+          ?.sort((a: DepotHubDto, b: DepotHubDto) => a.name.localeCompare(b.name))
+          ?.map((item: DepotHubDto) => ({
+            label: item.name,
+            value: item._id,
+          }));
+      }
+      return [];
+    }, [depotsRes, truckType]);
 
   const states = useMemo(() => {
     if (stateRes) {

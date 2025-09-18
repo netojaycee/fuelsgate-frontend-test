@@ -32,6 +32,8 @@ import { ChevronDownIcon } from 'lucide-react';
 import useDepotHubHook from '@/hooks/useDepotHub.hook';
 import { DepotHubDto } from '@/types/depot-hub.types';
 import useOrderHook from '@/hooks/useOrder.hook';
+import useTransportFareHook from '@/hooks/useTransportFare.hook';
+import { useEffect } from 'react';
 
 const sora = Sora({ subsets: ['latin'] });
 const LOCK_TRUCK = 'lOCK_TRUCK';
@@ -39,8 +41,9 @@ const LOCK_TRUCK = 'lOCK_TRUCK';
 const LockTruckModal = () => {
   const [open, setOpen] = useState(true);
   const { handleClose, openModal } = useContext(ModalContext);
-  const { truckId, truckNumber, depotHub, truckSize, product, state, city } =
-    openModal?.data;
+  const { truckId, truckNumber, depotHub, truckSize, truckCategory, truckType, loadStatus, product, state, city } =
+    openModal?.data || {};
+    console.log(truckId, truckNumber, depotHub, truckSize, truckCategory, truckType, loadStatus, product, state, city, "fff")
   const { useCreateOrder } = useOrderHook();
   const { mutateAsync: createNewOrder, isPending: isLoading } =
     useCreateOrder();
@@ -76,15 +79,44 @@ const LockTruckModal = () => {
     }
   }, [depotsRes, depotHub]);
 
-  const [selectedDepot, setSelectedDepot] = useState<
-    CustomSelectOption | undefined
-  >(undefined);
+  const [selectedDepot, setSelectedDepot] = useState<CustomSelectOption | undefined>(undefined);
+  const [fareRange, setFareRange] = useState<{ min: number; max: number } | null>(null);
+  const { useCalculateFare } = useTransportFareHook();
+  const { mutateAsync: calculateFare, isPending: isCalculatingFare } = useCalculateFare();
+
 
   const handleDepotChange = useCallback((value: unknown) => {
     setSelectedDepot(value as CustomSelectOption);
     setValue('loadingDepot', (value as CustomSelectOption)?.value as string);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setValue]);
+
+  // Fetch fare when depot is selected
+  useEffect(() => {
+    const fetchFare = async () => {
+      if (!selectedDepot || !truckType || !truckCategory || !truckSize || !state || !city) {
+        setFareRange(null);
+        return;
+      }
+      try {
+        const result = await calculateFare({
+          truckCapacity: parseInt(truckSize),
+          truckType,
+          truckCategory,
+          deliveryState: state,
+          deliveryLGA: city,
+          loadPoint: selectedDepot.value,
+        });
+        if (result.statusCode === 200 && result.data) {
+          setFareRange({ min: result.data.totalMin, max: result.data.totalMax });
+        } else {
+          setFareRange(null);
+        }
+      } catch {
+        setFareRange(null);
+      }
+    };
+    fetchFare();
+  }, [selectedDepot, truckType, truckCategory, truckSize, state, city, calculateFare]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -146,14 +178,19 @@ const LockTruckModal = () => {
                 </Text>
               </div>
 
-              <div className="flex items-center justify-between gap-2 mb-4">
-                <Text variant="ps" color="text-dark-gray-550">
-                  Product
-                </Text>
-                <Text variant="ps" color="text-[#151A23]" fontWeight="medium">
-                  {product.name}
-                </Text>
-              </div>
+
+              {/* Product only for tanker */}
+              {truckType === 'tanker' && product && (
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <Text variant="ps" color="text-dark-gray-550">
+                    Product
+                  </Text>
+                  <Text variant="ps" color="text-[#151A23]" fontWeight="medium">
+                    {product.name}
+                  </Text>
+                </div>
+              )}
+
 
               <div className="flex items-center justify-between gap-2 mb-4">
                 <Text variant="ps" color="text-dark-gray-550">
@@ -161,8 +198,21 @@ const LockTruckModal = () => {
                 </Text>
                 <Text variant="ps" color="text-[#151A23]" fontWeight="medium">
                   {formatNumber(truckSize)}
+                  {truckType ? ` (${truckType})` : ''}
                 </Text>
               </div>
+
+              {/* Load Status if present */}
+              {loadStatus && truckType === 'tanker' && (
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <Text variant="ps" color="text-dark-gray-550">
+                    Load Status
+                  </Text>
+                  <Text variant="ps" color="text-[#151A23]" fontWeight="medium">
+                    {loadStatus.charAt(0).toUpperCase() + loadStatus.slice(1)}
+                  </Text>
+                </div>
+              )}
 
               <div className="flex items-center justify-between gap-2 mb-4">
                 <Text variant="ps" color="text-dark-gray-550">
@@ -203,6 +253,23 @@ const LockTruckModal = () => {
             </CollapsibleContent>
           </Collapsible>
         </div>
+
+        {/* Transport Fare Estimate Badge/Section */}
+        {selectedDepot && fareRange && (
+          <div className="flex justify-center mb-4">
+            <div className="bg-gradient-to-br from-green-100 to-green-200 border border-green-300 rounded-xl px-6 py-3 shadow-md flex flex-col items-center max-w-xs w-full">
+              <Text variant="ps" color="text-green-700" fontWeight="bold" classNames="mb-1">
+                Estimated Transport Fare
+              </Text>
+              <div className="text-xl font-bold text-green-800">
+                ₦{formatNumber(fareRange.min)}{' '} - ₦{formatNumber(fareRange.max)}
+              </div>
+              <Text variant="pxs" color="text-green-600" classNames="mt-1">
+                (Guideline only, actual quote may vary)
+              </Text>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grow grid grid-cols-1 gap-2 bg-light-gray-150 py-[10px] px-4 rounded-[10px] mb-4">

@@ -14,6 +14,6 @@ export const TRUCK_SIZES = [
 ];
 
 export const NON_TANKER_SIZES = [
-  { label: '27000', value: '27000' },
-  { label: '30000', value: '30000' },
+  { label: '27', value: '27' },
+  { label: '30', value: '30' },
 ];

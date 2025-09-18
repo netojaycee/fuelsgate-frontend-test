@@ -125,7 +125,7 @@ const TruckRfq = () => {
   const profileLabel = isBuyer ? 'Transporter' : 'Buyer';
 
   return (
-    <div className="relative bg-white">
+  <div className="relative bg-white">
       <div className="container mx-auto py-8">
         <div className="relative max-w-[1064px] mx-auto border border-mid-gray-550 rounded-[10px]">
           <Image
@@ -201,6 +201,16 @@ const TruckRfq = () => {
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-3 border-t border-light-gray-700 mt-32 py-6 px-5">
+                {/* View Ticket button if RFQ is accepted */}
+                {orderData?.data.rfqStatus === 'accepted' && (
+                  <CustomButton
+                    variant="primary"
+                    label="View Ticket"
+                    width="w-[182px]"
+                    height="h-[55px]"
+                    onClick={() => router.push(`/dashboard/rfq/${orderData?.data?._id}`)}
+                  />
+                )}
                 {/* Always show RFQ status label */}
                 <div className="flex items-center gap-2 w-full mb-2">
                   <span className="font-semibold text-xs text-gray-500">

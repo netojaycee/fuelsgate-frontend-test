@@ -14,6 +14,7 @@ export interface TruckDto {
   depot?: string // Optional for flatbed trucks
   loadStatus?: 'loaded' | 'unloaded' // Optional for flatbed trucks
   truckType: 'tanker' | 'flatbed' | 'sidewall' | 'lowbed'
+  truckCategory: any;
   status?: TruckStatus
   truckOrderId?: string
   profileType?: string | undefined

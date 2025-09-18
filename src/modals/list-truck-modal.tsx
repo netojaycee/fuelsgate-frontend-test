@@ -394,18 +394,24 @@ const ListTruckModal = () => {
     if (getValues('capacity')) {
       const capacityRaw = getValues('capacity');
       const capacityValue =
-        capacityRaw !== undefined && capacityRaw !== null
-          ? capacityRaw.toString()
-          : '';
-      const _selectedCapacity = TRUCK_SIZES?.find(
-        (item: CustomSelectOption) => item.value === capacityValue,
+      capacityRaw !== undefined && capacityRaw !== null
+        ? capacityRaw.toString()
+        : '';
+
+      // Determine which size array to use based on truckType
+      const currentTruckType = getValues('truckType') || truckType?.value;
+      const sizeOptions =
+      currentTruckType === 'tanker' ? TRUCK_SIZES : NON_TANKER_SIZES;
+
+      const _selectedCapacity = sizeOptions?.find(
+      (item: CustomSelectOption) => item.value === capacityValue,
       );
 
       if (_selectedCapacity) {
-        setCapacity(_selectedCapacity);
+      setCapacity(_selectedCapacity);
       } else {
-        // If the capacity value doesn't match any predefined size, it's a custom value
-        setCapacity(TRUCK_SIZES.find((item) => item.value === 'others'));
+      // If the capacity value doesn't match any predefined size, it's a custom value
+      setCapacity(sizeOptions.find((item) => item.value === 'others'));
       }
     }
 

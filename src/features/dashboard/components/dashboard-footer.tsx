@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FGEmail, FGLinkedIn, FGPhone, FGTwitterX } from '@fg-icons';
 import { Text } from '@/components/atoms/text';
-import GoldLogo from '@assets/images/logo_gold.svg';
+import GoldLogo from '@assets/images/logo_gold.png';
 import { Youtube } from 'lucide-react';
 import { Sora } from 'next/font/google';
 

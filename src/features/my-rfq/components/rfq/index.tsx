@@ -39,6 +39,8 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
     }
   };
 
+  console.log(truckOrder, 'Truck Order in RFQ Component');
+
   // Dynamic rendering based on user role
   const renderUserInfo = () => {
     if (userRole === 'buyer') {
@@ -110,47 +112,64 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
   return (
     <div className="relative bg-white flex flex-col md:flex-row items-start md:items-center justify-between border border-mid-gray-550 p-4 rounded-[10px] min-h-[120px] max-h-[none] md:max-h-[120px]">
       <div className="flex items-start gap-4 flex-1 min-w-0 pr-0 md:pr-4 w-full">
-        <div className="h-[50px] w-[50px] rounded-[7px] bg-blue-tone-100 flex items-center justify-center flex-shrink-0">
+        <div className="h-[50px] w-[50px] rounded-[7px] bg-blue-tone-100 border border-black flex items-center justify-center flex-shrink-0">
           <FGTruckFill
             height={31}
             width={31}
-            color={
-              ((truckOrder.truckId as TruckDto)?.productId as ProductDto)?.color || '#1868DB'
-            }
+            color={'#1868DB'}
+            // ((truckOrder.truckId as TruckDto)?.productId as ProductDto)?.color ||
           />
         </div>
-        <div className="flex-1 min-w-0">
-          <Text
-            variant="pl"
-            color="text-deep-gray-300"
-            fontWeight="semibold"
-            classNames="flex flex-wrap items-center gap-2 mb-1"
-          >
-            <span
-              style={{
-              backgroundColor:
-                ((truckOrder.truckId as TruckDto)?.productId as ProductDto)?.color || '#1868DB',
-              }}
-              className="inline-flex items-center justify-center w-[43px] h-[17px] text-white rounded-[2px] uppercase font-medium text-xs flex-shrink-0"
-            >
-              {
-                ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
-                  ?.value
-              }
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1 w-full">
+            {/* Product badge (only for tanker) */}
+            {(truckOrder.truckId as TruckDto)?.truckType === 'tanker' && (
+              <span
+                style={{
+                  backgroundColor:
+                    ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
+                      ?.color || '#1868DB',
+                }}
+                className="border border-black inline-flex items-center justify-center w-[43px] h-[17px] text-black rounded-[2px] uppercase font-medium text-xs flex-shrink-0"
+              >
+                {
+                  ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
+                    ?.value
+                }
+              </span>
+            )}
+            {/* Truck type badge */}
+            <span className="inline-flex items-center justify-center px-2 h-[17px] text-blue-700 bg-blue-100 rounded-[2px] uppercase font-medium text-xs flex-shrink-0">
+              {(
+                (truckOrder.truckId as TruckDto)?.truckType || ''
+              ).toUpperCase()}
             </span>
-            <span className="flex-shrink-0">
-              {formatNumber((truckOrder.truckId as TruckDto)?.capacity ?? 0)} Ltrs
+            {/* Capacity with correct unit */}
+            <span className="flex-shrink-0 text-gray-700 font-semibold">
+              {formatNumber((truckOrder.truckId as TruckDto)?.capacity ?? 0)}{' '}
+              {(truckOrder.truckId as TruckDto)?.truckType === 'tanker'
+                ? 'Ltrs'
+                : 'Tons'}
             </span>
+            {/* Load status (if not tanker) */}
+            {(truckOrder.truckId as TruckDto)?.truckType !== 'tanker' && (
+              <span className="inline-flex items-center justify-center px-2 h-[17px] text-green-700 bg-green-100 rounded-[2px] uppercase font-medium text-xs flex-shrink-0">
+                {(
+                  (truckOrder.truckId as TruckDto)?.loadStatus || ''
+                ).toUpperCase()}
+              </span>
+            )}
+            {/* Price or Pending */}
             {truckOrder.rfqStatus === 'pending' ? (
               <span className="text-orange-500 ml-3 flex-shrink-0 italic">
                 Pending Quote
               </span>
             ) : (
-              <span className="text-green-tone-500 ml-3 flex-shrink-0">
+              <span className="text-green-tone-500 ml-3 flex-shrink-0 font-semibold">
                 &#8358; {formatNumber(truckOrder.price, true)}
               </span>
             )}
-          </Text>
+          </div>
           {renderUserInfo()}
           <Text
             variant="ps"

@@ -49,13 +49,21 @@ const LockBtn = ({
     truckNumber: string | undefined,
     truckSize: string | undefined,
     depotHub: string | undefined,
-    product: ProductDto | undefined;
+    product: ProductDto | undefined,
+    truckType: string | undefined,
+    truckCategory: string | undefined,
+    loadStatus: string | undefined;
+
+    console.log(truck, "Truckkkk")
 
   if (affix === 'Truck') {
     availability = truck?.status;
     truckId = truck?._id;
     truckNumber = truck?.truckNumber;
     truckSize = truck?.capacity;
+    truckType = truck?.truckType;
+    loadStatus = truck?.loadStatus;
+    truckCategory = truck?.truckCategory;
     depotHub = (truck?.depotHubId as DepotHubDto)?.name;
     product = truck?.productId as ProductDto;
   }
@@ -102,6 +110,9 @@ const LockBtn = ({
               depotHub,
               product,
               truckSize,
+              truckType,
+              loadStatus,
+              truckCategory,
               state: selectedState?.value,
               city: selectedLGA?.value,
             },
@@ -116,7 +127,7 @@ const LockBtn = ({
 
   return (
     <CustomButton
-    hideLabel
+      hideLabel
       disabled={disabled}
       variant={cn(orderStatus ? 'primary' : 'white')}
       classNames={cn(

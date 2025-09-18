@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
+import useDepotHubHook from '@/hooks/useDepotHub.hook';
 import useTruckListingHook from '../hooks/useTruckListing.hook';
 import { Card } from '@/components/ui/card';
 import { Text } from '@/components/atoms/text';
@@ -54,12 +55,15 @@ const Calculator = () => {
   const [deliveryLGA, setDeliveryLGA] = useState<
     CustomSelectOption | undefined
   >();
+  const [hub, setHub] = useState<CustomSelectOption | undefined>();
   const [loadPoint, setLoadPoint] = useState<CustomSelectOption | undefined>();
   const [calculationResult, setCalculationResult] = useState<any>(null);
   const [fuelPrice, setFuelPrice] = useState<number | undefined>(undefined);
 
   // Fetch data
   const { data: loadPointsRes, isLoading: loadingLoadPoints } = useFetchLoadPoints;
+  const { useFetchDepotHubs } = useDepotHubHook();
+  const { data: depotHubsRes, isLoading: loadingDepotHubs } = useFetchDepotHubs;
   const { data: stateRes, isLoading: loadingStates } = useFetchStates;
   const { data: lgaRes, isLoading: loadingLGA } = useFetchStateLGA(deliveryState?.value);
   const { mutateAsync: calculateFare, isPending: isCalculating } = useCalculateFare();
@@ -69,15 +73,35 @@ const Calculator = () => {
   } = useTruckListingHook();
 
   // Formatted data for dropdowns
-  const loadPoints = useMemo(() => {
-    if (loadPointsRes?.data) {
-      return loadPointsRes.data.map((point: any) => ({
-        label: point.displayName,
-        value: point.name,
-      }));
-    }
-    return [];
+
+  // --- Tanker: hub = depot hub, loadpoint = depot in hub ---
+  const tankerHubs = useMemo(() => {
+    if (!depotHubsRes?.data) return [];
+    return depotHubsRes.data
+      .filter((hub: any) => hub.type === 'tanker')
+      .map((hub: any) => ({ label: hub.name, value: hub._id, depots: hub.depots }));
+  }, [depotHubsRes]);
+
+  const tankerLoadPoints = useMemo(() => {
+    if (!hub) return [];
+    const found = tankerHubs.find((h: any) => h.value === hub.value);
+    if (!found) return [];
+    return (found.depots || []).map((depot: string) => ({ label: depot, value: depot }));
+  }, [hub, tankerHubs]);
+
+  // --- Non-tanker: hub = state from loadPoints, loadpoint = loadPoints in state ---
+  const nonTankerStates = useMemo(() => {
+    if (!loadPointsRes?.data) return [];
+    const uniqueStates = Array.from(new Set(loadPointsRes.data.map((p: any) => p.state))) as string[];
+    return uniqueStates.map((state) => ({ label: state, value: state }));
   }, [loadPointsRes]);
+
+  const nonTankerLoadPoints = useMemo(() => {
+    if (!hub || !loadPointsRes?.data) return [];
+    return loadPointsRes.data
+      .filter((p: any) => p.state === hub.value)
+      .map((p: any) => ({ label: p.displayName, value: p.name }));
+  }, [hub, loadPointsRes]);
 
   const states = useMemo(() => {
     if (stateRes) {
@@ -243,21 +267,60 @@ const Calculator = () => {
               </div>
             )}
 
-              {/* Load Point */}
-            <div>
-              <CustomSelect
-                label="Load Point"
-                name="loadPoint"
-                options={loadPoints}
-                value={loadPoint}
-                onChange={(value) =>
-                  setLoadPoint(value as CustomSelectOption | undefined)
-                }
-                placeholder="Load point"
-                isDisabled={loadingLoadPoints}
-                classNames="border-gray-300"
-              />
-            </div>
+              {/* Hub and Load Point fields */}
+              {selectedTruck?.truckType === 'tanker' ? (
+                <>
+                  <CustomSelect
+                    label="Hub"
+                    name="hub"
+                    options={tankerHubs}
+                    value={hub}
+                    onChange={(value) => {
+                      setHub(value as CustomSelectOption);
+                      setLoadPoint(undefined);
+                    }}
+                    placeholder="Select hub"
+                    isDisabled={loadingDepotHubs}
+                    classNames="border-gray-300"
+                  />
+                  <CustomSelect
+                    label="Load Point (Depot)"
+                    name="loadPoint"
+                    options={tankerLoadPoints}
+                    value={loadPoint}
+                    onChange={(value) => setLoadPoint(value as CustomSelectOption)}
+                    placeholder="Select depot"
+                    isDisabled={!hub}
+                    classNames="border-gray-300"
+                  />
+                </>
+              ) : (
+                <>
+                  <CustomSelect
+                    label="Hub"
+                    name="hub"
+                    options={nonTankerStates}
+                    value={hub}
+                    onChange={(value) => {
+                      setHub(value as CustomSelectOption);
+                      setLoadPoint(undefined);
+                    }}
+                    placeholder="Select state"
+                    isDisabled={loadingLoadPoints}
+                    classNames="border-gray-300"
+                  />
+                  <CustomSelect
+                    label="Load Point (Origin)"
+                    name="loadPoint"
+                    options={nonTankerLoadPoints}
+                    value={loadPoint}
+                    onChange={(value) => setLoadPoint(value as CustomSelectOption)}
+                    placeholder="Select load point"
+                    isDisabled={!hub}
+                    classNames="border-gray-300"
+                  />
+                </>
+              )}
 
             {/* Delivery Location */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

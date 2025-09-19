@@ -316,7 +316,7 @@ const usePublicSearch = (isSearchPage = false) => {
       // Not on search page, mark as initialized
       setUrlParamsInitialized(true);
     }
-  }, [isSearchPage, searchParams, products, depots]);
+  }, [isSearchPage, searchParams, products, depots, truckType]);
 
   const constructedSearchQuery = useMemo(() => {
     if (isSearchPage && urlParamsInitialized && truckType) {
@@ -342,6 +342,7 @@ const usePublicSearch = (isSearchPage = false) => {
   ]);
 
   useEffect(() => {
+
     if (constructedSearchQuery) {
       setSearchQuery(constructedSearchQuery);
       setHasSearched(true);

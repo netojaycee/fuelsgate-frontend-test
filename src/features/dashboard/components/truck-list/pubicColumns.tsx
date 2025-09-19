@@ -42,6 +42,7 @@ const truckListPublicColumns = [
     accessorKey: 'depot',
     header: 'Location',
     cell: ({ row }: { row: any }) => {
+      console.log(row.original, "dd")
       const depot = row.getValue('depot');
       const currentState = row.original?.currentState;
       return depot ? depot : currentState || '';

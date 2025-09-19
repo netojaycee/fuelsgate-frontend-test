@@ -98,7 +98,7 @@ const LockBtn = ({
       }
     } else if (affix === 'Truck') {
       if (isSearch) {
-        router.push(`/register?role=buyer`);
+        window.location.href = (`/register?role=buyer`);
       } else if (!isSearch && availability === 'available') {
         handleToggle &&
           handleToggle({

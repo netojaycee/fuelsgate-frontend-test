@@ -35,6 +35,7 @@ type TValue = any;
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
+  type?: string;
   data: TData[];
   loading?: boolean;
   emptyState?: { title: string; message: string };
@@ -49,6 +50,7 @@ const CustomTable = ({
   columns,
   loading,
   emptyState,
+  type,
 }: DataTableProps<TData, TValue>) => {
   const table = useReactTable({
     data: data ?? [],
@@ -57,6 +59,8 @@ const CustomTable = ({
     enableRowPinning: true,
     keepPinnedRows: true,
   });
+
+  console.log(data, 'Ffdfd');
 
   return (
     <Table className="my-5 border-separate border-spacing-y-3 w-full">
@@ -72,8 +76,8 @@ const CustomTable = ({
                     index === 0
                       ? 'rounded-l-xl'
                       : index === headerGroup.headers.length - 1
-                        ? 'rounded-r-xl'
-                        : '',
+                      ? 'rounded-r-xl'
+                      : '',
                   )}
                 >
                   {header.isPlaceholder
@@ -94,7 +98,7 @@ const CustomTable = ({
           </TableRow>
         ))}
       </TableHeader>
-      <TableBody className="max-h-[40px]">
+      <TableBody className="max-h-[40px] ">
         {loading ? (
           <TableRow className="relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400">
             <TableCell
@@ -107,95 +111,152 @@ const CustomTable = ({
         ) : table?.getRowModel().rows?.length ? (
           <>
             {/* Render Top Pinned Rows */}
-            {table.getTopRows().map((row) => (
-              <TableRow
-                key={row.id}
-                className={cn(
-                  'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
-                  'pinned-row',
-                )}
-              >
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell
-                    key={cell.id}
-                    className={cn(
-                      'py-3 text-sm font-normal leading-5',
-                      index === 0
-                        ? 'rounded-l-xl'
-                        : index === row.getVisibleCells().length - 1
+            {table.getTopRows().map((row) => {
+              const isTruckList = type === 'truckList';
+              const isTanker = row.original?.truckType === 'tanker';
+              const isLoaded = row.original?.loadStatus === 'loaded';
+              let bgStyle: React.CSSProperties | undefined = undefined;
+              if (isTruckList && isTanker && isLoaded) {
+                const color = row.original?.productId?.color;
+                if (typeof color === 'string' && color.includes('-')) {
+                  const [color1, color2] = color.split('-');
+                  bgStyle = {
+                    background: `linear-gradient(to bottom, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`,
+                    transition: 'background 0.3s',
+                  };
+                } else if (color) {
+                  bgStyle = { backgroundColor: color, transition: 'background 0.3s' };
+                }
+              }
+              return (
+                <TableRow
+                  key={row.id}
+                  className={cn(
+                    'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
+                    'pinned-row',
+                  )}
+                  style={bgStyle}
+                >
+                  {row.getVisibleCells().map((cell, index) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(
+                        'py-3 text-sm font-normal leading-5',
+                        index === 0
+                          ? 'rounded-l-xl'
+                          : index === row.getVisibleCells().length - 1
                           ? 'rounded-r-xl'
                           : '',
-                    )}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    {/* Add Unpin Button */}
-                    {index === 0 && (
-                      <button onClick={() => row.pin(false)}>Unpin</button>
-                    )}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+                      )}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {/* Add Unpin Button */}
+                      {index === 0 && (
+                        <button onClick={() => row.pin(false)}>Unpin</button>
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })}
 
             {/* Render Center Rows */}
-            {table.getCenterRows().map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
-                className={cn(
-                  'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
-                )}
-              >
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell
-                    key={cell.id}
-                    className={cn(
-                      'py-3 text-sm font-normal leading-5',
-                      index === 0
-                        ? 'rounded-l-xl'
-                        : index === row.getVisibleCells().length - 1
+            {table.getCenterRows().map((row) => {
+              const isTruckList = type === 'truckList';
+              const isTanker = row.original?.truckType === 'tanker';
+              const isLoaded = row.original?.loadStatus === 'loaded';
+              let bgStyle: React.CSSProperties | undefined = undefined;
+              if (isTruckList && isTanker && isLoaded) {
+                const color = row.original?.productId?.color;
+                if (typeof color === 'string' && color.includes('-')) {
+                  const [color1, color2] = color.split('-');
+                  bgStyle = {
+                    background: `linear-gradient(to bottom, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`,
+                    transition: 'background 0.3s',
+                  };
+                } else if (color) {
+                  bgStyle = { backgroundColor: color, transition: 'background 0.3s' };
+                }
+              }
+              return (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={cn(
+                    'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
+                  )}
+                  style={bgStyle}
+                >
+                  {row.getVisibleCells().map((cell, index) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(
+                        'py-3 text-sm font-normal leading-5',
+                        index === 0
+                          ? 'rounded-l-xl'
+                          : index === row.getVisibleCells().length - 1
                           ? 'rounded-r-xl'
                           : '',
-                    )}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    {/* Add Pin Buttons */}
-                    {/* {index === 0 && <button onClick={() => row.pin('top')}>Pin to Top</button>} */}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+                      )}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {/* Add Pin Buttons */}
+                      {/* {index === 0 && <button onClick={() => row.pin('top')}>Pin to Top</button>} */}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })}
 
             {/* Render Bottom Pinned Rows */}
-            {table.getBottomRows().map((row) => (
-              <TableRow
-                key={row.id}
-                className={cn(
-                  'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
-                  'pinned-row',
-                )}
-              >
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell
-                    key={cell.id}
-                    className={cn(
-                      'py-3 text-sm font-normal leading-5',
-                      index === 0
-                        ? 'rounded-l-xl'
-                        : index === row.getVisibleCells().length - 1
+            {table.getBottomRows().map((row) => {
+              const isTruckList = type === 'truckList';
+              const isTanker = row.original?.truckType === 'tanker';
+              const isLoaded = row.original?.loadStatus === 'loaded';
+              let bgStyle: React.CSSProperties | undefined = undefined;
+              if (isTruckList && isTanker && isLoaded) {
+                const color = row.original?.productId?.color;
+                if (typeof color === 'string' && color.includes('-')) {
+                  const [color1, color2] = color.split('-');
+                  bgStyle = {
+                    background: `linear-gradient(to bottom, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`,
+                    transition: 'background 0.3s',
+                  };
+                } else if (color) {
+                  bgStyle = { backgroundColor: color, transition: 'background 0.3s' };
+                }
+              }
+              return (
+                <TableRow
+                  key={row.id}
+                  className={cn(
+                    'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
+                    'pinned-row',
+                  )}
+                  style={bgStyle}
+                >
+                  {row.getVisibleCells().map((cell, index) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(
+                        'py-3 text-sm font-normal leading-5',
+                        index === 0
+                          ? 'rounded-l-xl'
+                          : index === row.getVisibleCells().length - 1
                           ? 'rounded-r-xl'
                           : '',
-                    )}
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    {/* Add Unpin Button */}
-                    {index === 0 && (
-                      <button onClick={() => row.pin(false)}>Unpin</button>
-                    )}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
+                      )}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {/* Add Unpin Button */}
+                      {index === 0 && (
+                        <button onClick={() => row.pin(false)}>Unpin</button>
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })}
           </>
         ) : (
           <TableRow className="relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400">

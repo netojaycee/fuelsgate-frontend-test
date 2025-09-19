@@ -14,7 +14,7 @@ const TruckTableList = ({
 }) => {
   // console.log('TruckTableList', trucks);
   return (
-    <CustomTable columns={isSearch ? truckListPublicColumns : truckListColumns} data={trucks} loading={loading} />
+    <CustomTable type={'truckList'} columns={isSearch ? truckListPublicColumns : truckListColumns} data={trucks} loading={loading} />
   );
 };
 

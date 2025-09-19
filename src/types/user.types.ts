@@ -9,6 +9,7 @@ export type UserType = {
   token: string;
   status: string;
   lastSeen: Date;
+  canLoad: boolean;
 }
 
 export type UpdatePasswordDto = {

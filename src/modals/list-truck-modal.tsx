@@ -37,6 +37,7 @@ import {
   CustomValueContainerWrapper,
 } from '@/features/dashboard/components/product-select-components';
 import { TRUCK_CATEGORY_OPTIONS } from '@/features/dashboard/components/BuyerCalculator';
+import { AuthContext } from '@/contexts/AuthContext';
 
 const sora = Sora({ subsets: ['latin'] });
 const LIST_TRUCK = 'list_truck';
@@ -77,6 +78,8 @@ const ListTruckModal = () => {
   const { handleClose, openModal } = useContext(ModalContext);
   const { useFetchDepotHubs } = useDepotHubHook();
   const { data: depotHubsRes, isLoading: loadingDepotHubs } = useFetchDepotHubs;
+    const { user } = useContext(AuthContext);
+  console.log(user, "user");
 
   // Truck type state
   const [truckType, setTruckType] = useState<CustomSelectOption | undefined>(
@@ -662,8 +665,38 @@ const ListTruckModal = () => {
             </div>
             {/* Capacity and Load Status layout */}
             {truckType?.value === 'tanker' ? (
-              <div className="col-span-full flex gap-3 relative z-25">
-                <div className="flex-1">
+              user?.data?.canLoad ? (
+                <div className="col-span-full flex gap-3 relative z-25">
+                  <div className="flex-1">
+                    <CustomSelect
+                      name="capacity"
+                      label="Capacity"
+                      options={TRUCK_SIZES}
+                      value={capacity}
+                      onChange={handleCapacityChange}
+                      error={errors.capacity?.message}
+                      ValueContainer={LitreValueContainerWrapper}
+                      classNames="relative z-25"
+                      unit="Ltr"
+                      placeholder="Capacity"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <CustomSelect
+                      name="loadStatus"
+                      label="Load Status"
+                      options={LOAD_STATUS_OPTIONS}
+                      value={loadStatus}
+                      onChange={(value: unknown) =>
+                        setLoadStatus(value as CustomSelectOption)
+                      }
+                      error={errors.loadStatus?.message}
+                      classNames="relative z-25"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="col-span-full relative z-25">
                   <CustomSelect
                     name="capacity"
                     label="Capacity"
@@ -672,25 +705,12 @@ const ListTruckModal = () => {
                     onChange={handleCapacityChange}
                     error={errors.capacity?.message}
                     ValueContainer={LitreValueContainerWrapper}
-                    classNames="relative z-25"
+                    classNames="relative z-25 w-full"
                     unit="Ltr"
                     placeholder="Capacity"
                   />
                 </div>
-                <div className="flex-1">
-                  <CustomSelect
-                    name="loadStatus"
-                    label="Load Status"
-                    options={LOAD_STATUS_OPTIONS}
-                    value={loadStatus}
-                    onChange={(value: unknown) =>
-                      setLoadStatus(value as CustomSelectOption)
-                    }
-                    error={errors.loadStatus?.message}
-                    classNames="relative z-25"
-                  />
-                </div>
-              </div>
+              )
             ) : (
               <div className="col-span-full relative z-25">
                 <CustomSelect

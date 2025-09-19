@@ -61,6 +61,12 @@ const truckListColumns = [
   {
     accessorKey: 'truckNumber',
     header: 'Truck No.',
+    cell: ({ row }: { row: any }) => {
+      // Hide this cell if loadStatus is 'loaded'
+      if (row.original?.loadStatus === 'loaded') return null;
+      return row.getValue('truckNumber');
+    },
+    // Optionally, you can add a meta property to help hide the column header in your table component if all rows are loaded
   },
   // {
   //   accessorKey: 'capacity',

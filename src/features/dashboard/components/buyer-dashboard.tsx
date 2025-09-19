@@ -102,7 +102,7 @@ const BuyerDashboard = () => {
             lineHeight="leading-[38px]"
             classNames="max-w-[511px] mr-auto"
           >
-            A Digital Platform For Bulk Fuel Transactions
+            A Digital Platform For Securing Bulk Fuels Deliveries
           </Heading>
 
           {/* <div className="flex flex-wrap items-center gap-3">
@@ -242,7 +242,7 @@ const BuyerDashboard = () => {
                   classNames="text-[20px] my-5"
                   lineHeight="leading-6"
                 >
-                  Secure trucks to help transport your purchases
+                  Find the product volume you need
                 </Heading>
               </>
             )}
@@ -300,7 +300,7 @@ const BuyerDashboard = () => {
                 {/* For tanker trucks only */}
                 {activeTab === 'transporter' && (
                   <CustomSelect
-                    label="Truck Size"
+                    label="Volume"
                     name="truckSize"
                     options={truckType?.value === 'tanker' ? TRUCK_SIZES : NON_TANKER_SIZES}
                     value={selectedSize}

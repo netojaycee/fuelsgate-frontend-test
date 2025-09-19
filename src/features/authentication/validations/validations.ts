@@ -20,6 +20,10 @@ export const registerSchema = yup.object({
     .email('Invalid email format')
     .required('Email is required'),
   password: yup.string().required('Password is required'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Passwords do not match')
+    .required('Please confirm your password'),
 }).required()
 
 export const forgotPasswordSchema = yup.object({

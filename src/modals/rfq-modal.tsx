@@ -45,7 +45,10 @@ const RFQModal = () => {
   );
 
   // Transport fare calculation state
-  const [fareRange, setFareRange] = useState<{ min: number; max: number } | null>(null);
+  const [fareRange, setFareRange] = useState<{
+    min: number;
+    max: number;
+  } | null>(null);
   const { useCalculateFare } = useTransportFareHook();
   const { mutateAsync: calculateFare } = useCalculateFare();
   const [fareLoading, setFareLoading] = useState(false);
@@ -64,14 +67,16 @@ const RFQModal = () => {
     return cap ? parseFloat(cap) : 0;
   }, [orderData]);
 
-  const showPricePerLitre = orderData?.data?.truckId?.truckType === 'tanker' && orderData?.data?.truckId?.loadStatus === 'loaded';
+  const showPricePerLitre =
+    orderData?.data?.truckId?.truckType === 'tanker' &&
+    orderData?.data?.truckId?.loadStatus === 'loaded';
 
   const total = useMemo(() => {
     // For loaded tankers, total = pricePerLitre * capacity + amount (fare)
     if (showPricePerLitre && pricePerLitre && amount) {
       const pL = parseFloat(pricePerLitre) || 0;
       const fare = parseFloat(amount) || 0;
-      return (pL * truckCapacity) + fare;
+      return pL * truckCapacity + fare;
     }
     // For others, total = amount (fare)
     if (amount) {
@@ -85,7 +90,15 @@ const RFQModal = () => {
     const fetchFare = async () => {
       if (!orderData?.data?.truckId) return;
       const truck = orderData.data.truckId;
-      if (!truck.truckType || !truck.truckCategory || !truck.capacity || !orderData.data.state || !orderData.data.city || !orderData.data.loadingDepot) return;
+      if (
+        !truck.truckType ||
+        !truck.truckCategory ||
+        !truck.capacity ||
+        !orderData.data.state ||
+        !orderData.data.city ||
+        !orderData.data.loadingDepot
+      )
+        return;
       setFareLoading(true);
       try {
         const result = await calculateFare({
@@ -97,7 +110,10 @@ const RFQModal = () => {
           loadPoint: orderData.data.loadingDepot,
         });
         if (result.statusCode === 200 && result.data) {
-          setFareRange({ min: result.data.totalMin, max: result.data.totalMax });
+          setFareRange({
+            min: result.data.totalMin,
+            max: result.data.totalMax,
+          });
         } else {
           setFareRange(null);
         }
@@ -136,8 +152,7 @@ const RFQModal = () => {
     },
   });
 
-  console.log(orderData, "data in quote sending")
-
+  console.log(orderData, 'data in quote sending');
 
   const onSubmit = async () => {
     try {
@@ -179,6 +194,38 @@ const RFQModal = () => {
           <>
             <div className="bg-light-gray-150 py-[10px] px-4 rounded-[10px] mb-3">
               <div className="bg-white p-4 rounded-lg">
+
+                {/* Cargo Details for non-tanker trucks */}
+                {orderData?.data?.truckId?.truckType !== 'tanker' && (
+                  <div className="mb-4">
+                    <Text variant="ps" color="text-dark-gray-550" fontWeight="semibold" classNames="mb-2">
+                      Cargo Details
+                    </Text>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <Text variant="ps" color="text-dark-gray-550">Goods/Materials Type</Text>
+                      <Text variant="ps" color="text-[#151A23]" fontWeight="medium">{orderData?.data?.cargoType}</Text>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <Text variant="ps" color="text-dark-gray-550">Cargo Weight/Volume</Text>
+                      <Text variant="ps" color="text-[#151A23]" fontWeight="medium">{orderData?.data?.cargoWeight}</Text>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <Text variant="ps" color="text-dark-gray-550">Cargo Type</Text>
+                      <Text variant="ps" color="text-[#151A23]" fontWeight="medium">{orderData?.data?.cargoCategory}</Text>
+                    </div>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <Text variant="ps" color="text-dark-gray-550">Special Handling</Text>
+                      <Text variant="ps" color="text-[#151A23]" fontWeight="medium">{(orderData?.data?.specialHandling || []).join(', ')}</Text>
+                    </div>
+                    {orderData?.data?.notes && (
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <Text variant="ps" color="text-dark-gray-550">Notes</Text>
+                        <Text variant="ps" color="text-[#151A23]" fontWeight="medium">{orderData?.data?.notes}</Text>
+                      </div>
+                    )}
+                    <hr className="my-2" />
+                  </div>
+                )}
                 <Text
                   variant="ps"
                   color="text-dark-gray-550"
@@ -201,9 +248,24 @@ const RFQModal = () => {
                     {orderData?.data?.truckId?.truckNumber}
                   </Text>
                 </div>
+                {orderData?.data?.truckId?.truckType === 'tanker' && (
+                  <div className="flex items-center justify-between gap-2 mb-4">
+                    <Text variant="ps" color="text-dark-gray-550">
+                      Product
+                    </Text>
+                    <Text
+                      variant="ps"
+                      color="text-[#151A23]"
+                      fontWeight="bold"
+                      classNames="text-right"
+                    >
+                      {orderData?.data?.truckId?.productId?.name}
+                    </Text>
+                  </div>
+                )}
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <Text variant="ps" color="text-dark-gray-550">
-                  Product
+                    Capacity
                   </Text>
                   <Text
                     variant="ps"
@@ -211,20 +273,10 @@ const RFQModal = () => {
                     fontWeight="bold"
                     classNames="text-right"
                   >
-                    {orderData?.data?.truckId?.productId?.name}
-                  </Text>
-                </div>
-                 <div className="flex items-center justify-between gap-2 mb-4">
-                  <Text variant="ps" color="text-dark-gray-550">
-                  Capacity
-                  </Text>
-                  <Text
-                    variant="ps"
-                    color="text-[#151A23]"
-                    fontWeight="bold"
-                    classNames="text-right"
-                  >
-                    {orderData?.data?.truckId?.capacity} {orderData?.data?.truckId?.truckType === 'tanker' ? 'Ltrs' : 'Tons'}
+                    {orderData?.data?.truckId?.capacity}{' '}
+                    {orderData?.data?.truckId?.truckType === 'tanker'
+                      ? 'Ltrs'
+                      : 'Tons'}
                   </Text>
                 </div>
 
@@ -274,24 +326,43 @@ const RFQModal = () => {
               </div>
             </div>
 
-            <form onSubmit={e => { e.preventDefault(); onSubmit(); }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                onSubmit();
+              }}
+            >
               {/* Transport Fare Estimate Badge */}
               {fareLoading ? (
-                <div className="flex justify-center mb-4"><CustomLoader /></div>
-              ) : fareRange && (
                 <div className="flex justify-center mb-4">
-                  <div className="bg-gradient-to-br from-green-100 to-green-200 border border-green-300 rounded-xl px-6 py-3 shadow-md flex flex-col items-center max-w-xs w-full">
-                    <Text variant="ps" color="text-green-700" fontWeight="bold" classNames="mb-1">
-                      Estimated Transport Fare
-                    </Text>
-                    <div className="text-xl font-bold text-green-800">
-                      ₦{formatNumber(fareRange.min)}{' '} - ₦{formatNumber(fareRange.max)}
-                    </div>
-                    <Text variant="pxs" color="text-green-600" classNames="mt-1">
-                      (Guideline only, actual quote may vary)
-                    </Text>
-                  </div>
+                  <CustomLoader />
                 </div>
+              ) : (
+                fareRange && (
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-gradient-to-br from-green-100 to-green-200 border border-green-300 rounded-xl px-6 py-3 shadow-md flex flex-col items-center max-w-xs w-full">
+                      <Text
+                        variant="ps"
+                        color="text-green-700"
+                        fontWeight="bold"
+                        classNames="mb-1"
+                      >
+                        Estimated Transport Fare
+                      </Text>
+                      <div className="text-xl font-bold text-green-800">
+                        ₦{formatNumber(fareRange.min)} - ₦
+                        {formatNumber(fareRange.max)}
+                      </div>
+                      <Text
+                        variant="pxs"
+                        color="text-green-600"
+                        classNames="mt-1"
+                      >
+                        (Guideline only, actual quote may vary)
+                      </Text>
+                    </div>
+                  </div>
+                )
               )}
               <div className="bg-light-gray-150 py-[10px] px-4 rounded-[10px] mb-8">
                 {/* Amount field (fare) */}
@@ -299,8 +370,12 @@ const RFQModal = () => {
                   type="number"
                   name="amount"
                   value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                  label={showPricePerLitre ? 'Enter Transport Fare' : 'Enter Amount (Fare)'}
+                  onChange={(e) => setAmount(e.target.value)}
+                  label={
+                    showPricePerLitre
+                      ? 'Enter Transport Fare'
+                      : 'Enter Amount (Fare)'
+                  }
                   prefix="₦"
                   prefixPadding="pl-10"
                   classNames="mb-4"
@@ -311,7 +386,7 @@ const RFQModal = () => {
                     type="number"
                     name="pricePerLitre"
                     value={pricePerLitre}
-                    onChange={e => setPricePerLitre(e.target.value)}
+                    onChange={(e) => setPricePerLitre(e.target.value)}
                     label="Price Per Litre"
                     prefix="₦"
                     prefixPadding="pl-10"
@@ -323,43 +398,71 @@ const RFQModal = () => {
                   type="datetime-local"
                   name="arrivalTime"
                   value={arrivalTime}
-                  onChange={e => setArrivalTime(e.target.value)}
+                  onChange={(e) => setArrivalTime(e.target.value)}
                   label="Enter estimated time of arrival"
                 />
               </div>
               {/* Total summary */}
-              {(showPricePerLitre ? (pricePerLitre && amount) : amount) && (
+              {(showPricePerLitre ? pricePerLitre && amount : amount) && (
                 <div className="flex justify-center mb-4">
                   <div className="bg-blue-50 border border-blue-200 rounded-xl px-6 py-3 shadow flex flex-col items-center max-w-xs w-full">
-                    <Text variant="ps" color="text-blue-700" fontWeight="bold" classNames="mb-2">
+                    <Text
+                      variant="ps"
+                      color="text-blue-700"
+                      fontWeight="bold"
+                      classNames="mb-2"
+                    >
                       Quote Breakdown
                     </Text>
                     {showPricePerLitre ? (
                       <>
                         <div className="flex items-center justify-between w-full mb-1">
-                          <span className="text-sm text-blue-900 font-medium">Price Per Litre × Capacity</span>
-                          <span className="text-sm text-blue-900 font-semibold">₦{formatNumber((parseFloat(pricePerLitre) || 0) * truckCapacity)}</span>
+                          <span className="text-sm text-blue-900 font-medium">
+                            Price Per Litre × Capacity
+                          </span>
+                          <span className="text-sm text-blue-900 font-semibold">
+                            ₦
+                            {formatNumber(
+                              (parseFloat(pricePerLitre) || 0) * truckCapacity,
+                            )}
+                          </span>
                         </div>
                         <div className="flex items-center justify-between w-full mb-1">
-                          <span className="text-sm text-blue-900 font-medium">Transport Fare</span>
-                          <span className="text-sm text-blue-900 font-semibold">₦{formatNumber(amount)}</span>
+                          <span className="text-sm text-blue-900 font-medium">
+                            Transport Fare
+                          </span>
+                          <span className="text-sm text-blue-900 font-semibold">
+                            ₦{formatNumber(amount)}
+                          </span>
                         </div>
                         <div className="border-t border-blue-200 w-full my-2"></div>
                         <div className="flex items-center justify-between w-full">
-                          <span className="text-base font-bold text-blue-700">Total Quote</span>
-                          <span className="text-xl font-bold text-blue-800">₦{formatNumber(total)}</span>
+                          <span className="text-base font-bold text-blue-700">
+                            Total Quote
+                          </span>
+                          <span className="text-xl font-bold text-blue-800">
+                            ₦{formatNumber(total)}
+                          </span>
                         </div>
                       </>
                     ) : (
                       <>
                         <div className="flex items-center justify-between w-full mb-1">
-                          <span className="text-sm text-blue-900 font-medium">Transport Fare</span>
-                          <span className="text-sm text-blue-900 font-semibold">₦{formatNumber(amount)}</span>
+                          <span className="text-sm text-blue-900 font-medium">
+                            Transport Fare
+                          </span>
+                          <span className="text-sm text-blue-900 font-semibold">
+                            ₦{formatNumber(amount)}
+                          </span>
                         </div>
                         <div className="border-t border-blue-200 w-full my-2"></div>
                         <div className="flex items-center justify-between w-full">
-                          <span className="text-base font-bold text-blue-700">Total Quote</span>
-                          <span className="text-xl font-bold text-blue-800">₦{formatNumber(total)}</span>
+                          <span className="text-base font-bold text-blue-700">
+                            Total Quote
+                          </span>
+                          <span className="text-xl font-bold text-blue-800">
+                            ₦{formatNumber(total)}
+                          </span>
                         </div>
                       </>
                     )}
@@ -378,7 +481,12 @@ const RFQModal = () => {
                   label="Send Quote"
                   type="submit"
                   loading={updatingOrder}
-                  disabled={!(arrivalTime && (showPricePerLitre ? (pricePerLitre && amount) : amount))}
+                  disabled={
+                    !(
+                      arrivalTime &&
+                      (showPricePerLitre ? pricePerLitre && amount : amount)
+                    )
+                  }
                 />
               </div>
             </form>

@@ -70,7 +70,7 @@ export default function BuyerCalculator() {
 
 
   // Fetch data
-  const { data: loadPointsRes, isLoading: loadingLoadPoints } = useFetchLoadPoints;
+  const { data: loadPointsRes, isLoading: loadingLoadPoints } = useFetchLoadPoints();
   const { data: depotHubsRes, isLoading: loadingDepotHubs } = useFetchDepotHubs;
   const { data: stateRes, isLoading: loadingStates } = useFetchStates;
   const { data: lgaRes, isLoading: loadingLGA } = useFetchStateLGA(destinationState?.value);

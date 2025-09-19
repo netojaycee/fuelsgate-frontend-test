@@ -100,11 +100,9 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
 
       {/* Truck Type Badge - Top Left */}
       <div className="absolute -top-2 -left-2 z-10">
-        <span 
+        <span
           className={`flex items-center justify-center border-2 border-white px-2 py-1 rounded-full shadow-lg ${
-            data?.truckType !== 'tanker' 
-              ? 'bg-purple-500' 
-              : 'bg-blue-500'
+            data?.truckType !== 'tanker' ? 'bg-purple-500' : 'bg-blue-500'
           }`}
         >
           <Text variant="pxs" fontWeight="semibold" color="text-white">
@@ -118,12 +116,15 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
         <div className="flex items-center gap-3">
           <span
             className={`h-7 w-10 rounded-full flex items-center justify-center shadow-sm relative overflow-hidden ${
-              data?.truckType !== 'tanker' || !(typeof data?.productId === 'object' && data?.productId?.color)
+              data?.truckType !== 'tanker' ||
+              !(typeof data?.productId === 'object' && data?.productId?.color)
                 ? 'bg-blue-tone-100'
                 : ''
             }`}
             style={
-              data?.truckType === 'tanker' && typeof data?.productId === 'object' && data?.productId?.color
+              data?.truckType === 'tanker' &&
+              typeof data?.productId === 'object' &&
+              data?.productId?.color
                 ? data?.productId?.color.includes('-')
                   ? {
                       background: `linear-gradient(to bottom, ${
@@ -151,12 +152,11 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
               {data?.truckNumber || 'N/A'}
             </Text>
             <Text variant="pxs" color="text-gray-500" classNames="truncate">
-              {data?.truckType === 'tanker' 
-                ? (typeof data?.productId === 'object'
-                    ? data?.productId?.name
-                    : 'Unknown Product')
-                : `${data?.truckType} Truck`
-              }
+              {data?.truckType === 'tanker'
+                ? typeof data?.productId === 'object'
+                  ? data?.productId?.name
+                  : 'Unknown Product'
+                : `${data?.truckType} Truck`}
             </Text>
           </div>
         </div>
@@ -210,7 +210,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
                 data.loadStatus === 'loaded' ? 'bg-blue-500' : 'bg-gray-400'
               }`}
             >
-              <p className='text-[9px] text-white p-0'>
+              <p className="text-[9px] text-white p-0">
                 {data.loadStatus === 'loaded' ? 'Loaded' : 'Unloaded'}
               </p>
             </span>
@@ -224,7 +224,9 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
               Product
             </Text>
             <Text variant="pxs" color="text-gray-700">
-              {typeof data?.productId === 'object' ? data?.productId?.name : data?.productId}
+              {typeof data?.productId === 'object'
+                ? data?.productId?.name
+                : data?.productId}
             </Text>
           </div>
         )}
@@ -233,10 +235,11 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
         {data?.capacity && (
           <div className="flex items-center justify-between">
             <Text variant="pxs" color="text-gray-500">
-              Capacity
+              Volume
             </Text>
             <Text variant="ps" fontWeight="semibold" color="text-gray-900">
-              {formatNumber(data.capacity)} {data?.truckType === 'tanker' ? 'Ltrs' : 'Tons'}
+              {formatNumber(data.capacity)}{' '}
+              {data?.truckType === 'tanker' ? 'Ltrs' : 'Tons'}
             </Text>
           </div>
         )}

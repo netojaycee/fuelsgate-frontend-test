@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Fuelsgate',
-  description: 'A Digital Platform For Bulk Fuel Transactions',
+  description: 'A Digital Platform For Securing Bulk Fuels Deliveries',
 };
 
 export default function RootLayout({

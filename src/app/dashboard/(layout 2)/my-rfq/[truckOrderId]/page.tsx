@@ -198,6 +198,46 @@ const TruckRfq = () => {
                     truckSize={orderData?.data.truckId.capacity}
                   />
                 </TransporterRoot>
+
+                {/* Cargo Details for non-tanker trucks */}
+                {orderData?.data.truckId.truckType !== 'tanker' && (
+                  <div className="max-w-[496px] mx-auto mt-8 border border-blue-100 rounded-lg p-4 bg-blue-50">
+                    <Heading
+                      variant="h6"
+                      classNames="mb-2 text-blue-700"
+                      fontWeight="semibold"
+                    >
+                      Cargo Details
+                    </Heading>
+                    <div className="flex flex-col gap-2">
+                      {orderData?.data.cargoType && (
+                        <Text variant="ps" color="text-dark-gray-400">
+                          <span className="font-semibold">Cargo Type:</span> {orderData.data.cargoType}
+                        </Text>
+                      )}
+                      {orderData?.data.cargoCategory && (
+                        <Text variant="ps" color="text-dark-gray-400">
+                          <span className="font-semibold">Cargo Category:</span> {orderData.data.cargoCategory}
+                        </Text>
+                      )}
+                      {orderData?.data.cargoWeight && (
+                        <Text variant="ps" color="text-dark-gray-400">
+                          <span className="font-semibold">Cargo Weight:</span> {orderData.data.cargoWeight}
+                        </Text>
+                      )}
+                      {orderData?.data.specialHandling && orderData.data.specialHandling.length > 0 && (
+                        <Text variant="ps" color="text-dark-gray-400">
+                          <span className="font-semibold">Special Handling:</span> {orderData.data.specialHandling.join(', ')}
+                        </Text>
+                      )}
+                      {orderData?.data.notes && (
+                        <Text variant="ps" color="text-dark-gray-400">
+                          <span className="font-semibold">Notes:</span> {orderData.data.notes}
+                        </Text>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center justify-end gap-3 border-t border-light-gray-700 mt-32 py-6 px-5">

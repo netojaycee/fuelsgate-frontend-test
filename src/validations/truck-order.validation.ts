@@ -9,6 +9,11 @@ export const truckOrderSchema = yup.object({
   // loadingCity: yup.string().required('Loading City is required'),
   // loadingAddress: yup.string().required('Loading Address is required'),
   loadingDate: yup.date().typeError('Please enter a loading date'),
+  // specialHandling: yup.array().of(yup.string()),
+  // notes: yup.string(),
+  // cargoType: yup.string(),
+  // cargoCategory: yup.string(),
+  // cargoWeight: yup.string(),
 });
 
 export const updateTruckOrderPriceSchema = yup.object({

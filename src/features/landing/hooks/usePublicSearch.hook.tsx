@@ -174,7 +174,7 @@ const usePublicSearch = (isSearchPage = false) => {
         showToast('Please select a depot', 'error');
         return false;
       } else if (!selectedSize) {
-        showToast('Please select truck size', 'error');
+        showToast('Please select Volume', 'error');
         return false;
       }
     } else if (truckType.value !== 'tanker') {
@@ -192,7 +192,9 @@ const usePublicSearch = (isSearchPage = false) => {
     if (depotsRes && truckType) {
       return depotsRes?.data
         ?.filter((item: DepotHubDto) =>
-          truckType.value === 'tanker' ? item.type === 'tanker' : item.type === 'others'
+          truckType.value === 'tanker'
+            ? item.type === 'tanker'
+            : item.type === 'others',
         )
         ?.sort((a: DepotHubDto, b: DepotHubDto) => a.name.localeCompare(b.name))
         ?.map((item: DepotHubDto) => ({
@@ -249,7 +251,14 @@ const usePublicSearch = (isSearchPage = false) => {
 
   // Initialize values from URL when on search page
   useEffect(() => {
-    if (isSearchPage && searchParams) {
+    if (urlParamsInitialized) return;
+    // if (isSearchPage && searchParams) {
+    if (
+      isSearchPage &&
+      searchParams &&
+      productsRes?.data?.products?.length &&
+      depotsRes?.data?.length
+    ) {
       // Get values from URL
       const productId = searchParams.get('productId');
       const depotHubId = searchParams.get('depotHubId');
@@ -257,12 +266,7 @@ const usePublicSearch = (isSearchPage = false) => {
       const truckTypeValue = searchParams.get('truckType');
 
       // If we have URL params, set the initial selections
-      if (
-        productId ||
-        depotHubId ||
-        sizeValue ||
-        truckTypeValue
-      ) {
+      if (productId || depotHubId || sizeValue || truckTypeValue) {
         // Set truck type first (this is critical for conditional rendering)
         if (truckTypeValue) {
           const truckTypeOptions = [
@@ -286,16 +290,30 @@ const usePublicSearch = (isSearchPage = false) => {
         }
 
         // Handle depot/location for both tanker (depotHubId) and flatbed (locationId)
-        if ((depotHubId) && depots?.length) {
-          const depotObj = depots.find(
-            (item: any) => item.value === (depotHubId),
+        if (depotHubId && depotsRes?.data?.length) {
+          // Filter depots for the truckTypeValue from URL
+          const filteredDepots = depotsRes.data
+            .filter((item: DepotHubDto) =>
+              truckTypeValue === 'tanker'
+                ? item.type === 'tanker'
+                : item.type === 'others',
+            )
+            .sort((a: DepotHubDto, b: DepotHubDto) =>
+              a.name.localeCompare(b.name),
+            )
+            .map((item: DepotHubDto) => ({
+              label: item.name,
+              value: item._id,
+            }));
+          const depotObj = filteredDepots.find(
+            (item: any) => item.value === depotHubId,
           );
           if (depotObj) setDepot(depotObj);
         }
 
         if (sizeValue) {
           let sizeOptions = [];
-          if (truckType && truckType.value === 'tanker') {
+          if (truckTypeValue === 'tanker') {
             sizeOptions = TRUCK_SIZES;
           } else {
             sizeOptions = NON_TANKER_SIZES;
@@ -316,7 +334,16 @@ const usePublicSearch = (isSearchPage = false) => {
       // Not on search page, mark as initialized
       setUrlParamsInitialized(true);
     }
-  }, [isSearchPage, searchParams, products, depots, truckType]);
+  }, [
+    isSearchPage,
+    searchParams,
+    productsRes?.data?.products,
+    depotsRes?.data,
+    truckType,
+    products,
+    depots,
+    urlParamsInitialized,
+  ]);
 
   const constructedSearchQuery = useMemo(() => {
     if (isSearchPage && urlParamsInitialized && truckType) {
@@ -341,13 +368,19 @@ const usePublicSearch = (isSearchPage = false) => {
     selectedSize,
   ]);
 
+  // Only set searchQuery and hasSearched on initial load with URL params
   useEffect(() => {
-
-    if (constructedSearchQuery) {
+    if (
+      isSearchPage &&
+      urlParamsInitialized &&
+      truckType &&
+      constructedSearchQuery &&
+      !hasSearched
+    ) {
       setSearchQuery(constructedSearchQuery);
       setHasSearched(true);
     }
-  }, [constructedSearchQuery]);
+  }, [isSearchPage, urlParamsInitialized, truckType, constructedSearchQuery, hasSearched]);
 
   // Fetch truck data based on search query
   const {
@@ -363,29 +396,23 @@ const usePublicSearch = (isSearchPage = false) => {
   );
 
   // Automatic search effect when URL params are loaded and all required fields are present
+  // Only run search automatically on initial load with URL params
   useEffect(() => {
     if (
       isSearchPage &&
       urlParamsInitialized &&
       truckType &&
-      constructedSearchQuery
+      constructedSearchQuery &&
+      !hasSearched
     ) {
-      // Automatically trigger search when URL parameters are present and initialized
       const timeoutId = setTimeout(() => {
         if (refetchTrucks) {
           refetchTrucks();
         }
-      }, 100); // Small delay to ensure everything is properly initialized
-
+      }, 100);
       return () => clearTimeout(timeoutId);
     }
-  }, [
-    isSearchPage,
-    urlParamsInitialized,
-    truckType,
-    constructedSearchQuery,
-    refetchTrucks,
-  ]);
+  }, [isSearchPage, urlParamsInitialized, truckType, constructedSearchQuery, hasSearched, refetchTrucks]);
 
   // Search handler
   const handleSearchTruckClick = useCallback(() => {
@@ -448,13 +475,13 @@ const usePublicSearch = (isSearchPage = false) => {
       }
 
       if (url) {
-        router.push(url);
+        window.location.href = url;
       }
     }
   }, [
     areRequiredFieldsPresent,
     validateSearchTrucks,
-    router,
+    // router,
     truckType,
     selectedProduct,
     depot,

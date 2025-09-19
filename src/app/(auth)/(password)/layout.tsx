@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Fuelsgate | Authentication',
-  description: 'A Digital Platform For Bulk Fuel Transactions',
+  description: 'A Digital Platform For Securing Bulk Fuels Deliveries',
 };
 
 export default function AuthLayout({

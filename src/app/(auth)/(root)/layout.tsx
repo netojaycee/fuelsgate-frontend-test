@@ -9,7 +9,7 @@ import { Heading } from '@/components/atoms/heading';
 
 export const metadata: Metadata = {
   title: 'Fuelsgate | Authentication',
-  description: 'A Digital Platform For Bulk Fuel Transactions',
+  description: 'A Digital Platform For Securing Bulk Fuels Deliveries',
 };
 
 const sora = Sora({ subsets: ['latin'] });
@@ -36,7 +36,7 @@ export default function AuthLayout({
                 fontFamily={sora.className}
                 classNames="mb-8"
               >
-                A Digital Platform For Bulk Fuel Transactions
+                A Digital Platform For Securing Bulk Fuels Deliveries
               </Heading>
               <Text
                 variant="pl"
@@ -63,9 +63,12 @@ export default function AuthLayout({
           </div>
         </div>
       </div>
-       <Link href={'/'} className="text-blue-tone-400 hover:underline p-4 md:hidden ">
-              <Image src={GoldLogo} alt="White Logo" width={99} height={66} />
-            </Link>
+      <Link
+        href={'/'}
+        className="text-blue-tone-400 hover:underline p-4 md:hidden "
+      >
+        <Image src={GoldLogo} alt="White Logo" width={99} height={66} />
+      </Link>
       <div className="relative h-full flex flex-col w-full lg:w-1/2 py-10 px-3.5">
         {children}
         <div className="flex items-center justify-end gap-7 mt-14 lg:mr-14">

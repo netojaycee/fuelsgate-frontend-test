@@ -206,7 +206,7 @@ const SearchFilterContent = ({
                       <div className="p-1.5 bg-purple-500/20 rounded-lg">
                         <Gauge className="w-4 h-4 text-purple-400" />
                       </div>
-                      Truck Size
+                     Volume
                     </div>
                     <div className="transform transition-all duration-300 group-hover:scale-105 relative z-30">
                       <CustomSelect
@@ -284,7 +284,7 @@ const SearchFilterContent = ({
                       <div className="p-1.5 bg-purple-500/20 rounded-lg">
                         <Gauge className="w-4 h-4 text-purple-400" />
                       </div>
-                      Truck Size
+                     Volume
                     </div>
                     <div className="transform transition-all duration-300 group-hover:scale-105 relative z-30">
                       <CustomSelect
@@ -315,7 +315,7 @@ const SearchFilterContent = ({
                   variant="glow"
                   onClick={handleSearchTruckClick}
                   leftIcon={<Search className="" />}
-                  label="Search Trucks"
+                  label="Search"
                   // width="w-full md:w-[320px]"
                   width="w-[250px]"
                   // height="h-16"

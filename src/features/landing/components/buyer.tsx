@@ -32,35 +32,34 @@ const Buyer = () => {
         fontWeight="regular"
         lineHeight="leading-[45px]"
       >
-        Stop waiting for <span className="text-gold font-semibold">trucks</span>
-        . Start loading <span className="text-gold font-semibold">faster</span>.
+        Don&apos;t wait. Load out{" "}
+        <span className="text-gold font-semibold">fast</span>.
       </Heading>
       <Heading
         variant="h6"
         classNames="text-center mb-20"
         color="text-dark-gray-400"
       >
-        Connect directly with trucks already at refineries, depots & truck
-        parks, for bridging or local delivery. <br /> PMS, AGO, ATK, LPG, CNG.
+       Connect directly to Dangote Refinery fuel supply vendors, fuel importers and vetted trucks of all types.
       </Heading>
 
       <div className="grid grid-cols-2 max-lg:grid-cols-1 items-start gap-10 max-sm:gap-2">
         <div className="flex flex-col h-full gap-5 py-5">
           <Checklist
-            title="Updated with new trucks hourly"
-            description="New trucks arrive the depot area throughout each day"
+            title="Loaded & unloaded trucks"
+            description="Cut out the depot loading bureaucracy cut out the calls & search for trucks"
           />
           <Checklist
-            title="Search by exact truck"
-            description="Filter by depot, product, truck capacity & local or bridging deliveries"
+            title="Find exact trucks"
+            description="Filter search by location, truck type, truck size, local or bridging deliveries"
           />
           <Checklist
-            title="Deal Directly with Drivers"
-            description="Request quotes, negotiate, meet & pay the driver directly"
+            title="Deal Directly"
+            description="Request for quotes, receive quotes, counter-offer, reject or accept & generate smart contract."
           />
           <Checklist
             title="Access key Terminals"
-            description="Active now in Lagos at all depot locations, Pinnacle/Dangote refinery location, truck Parks & more launching soon."
+            description="Active for loads in Dangote refinery, depots, Tin Can Island & Lekki Deep Sea Ports in Lagos."
           />
           <div>
             <Link

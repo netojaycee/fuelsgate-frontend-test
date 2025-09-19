@@ -9,10 +9,11 @@ import useToastConfig from './useToastConfig.hook';
 const useTransportFareHook = () => {
   const { showToast } = useToastConfig();
 
-  const useFetchLoadPoints = useQuery({
-    queryFn: async () => {
-      return await fetchLoadPointsRequest();
-    },
+  const useFetchLoadPoints = () =>
+    useQuery({
+      queryFn: async () => {
+        return await fetchLoadPointsRequest();
+      },
     queryKey: [`LOAD_POINTS`],
   });
 

@@ -12,8 +12,8 @@ const Header = () => {
 
   return (
     <div className="flex items-center flex-wrap justify-between gap-2 py-4">
-      <Text variant='pl' color='text-dark-gray-500' fontWeight='medium'>Available Trucks</Text>
-      <CustomButton variant='primary' label='List Truck' width='w-fit' height='h-11' fontSize='text-sm' leftIcon={<Plus height={24} width={24} />} classNames='gap-1 rounded-lg p-2' onClick={openListTruckModal} />
+      <Text variant='pl' color='text-dark-gray-500' fontWeight='medium'>Allocated Volumes</Text>
+      <CustomButton variant='primary' label='Allocate Volumes' width='w-fit' height='h-11' fontSize='text-sm' leftIcon={<Plus height={24} width={24} />} classNames='gap-1 rounded-lg p-2' onClick={openListTruckModal} />
     </div>
   )
 }

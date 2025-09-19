@@ -140,13 +140,7 @@ const LockTruckModal = () => {
   const onSubmit = async (data: any) => {
     try {
       console.log(data, 'data in LockTruckModal onSubmit');
-      let loadingDepotValue = data.loadingDepot;
-      if (loadingDepotValue === 'lekki_deep_sea') {
-        loadingDepotValue = 'Lekki Deep Sea Port';
-      } else if (loadingDepotValue === 'tin_can_island') {
-        loadingDepotValue = 'Tin Can Island Port';
-      }
-      await createNewOrder({ ...data, loadingDepot: loadingDepotValue, type: 'truck' });
+      await createNewOrder({...data, type: 'truck'});
       window.location.href = `/dashboard/my-rfq/`;
     } catch (error: any) {
       renderErrors(error?.errors, setError);
@@ -219,7 +213,7 @@ const LockTruckModal = () => {
 
               <div className="flex items-center justify-between gap-2 mb-4">
                 <Text variant="ps" color="text-dark-gray-550">
-                  Volume
+                  Truck Volume
                 </Text>
                 <Text variant="ps" color="text-[#151A23]" fontWeight="medium">
                   {formatNumber(truckSize)}
@@ -298,69 +292,6 @@ const LockTruckModal = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grow grid grid-cols-1 gap-2 bg-light-gray-150 py-[10px] px-4 rounded-[10px] mb-4">
-            {/* Cargo Details for non-tanker trucks */}
-            {truckType !== 'tanker' && (
-              <>
-                <CustomInput
-                  type="text"
-                  name="cargoType"
-                  register={register}
-                  error={errors.cargoType?.message}
-                  label="Goods/Materials Type"
-                  placeholder="e.g. Steel pipes, Machinery"
-                  classNames="mb-2"
-                />
-                <CustomInput
-                  type="text"
-                  name="cargoWeight"
-                  register={register}
-                  error={errors.cargoWeight?.message}
-                  label="Cargo Weight/Volume"
-                  placeholder="e.g. 10 tonnes, 20 pallets"
-                  classNames="mb-2"
-                />
-                <CustomSelect
-                  label="Cargo Type"
-                  name="cargoCategory"
-                  options={[
-                    { label: 'Standard (uniform)', value: 'standard' },
-                    { label: 'Oversized (special permits)', value: 'oversized' },
-                    { label: 'Hazardous', value: 'hazardous' },
-                    { label: 'Other', value: 'other' },
-                  ]}
-                  value={undefined}
-                  onChange={(val: unknown) => setValue('cargoCategory', (val as CustomSelectOption | undefined)?.value)}
-                  error={errors.cargoCategory?.message}
-                  classNames="mb-2"
-                />
-                <CustomSelect
-                  label="Special Handling"
-                  name="specialHandling"
-                  options={[
-                    { label: 'Cranes', value: 'cranes' },
-                    { label: 'Tarpaulin', value: 'tarpaulin' },
-                    { label: 'Customs clearance', value: 'customs' },
-                    { label: 'Escorts', value: 'escorts' },
-                    { label: 'Other', value: 'other' },
-                  ]}
-                  // isMulti
-                  value={undefined}
-                  onChange={(val) => setValue('specialHandling', Array.isArray(val) ? val.map((v: any) => v.value) : undefined)}
-                  error={errors.specialHandling?.message}
-                  classNames="mb-2"
-                />
-                <CustomInput
-                  type="text"
-                  name="notes"
-                  register={register}
-                  error={errors.notes?.message}
-                  label="Additional Notes (optional)"
-                  placeholder="Any extra info for the transporter"
-                  classNames="mb-2"
-                />
-                <hr className="my-2" />
-              </>
-            )}
             <CustomSelect
               label={truckType === 'tanker' ? 'Load Depot' : 'Load Port'}
               name="loadingDepot"
@@ -370,6 +301,27 @@ const LockTruckModal = () => {
               onChange={handleDepotChange}
               error={errors.loadingDepot?.message}
             />
+
+            {/* 
+              <CustomSelect
+                label="Loading City"
+                name="loadingCity"
+                options={lgas}
+                isDisabled={loadingLGA}
+                value={selectedLGA}
+                onChange={handleLGAChange}
+                error={errors.loadingCity?.message}
+              />
+
+              <CustomInput
+                type="text"
+                name="loadingAddress"
+                register={register}
+                error={errors.loadingAddress?.message}
+                label="Enter Loading Address"
+                classNames="mb-4 col-span-2"
+              /> 
+            */}
           </div>
 
           <div className="bg-light-gray-150 py-[10px] px-4 rounded-[10px] mb-8">
@@ -386,7 +338,7 @@ const LockTruckModal = () => {
               name="loadingDate"
               register={register}
               error={errors.loadingDate?.message}
-              label="Enter Loading Date (minimum of 24hrs notice time)"
+              label="Enter Loading Date"
             />
           </div>
 

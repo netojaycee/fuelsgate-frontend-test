@@ -81,11 +81,20 @@ export const SignUpForm = () => {
         register={register}
         classNames="mb-4"
       />
+
       <CustomInput
         label="Password"
         type="password"
         name="password"
         error={errors.password?.message}
+        register={register}
+        classNames="mb-4"
+      />
+      <CustomInput
+        label="Confirm Password"
+        type="password"
+        name="confirmPassword"
+        error={errors.confirmPassword?.message}
         register={register}
         classNames="mb-9"
       />

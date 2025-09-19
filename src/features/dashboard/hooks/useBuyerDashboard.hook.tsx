@@ -145,7 +145,7 @@ const useBuyerDashboardHook = () => {
         showToast('Please select a depot', 'error');
         return false;
       } else if (!selectedSize) {
-        showToast('Please select truck size', 'error');
+        showToast('Please select Volume', 'error');
         return false;
       } else if (!selectedLoadStatus) {
         showToast('Please select load status', 'error');

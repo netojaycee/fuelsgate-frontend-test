@@ -7,7 +7,7 @@ import GoBack from "@/features/authentication/components/go-back";
 
 export const metadata: Metadata = {
   title: 'Fuelsgate | Onboarding',
-  description: 'A Digital Platform For Bulk Fuel Transactions',
+  description: 'A Digital Platform For Securing Bulk Fuels Deliveries',
 };
 
 

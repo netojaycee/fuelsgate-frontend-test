@@ -33,12 +33,17 @@ export interface TruckOrderDto {
   // loadingAddress: string;
   createdAt?: Date | string;
   updatedAt?: Date | string;
+  specialHandling?: string[];
+  notes?: string;
+  cargoType?: string;
+  cargoCategory?: string;
+  cargoWeight?: string;
 }
 export type TruckOrderRFQStatus = 'pending' | 'sent' | 'accepted' | 'rejected';
 
 export type TruckOrderFormDto = Pick<
   TruckOrderDto,
-  'orderId' | 'state' | 'city' | 'destination' | 'loadingDate' | 'loadingDepot'
+  'orderId' | 'state' | 'city' | 'destination' | 'loadingDate' | 'loadingDepot' | 'specialHandling' | 'notes' | 'cargoType' | 'cargoCategory' | 'cargoWeight'
   // | 'loadingState'
   // | 'loadingCity'
   // | 'loadingAddress'

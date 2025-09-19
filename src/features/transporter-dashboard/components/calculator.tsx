@@ -61,7 +61,7 @@ const Calculator = () => {
   const [fuelPrice, setFuelPrice] = useState<number | undefined>(undefined);
 
   // Fetch data
-  const { data: loadPointsRes, isLoading: loadingLoadPoints } = useFetchLoadPoints;
+  const { data: loadPointsRes, isLoading: loadingLoadPoints } = useFetchLoadPoints();
   const { useFetchDepotHubs } = useDepotHubHook();
   const { data: depotHubsRes, isLoading: loadingDepotHubs } = useFetchDepotHubs;
   const { data: stateRes, isLoading: loadingStates } = useFetchStates;

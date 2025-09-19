@@ -50,7 +50,7 @@ const truckListPublicColumns = [
   },
   // {
   //   accessorKey: 'capacity',
-  //   header: 'Truck Size',
+  //   header: 'Volume',
   //   cell: ({ row }: { row: any }) => {
   //     return <TableNumber number={row.getValue('capacity')} type="volume" />;
   //   },

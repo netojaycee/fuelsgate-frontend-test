@@ -218,18 +218,16 @@ const Hero = () => {
           lineHeight="leading-12"
           classNames="max-w-[850px] mx-auto mb-2 max-sm:text-[30px]"
         >
-          Search, Find &amp; Negotiate Deals for{' '}
-          <span className="text-gold">Trucks</span>
+          Search, Find & Book Fuels & Dry Cargo Direct{" "}
+          <span className="text-gold">Deliveries</span>
         </Heading>
         <Text
           variant="pm"
           classNames="max-w-[786px] mx-auto mb-10"
           color="text-mid-gray-175"
         >
-          Save time, money & effort with Fuelsgate productivity tool. The
-          smartest way to source & book exact trucks you need – Instantly
-          connect by size, product type and locations at Depots, Dangote
-          refinery & Truck parks.
+         Save time & money with the smart way to source & secure direct fuel deliveries from Dangote Refinery & depots – Is it trucks only you require? Instantly connect to any truck type & size for fuels or dry cargo. 
+
         </Text>
         <div className="space-y-6">
           <SearchFilter />

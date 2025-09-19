@@ -6,6 +6,7 @@ export interface RegisterFormType {
   role: Roles
   email: string
   password: string
+  confirmPassword: string // Only for frontend validation
 }
 
 export type LoginDto = {

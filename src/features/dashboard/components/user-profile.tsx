@@ -133,7 +133,7 @@ const UserProfile = () => {
           <>
             <div className="p-3 rounded-lg border border-mid-gray-350">
               <Text variant="pxs" fontWeight="semibold" classNames="mb-1.5">
-                Total Trucks
+                Total Allocations
               </Text>
               {loadingTransporter ? (
                 <CustomLoader height="h-6" width="w-6" />
@@ -149,7 +149,7 @@ const UserProfile = () => {
             </div>
             <div className="p-3 rounded-lg border border-mid-gray-350">
               <Text variant="pxs" fontWeight="semibold" classNames="mb-1.5">
-                Trucks Locked
+                Volumes Locked
               </Text>
               {loadingTransporter ? (
                 <CustomLoader height="h-6" width="w-6" />

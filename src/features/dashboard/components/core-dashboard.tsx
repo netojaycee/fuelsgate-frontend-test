@@ -148,7 +148,7 @@ const CoreDashboard = () => {
                       : 'border-light-gray-200',
                   )}
                   fontWeight="semibold"
-                  label="Truck Request"
+                  label="Volume Request"
                 />
                 {role === 'transporter' && (
                   <CustomButton
@@ -172,7 +172,7 @@ const CoreDashboard = () => {
                         : 'border-light-gray-200',
                     )}
                     fontWeight="semibold"
-                    label="Trucks"
+                    label="Volumes"
                   />
                 )}
 

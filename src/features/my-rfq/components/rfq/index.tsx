@@ -111,26 +111,23 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
 
   return (
     <div className="relative bg-white flex flex-col md:flex-row items-start md:items-center justify-between border border-mid-gray-550 p-4 rounded-[10px] min-h-[120px] max-h-[none] md:max-h-[120px]">
-      <div className="flex items-start gap-4 flex-1 min-w-0 pr-0 md:pr-4 w-full">
-        <div className="h-[50px] w-[50px] rounded-[7px] bg-blue-tone-100 border border-black flex items-center justify-center flex-shrink-0">
+      <div className=" flex items-start gap-4 flex-1 min-w-0 pr-0 md:pr-4 w-full">
+       <div className='flex flex-col gap-1'> <div className="h-[50px] w-[50px] rounded-[7px] bg-blue-tone-100 border border-black flex items-center justify-center flex-shrink-0">
           <FGTruckFill
             height={31}
             width={31}
             color={'#1868DB'}
             // ((truckOrder.truckId as TruckDto)?.productId as ProductDto)?.color ||
           />
-        </div>
-        <div className="flex-1 min-w-0 flex flex-col gap-1">
-          <div className="flex flex-wrap items-center gap-2 mb-1 w-full">
-            {/* Product badge (only for tanker) */}
-            {(truckOrder.truckId as TruckDto)?.truckType === 'tanker' && (
+        
+        </div>    {(truckOrder.truckId as TruckDto)?.truckType === 'tanker' && (
               <span
                 style={{
                   backgroundColor:
                     ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
                       ?.color || '#1868DB',
                 }}
-                className="border border-black inline-flex items-center justify-center w-[43px] h-[17px] text-black rounded-[2px] uppercase font-medium text-xs flex-shrink-0"
+                className="border border-black inline-flex items-center justify-center w-[50px] h-[17px] text-black rounded-[2px] uppercase font-medium text-xs flex-shrink-0"
               >
                 {
                   ((truckOrder.truckId as TruckDto)?.productId as ProductDto)
@@ -138,12 +135,18 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
                 }
               </span>
             )}
-            {/* Truck type badge */}
-            <span className="inline-flex items-center justify-center px-2 h-[17px] text-blue-700 bg-blue-100 rounded-[2px] uppercase font-medium text-xs flex-shrink-0">
+             {/* Truck type badge */}
+            <span className="inline-flex items-center justify-center px-2 w-[50px] h-[17px] text-blue-700 bg-blue-100 rounded-[2px] uppercase font-medium text-[10px] flex-shrink-0">
               {(
                 (truckOrder.truckId as TruckDto)?.truckType || ''
               ).toUpperCase()}
             </span>
+            </div>
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1 w-full">
+            {/* Product badge (only for tanker) */}
+          
+           
             {/* Capacity with correct unit */}
             <span className="flex-shrink-0 text-gray-700 font-semibold">
               {formatNumber((truckOrder.truckId as TruckDto)?.capacity ?? 0)}{' '}
@@ -152,7 +155,7 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
                 : 'Tons'}
             </span>
             {/* Load status (if not tanker) */}
-            {(truckOrder.truckId as TruckDto)?.truckType !== 'tanker' && (
+            {(truckOrder.truckId as TruckDto)?.truckType === 'tanker' && (
               <span className="inline-flex items-center justify-center px-2 h-[17px] text-green-700 bg-green-100 rounded-[2px] uppercase font-medium text-xs flex-shrink-0">
                 {(
                   (truckOrder.truckId as TruckDto)?.loadStatus || ''

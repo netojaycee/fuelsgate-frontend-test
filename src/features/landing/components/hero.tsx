@@ -8,7 +8,7 @@ import FuelsGateBrand from '@assets/images/Fuelgate.svg';
 import { Heading } from '@/components/atoms/heading';
 import { Sora } from 'next/font/google';
 import Marquee from 'react-fast-marquee';
-import Logo from '@assets/images/logo_gold.svg';
+// import Logo from '@assets/images/logo_gold.svg';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { LandingContext } from '../contexts/LandingContext';
@@ -26,6 +26,7 @@ import usePricingHook from '@/hooks/usePricing.hook';
 import ProductRenderer from '@/components/atoms/product-renderer';
 import { formatNumber } from '@/utils/formatNumber';
 import SearchFilter from './SearchFilter';
+import Logo from '@/features/dashboard/components/Logo';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -129,8 +130,8 @@ const Hero = () => {
         )}
       >
         <div className="group/navbar container mx-auto flex justify-between items-center gap-3">
-          <Image src={Logo} width={99} height={67} alt="Logo" />
-
+          {/* <Image src={Logo} width={99} height={67} alt="Logo" /> */}
+          <Logo />
           <MobileMenu />
 
           <div className="bg-white/10 sm:flex items-center justify-evenly rounded-full h-[50px] w-[250px] hidden">
@@ -218,7 +219,7 @@ const Hero = () => {
           lineHeight="leading-12"
           classNames="max-w-[850px] mx-auto mb-2 max-sm:text-[30px]"
         >
-          Search, Find & Book Fuels & Dry Cargo Direct{" "}
+          Search, Find & Book Fuels & Dry Cargo{' '}
           <span className="text-gold">Deliveries</span>
         </Heading>
         <Text
@@ -226,8 +227,9 @@ const Hero = () => {
           classNames="max-w-[786px] mx-auto mb-10"
           color="text-mid-gray-175"
         >
-         Save time & money with the smart way to source & secure direct fuel deliveries from Dangote Refinery & depots – Is it trucks only you require? Instantly connect to any truck type & size for fuels or dry cargo. 
-
+          Save time & money with the smart way to source & secure direct fuel
+          deliveries from Dangote Refinery & depots - Is it trucks only you
+          require? Instantly connect to any truck type & size
         </Text>
         <div className="space-y-6">
           <SearchFilter />

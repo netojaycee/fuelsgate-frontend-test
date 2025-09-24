@@ -30,11 +30,11 @@ const TruckRfq = () => {
   const { handleToggle } = useContext(ModalContext);
   const { user } = useContext(AuthContext);
   const router = useRouter();
-  const { useGetTruckOrderDetails, useUpdateTruckOrderRFQStatus } =
-    useTruckOrderHook();
-  const { data, isLoading, refetch } = useGetTruckOrderDetails(
-    params.truckOrderId as string,
-  );
+  // const { useGetTruckOrderDetails, useUpdateTruckOrderRFQStatus } =
+  //   useTruckOrderHook();
+  // const { data, isLoading, refetch } = useGetTruckOrderDetails(
+  //   params.truckOrderId as string,
+  // );
   const { useGetOrderDetails, useUpdateOrder } = useOrderHook();
   const { data: orderData, isLoading: isLoadingOrder } = useGetOrderDetails(
     params.truckOrderId as string,
@@ -42,43 +42,43 @@ const TruckRfq = () => {
 
   console.log(orderData, 'orderData in TruckRfq');
 
-  const { mutateAsync: updateRFQStatus, isPending: isUpdatingStatus } =
-    useUpdateTruckOrderRFQStatus(params.truckOrderId as string);
+  // const { mutateAsync: updateRFQStatus, isPending: isUpdatingStatus } =
+  //   useUpdateTruckOrderRFQStatus(params.truckOrderId as string);
 
   const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
     useUpdateOrder(params.truckOrderId as string);
 
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_API_BASE_URL, {
-      transports: ['websocket'],
-      secure: true,
-    });
-    socket.on('updatedTruckOrderStatus', (res) => {
-      queryClient.invalidateQueries({
-        queryKey: [`${res._id}_TRUCK_ORDER_DETAIL`],
-      });
-      refetch();
-    });
-  }, [queryClient, refetch]);
+  // useEffect(() => {
+  //   const socket = io(process.env.NEXT_PUBLIC_API_BASE_URL, {
+  //     transports: ['websocket'],
+  //     secure: true,
+  //   });
+  //   socket.on('updatedTruckOrderStatus', (res) => {
+  //     queryClient.invalidateQueries({
+  //       queryKey: [`${res._id}_TRUCK_ORDER_DETAIL`],
+  //     });
+  //     refetch();
+  //   });
+  // }, [queryClient, refetch]);
 
-  const handleAccept = async () => {
-    await updateRFQStatus({
-      rfqStatus: 'accepted',
-    });
-  };
+  // const handleAccept = async () => {
+  //   await updateRFQStatus({
+  //     rfqStatus: 'accepted',
+  //   });
+  // };
 
-  const handleReject = async () => {
-    await updateRFQStatus({
-      rfqStatus: 'rejected',
-    });
-  };
+  // const handleReject = async () => {
+  //   await updateRFQStatus({
+  //     rfqStatus: 'rejected',
+  //   });
+  // };
 
   const handleStatus = async (status: 'accepted' | 'rejected') => {
     try {
       const credentials = {
-        ...data,
+        ...orderData,
         description:
           status === 'accepted' ? 'accepting_order' : 'rejecting_order',
         type: 'truck',
@@ -146,7 +146,7 @@ const TruckRfq = () => {
                   fontWeight="semibold"
                   color="text-dark-500"
                 >
-                  Truck RFQ
+                  {orderData?.data.truckId.truckType === 'tanker' && orderData?.data.truckId.loadStatus === "loaded" ? "Volume RFQ" : "Truck RFQ"}
                 </Heading>
                 <Text
                   variant="pm"
@@ -155,12 +155,24 @@ const TruckRfq = () => {
                 >
                   {isBuyer ? (
                     <>
-                      This is a quotation for securing truck number{' '}
-                      <span className="font-bold">
-                        {orderData?.data.truckId.truckNumber}
-                      </span>
-                      . Kindly contact the transporter for truck location and to
-                      finalize payment and loading.
+                      {orderData?.data.truckId.truckType === 'tanker' &&
+                       orderData?.data.truckId.loadStatus === 'loaded' ? (
+                        <>
+                          This is a quotation for securing{" "}
+                          <span className="font-bold">
+                            {orderData?.data.truckId.capacity}
+                          </span> litres. Kindly contact the transporter for load/truck location and to finalize payment and loading.
+                        </>
+                      ) : (
+                        <>
+                          This is a quotation for securing truck number{' '}
+                          <span className="font-bold">
+                            {orderData?.data.truckId.truckNumber}
+                          </span>
+                          . Kindly contact the transporter for truck location and to
+                          finalize payment and loading.
+                        </>
+                      )}
                     </>
                   ) : (
                     <>
@@ -278,7 +290,7 @@ const TruckRfq = () => {
                       label="Accept Offer"
                       width="w-[182px]"
                       height="h-[55px]"
-                      loading={isUpdatingStatus}
+                      loading={isUpdatingOrder}
                       onClick={() => {
                         handleStatus('accepted');
                       }}

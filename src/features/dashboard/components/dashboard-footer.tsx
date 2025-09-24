@@ -1,11 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { FGEmail, FGLinkedIn, FGPhone, FGTwitterX } from '@fg-icons';
 import { Text } from '@/components/atoms/text';
-import GoldLogo from '@assets/images/logo_gold.png';
 import { Youtube } from 'lucide-react';
 import { Sora } from 'next/font/google';
+import Logo from './Logo';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -16,12 +15,7 @@ const DashboardFooter = () => {
         <div className="container mx-auto">
           <div className="flex flex-wrap items-end gap-20 py-14">
             <div className="mr-auto">
-              <div className="inline-flex items-end gap-4 mb-5">
-                <Image src={GoldLogo} width={99} height={66} alt="Logo" />
-                <Text variant="ps" classNames="italic">
-                  .. smart up
-                </Text>
-              </div>
+                <Logo />
               <Text variant="ps" classNames="flex items-center gap-3">
                 Follow us on our socials
                 <Link

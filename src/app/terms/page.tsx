@@ -1,14 +1,16 @@
 import DashboardFooter from '@/features/dashboard/components/dashboard-footer';
+import Logo from '@/features/dashboard/components/Logo';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import Logo from '@assets/images/logo_gold.svg';
+// import Logo from '@assets/images/logo_gold.svg';
 
 export default function Terms() {
   return (
     <>
     <div className="mt-10 group/navbar container mx-auto flex justify-between items-center gap-3 mb-4">
-              <Image src={Logo} width={99} height={67} alt="Logo" />
+             <Logo />
+              {/* <Image src={Logo} width={99} height={67} alt="Logo" /> */}
               <div className="flex items-center gap-4">
                 <Link href={'/'} className="text-blue-tone-400 hover:underline">
                   Home

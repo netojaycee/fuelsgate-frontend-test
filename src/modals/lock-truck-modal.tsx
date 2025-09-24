@@ -162,12 +162,12 @@ const LockTruckModal = () => {
             sora.className,
           )}
         >
-          Lock Truck
+          Lock {loadStatus === "loaded" ?  "Volume" : "Truck"}
         </DialogTitle>
       </DialogHeader>
       <div>
         <DialogDescription className="text-dark-gray-400 text-sm mb-5">
-          Fill in the details below to lock the truck
+          Fill in the details below to lock the {loadStatus === "loaded" ?  "Volume" : "Truck"}
         </DialogDescription>
 
         <div className="bg-light-gray-150 py-[10px] px-4 rounded-[10px] mb-3">
@@ -219,7 +219,7 @@ const LockTruckModal = () => {
 
               <div className="flex items-center justify-between gap-2 mb-4">
                 <Text variant="ps" color="text-dark-gray-550">
-                  Volume
+                  {loadStatus === "loaded" ? "Volume" : "Capacity"}
                 </Text>
                 <Text variant="ps" color="text-[#151A23]" fontWeight="medium">
                   {formatNumber(truckSize)}

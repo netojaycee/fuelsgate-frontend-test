@@ -21,6 +21,7 @@ const sora = Sora({ subsets: ['latin'] });
 const UserProfile = () => {
   const { user, profile } = useContext(AuthContext);
   const role: Roles | undefined = user?.data?.role;
+  const canLoad = user?.data?.canLoad || false;
 
   const { useFetchTransporterAnalytics } = useTransporterHook();
   const { useFetchSellerAnalytics } = useSellerHook();
@@ -133,7 +134,7 @@ const UserProfile = () => {
           <>
             <div className="p-3 rounded-lg border border-mid-gray-350">
               <Text variant="pxs" fontWeight="semibold" classNames="mb-1.5">
-                Total Allocations
+                {canLoad ? 'Total Allocations' : 'Total Trucks'}{' '}
               </Text>
               {loadingTransporter ? (
                 <CustomLoader height="h-6" width="w-6" />
@@ -149,7 +150,7 @@ const UserProfile = () => {
             </div>
             <div className="p-3 rounded-lg border border-mid-gray-350">
               <Text variant="pxs" fontWeight="semibold" classNames="mb-1.5">
-                Volumes Locked
+                {canLoad ? 'Volumes Locked' : 'Trucks Locked'}
               </Text>
               {loadingTransporter ? (
                 <CustomLoader height="h-6" width="w-6" />

@@ -24,6 +24,7 @@ const CoreDashboard = () => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const { user } = useContext(AuthContext);
   const role: Roles | undefined = user?.data?.role;
+  const canLoad = user?.data?.canLoad || false;
 
   const [activeTab, setActive] = useState<TabTypes>(
     isTabType(_activeTab)
@@ -148,7 +149,7 @@ const CoreDashboard = () => {
                       : 'border-light-gray-200',
                   )}
                   fontWeight="semibold"
-                  label="Volume Request"
+                  label={canLoad ? "Volume Request" : "Truck Request"}
                 />
                 {role === 'transporter' && (
                   <CustomButton
@@ -172,7 +173,7 @@ const CoreDashboard = () => {
                         : 'border-light-gray-200',
                     )}
                     fontWeight="semibold"
-                    label="Volumes"
+                  label={canLoad ? "Volumes" : "Trucks"}
                   />
                 )}
 

@@ -40,7 +40,7 @@ const Buyer = () => {
         classNames="text-center mb-20"
         color="text-dark-gray-400"
       >
-       Connect directly to Dangote Refinery fuel supply vendors, fuel importers and vetted trucks of all types.
+       Connect directly to Dangote Refinery fuel supply vendors, fuel importers and vetted trucks of all types
       </Heading>
 
       <div className="grid grid-cols-2 max-lg:grid-cols-1 items-start gap-10 max-sm:gap-2">
@@ -55,11 +55,11 @@ const Buyer = () => {
           />
           <Checklist
             title="Deal Directly"
-            description="Request for quotes, receive quotes, counter-offer, reject or accept & generate smart contract."
+            description="Request for quotes, receive quotes, counter-offer, reject or accept & generate smart contract"
           />
           <Checklist
             title="Access key Terminals"
-            description="Active for loads in Dangote refinery, depots, Tin Can Island & Lekki Deep Sea Ports in Lagos."
+            description="Active for loads in Dangote refinery, depots, Tin Can Island & Lekki Deep Sea Ports in Lagos"
           />
           <div>
             <Link

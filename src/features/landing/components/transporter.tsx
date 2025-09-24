@@ -39,27 +39,27 @@ const Transporter = () => {
         classNames="text-center mb-20"
         color="text-dark-gray-400"
       >
-        Transform your business with a digital marketplace presence, where cargo & transport business opportunities thrive.
+        Transform your business with a digital marketplace presence, where cargo & transport business opportunities thrive
       </Heading>
 
       <div className="grid grid-cols-2 max-lg:grid-cols-1 items-start gap-10 max-sm:gap-2">
         <div className="flex flex-col h-full gap-5 py-5">
           <Checklist
             title="Anywhere, Anytime"
-            description="Active in Dangote refinery, depots, Tin Can Island & Lekki Deep Sea Ports in Lagos."
+            description="Active in Dangote refinery, depots, Tin Can Island & Lekki Deep Sea Ports in Lagos"
           />
           <Checklist
             title="Dedicated dashboard"
-            description="Reach the market with your brand, deal privately, in real-time."
+            description="Reach the market with your brand, deal privately, in real-time"
           />
           <Checklist
             title="List & delist anytime"
-            description="Update your cargo / truck availability & location at a click."
+            description="Update your cargo / truck availability & location at a click"
           />
 
           <Checklist
             title="Transaction flexibility"
-            description="Receive RFQs, send quotes, counter-offer, reject or accept & generate smart contracts."
+            description="Receive RFQs, send quotes, counter-offer, reject or accept & generate smart contracts"
           />
           {isLoggedIn ? (
             <CustomButton

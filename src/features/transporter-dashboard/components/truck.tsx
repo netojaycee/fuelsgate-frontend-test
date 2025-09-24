@@ -1,6 +1,5 @@
 import { Text } from '@/components/atoms/text';
 import { ModalContext } from '@/contexts/ModalContext';
-import { AuthContext } from '@/contexts/AuthContext';
 import { FGTruckFill } from '@fg-icons';
 import React, { useContext } from 'react';
 import { TRACK_TRUCK } from '@/modals/track-truck-modal';
@@ -21,7 +20,6 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
   const { useDeleteTruck } = useTruckHook();
   const { mutateAsync: deleteTruckAsync } = useDeleteTruck();
   const { showConfirmation } = useConfirmation();
-
   // const handleTrackTruckModal = () =>
   //   handleToggle &&
   //   handleToggle({
@@ -235,7 +233,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
         {data?.capacity && (
           <div className="flex items-center justify-between">
             <Text variant="pxs" color="text-gray-500">
-              Volume
+              {data?.loadStatus === 'loaded' ? "Volume" : "Capacity"}
             </Text>
             <Text variant="ps" fontWeight="semibold" color="text-gray-900">
               {formatNumber(data.capacity)}{' '}

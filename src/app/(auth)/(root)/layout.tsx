@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import whiteLogo from '@assets/images/logo_white.svg';
-import GoldLogo from '@assets/images/logo_gold.svg';
+// import whiteLogo from '@assets/images/logo_white.svg';
+// import GoldLogo from '@assets/images/logo_gold.svg';
 import { Text } from '@/components/atoms/text';
 import { Sora } from 'next/font/google';
 import Link from 'next/link';
 import { Heading } from '@/components/atoms/heading';
+import Logo from '@/features/dashboard/components/Logo';
 
 export const metadata: Metadata = {
   title: 'Fuelsgate | Authentication',
@@ -24,9 +25,10 @@ export default function AuthLayout({
       <div className="relative w-1/2 hidden lg:block h-full bg-white p-3">
         <div className="relative bg-[url('/images/AuthBg.svg')] bg-cover bg-no-repeat bg-top-center h-fit min-h-full w-full rounded-[30px]">
           <div className="relative flex flex-col gap-5 bg-[url('/images/card.svg')] bg-cover bg-no-repeat bg-top-center h-fit !min-h-screen w-full p-14 pb-10">
-            <Link href={'/'} className="text-blue-tone-400 hover:underline">
+            {/* <Link href={'/'} className="text-blue-tone-400 hover:underline">
               <Image src={whiteLogo} alt="White Logo" width={99} height={66} />
-            </Link>
+            </Link> */}
+            <Logo white />
             <div className="max-w-[562px] mt-20">
               <Heading
                 variant="dl"
@@ -50,10 +52,11 @@ export default function AuthLayout({
               </Text>
             </div>
 
-            <div className="flex items-center gap-[16px] bg-dark-400 rounded-[20px] p-6 mt-auto">
-              <Image src={GoldLogo} alt="Gold Logo" width={60} height={40} />
+            <div className="flex items-baseline justify-between bg-dark-400 rounded-[20px] p-6 mt-auto">
+              {/* <Image src={GoldLogo} alt="Gold Logo" width={60} height={40} /> */}
+              <Logo />
               <Text
-                variant="pm"
+                variant="pxs"
                 color="text-mid-gray-700"
                 lineHeight="leading-[21px]"
               >
@@ -67,7 +70,8 @@ export default function AuthLayout({
         href={'/'}
         className="text-blue-tone-400 hover:underline p-4 md:hidden "
       >
-        <Image src={GoldLogo} alt="White Logo" width={99} height={66} />
+        <Logo />
+        {/* <Image src={GoldLogo} alt="White Logo" width={99} height={66} /> */}
       </Link>
       <div className="relative h-full flex flex-col w-full lg:w-1/2 py-10 px-3.5">
         {children}

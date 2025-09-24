@@ -622,6 +622,7 @@ import ProductRenderer from '@/components/atoms/product-renderer';
 import { formatNumber } from '@/utils/formatNumber';
 import { useSocket } from '@/contexts/SocketContext';
 import useNotificationHook from '@/hooks/useNotification.hook';
+import Logo from './Logo';
 
 const DashboardHeader = () => {
   const [isMounted, setIsMounted] = useState<boolean>(false);
@@ -839,10 +840,10 @@ const DashboardHeader = () => {
 
         <div className="relative container mx-auto">
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <Link href={DASHBOARD}>
+            {/* <Link href={DASHBOARD}>
               <Image src={whiteLogo} width={99} height={67} alt="Logo" />
-            </Link>
-
+            </Link> */}
+<Logo white link={DASHBOARD} />
             <MobileMenu />
 
             <div className="flex flex-wrap items-center gap-2 max-md:hidden">

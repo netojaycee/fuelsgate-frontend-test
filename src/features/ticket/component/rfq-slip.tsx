@@ -386,7 +386,7 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
 
               <div className="flex flex-col">
                 <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                  Truck Capacity
+                 {(truckOrder?.truckId as TruckDto)?.loadStatus === "loaded" ? "Product Volume" : "Truck Capacity"} 
                 </Text>
                 <Text
                   variant="pxs"

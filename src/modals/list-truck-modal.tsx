@@ -80,6 +80,9 @@ const ListTruckModal = () => {
   const { data: depotHubsRes, isLoading: loadingDepotHubs } = useFetchDepotHubs;
     const { user } = useContext(AuthContext);
   console.log(user, "user");
+      const canLoad = user?.data?.canLoad || false;
+  
+  
 
   // Truck type state
   const [truckType, setTruckType] = useState<CustomSelectOption | undefined>(
@@ -217,6 +220,7 @@ const ListTruckModal = () => {
         truckData = {
           ...rest,
           truckType,
+          loadStatus: canLoad ? ('loaded' as 'loaded') : ('unloaded' as 'unloaded'),
           ...(profileType ? { profileType: profileType.toLowerCase() } : {}),
         };
       }
@@ -537,12 +541,12 @@ const ListTruckModal = () => {
             sora.className,
           )}
         >
-          List a truck
+         {canLoad ? "Allocate Volume" : "List a truck"}
         </DialogTitle>
       </DialogHeader>
       <div className="relative overflow-visible">
         <DialogDescription className="text-dark-gray-400 text-sm mb-10">
-          Enter available truck details
+          {canLoad ? "Enter volume details" : "Enter available truck details"}
         </DialogDescription>
 
         <form
@@ -627,12 +631,12 @@ const ListTruckModal = () => {
                   // Reset truck category when fuel type changes
                   setTruckCategory(undefined);
                 }}
-                error={errors.truckFuelType?.message}
+                error={errors.truckFuelType?.message as any}
                 classNames="relative z-30 mt-2"
                 placeholder="Fuel type"
               />
             </div>
-            <div className="relative z-30">
+            <div className="relative">
               <CustomSelect
                 label="Truck Category"
                 name="truckCategory"
@@ -656,7 +660,7 @@ const ListTruckModal = () => {
                   setTruckCategory(value as CustomSelectOption)
                 }
                 placeholder="Truck category"
-                classNames="border-gray-300 mt-2 relative z-30"
+                classNames="border-gray-300 mt-2 relative"
                 isDisabled={!truckFuelType}
               />
               <div className="text-xs text-gray-500 mt-1">
@@ -665,12 +669,12 @@ const ListTruckModal = () => {
             </div>
             {/* Capacity and Load Status layout */}
             {truckType?.value === 'tanker' ? (
-              user?.data?.canLoad ? (
+              canLoad ? (
                 <div className="col-span-full flex gap-3 relative z-25">
                   <div className="flex-1">
                     <CustomSelect
                       name="capacity"
-                      label="Capacity"
+                      label="Volume"
                       options={TRUCK_SIZES}
                       value={capacity}
                       onChange={handleCapacityChange}
@@ -678,10 +682,10 @@ const ListTruckModal = () => {
                       ValueContainer={LitreValueContainerWrapper}
                       classNames="relative z-25"
                       unit="Ltr"
-                      placeholder="Capacity"
+                      placeholder="Volume"
                     />
                   </div>
-                  <div className="flex-1">
+                  {/* <div className="flex-1">
                     <CustomSelect
                       name="loadStatus"
                       label="Load Status"
@@ -693,7 +697,7 @@ const ListTruckModal = () => {
                       error={errors.loadStatus?.message}
                       classNames="relative z-25"
                     />
-                  </div>
+                  </div> */}
                 </div>
               ) : (
                 <div className="col-span-full relative z-25">
@@ -732,7 +736,7 @@ const ListTruckModal = () => {
           {/* Hub and Depot for all trucks */}
           {truckType && (
             <div className="bg-light-gray-150 grid grid-cols-2 max-sm:grid-cols-1 gap-3 py-[10px] px-4 rounded-[10px] mb-3 relative">
-              <div className="relative z-20">
+              <div className="relative">
                 <CustomSelect
                   name="depotHubId"
                   label="Hub"
@@ -741,13 +745,13 @@ const ListTruckModal = () => {
                   onChange={handleDepotHubChange}
                   isDisabled={loadingDepotHubs}
                   error={errors.depotHubId?.message}
-                  classNames="relative z-20"
+                  classNames="relative"
                 />
               </div>
               <div className="relative z-20">
                 <CustomSelect
                   name="depot"
-                  label="Depot"
+                  label={truckType?.value === 'tanker' ? "Depot" : "Park"}
                   options={depots}
                   value={depot}
                   onChange={handleDepotChange}

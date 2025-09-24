@@ -15,6 +15,7 @@ export interface TruckDto {
   loadStatus?: 'loaded' | 'unloaded' // Optional for flatbed trucks
   truckType: 'tanker' | 'flatbed' | 'sidewall' | 'lowbed'
   truckCategory: any;
+  truckFuelType: any;
   status?: TruckStatus
   truckOrderId?: string
   profileType?: string | undefined

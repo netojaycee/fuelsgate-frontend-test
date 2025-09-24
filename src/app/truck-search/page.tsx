@@ -8,10 +8,11 @@ import { Text } from '@/components/atoms/text';
 import { Loader, AlertCircle, Search, ArrowDownToLine } from 'lucide-react';
 import SearchFilter from '@/features/landing/components/SearchFilter';
 import Image from 'next/image';
-import Logo from '@assets/images/logo_gold.svg';
+// import Logo from '@assets/images/logo_gold.svg';
 import Link from 'next/link';
 import { TruckTableList } from '@/features/dashboard/components/truck-list';
 import CustomButton from '@/components/atoms/custom-button';
+import Logo from '@/features/dashboard/components/Logo';
 
 export default function TruckSearchPage() {
   // Use the enhanced search hook with isSearchPage set to true
@@ -53,7 +54,8 @@ export default function TruckSearchPage() {
       {/* Search filter section */}
       <div className="bg-gradient-to-b from-blue-tone-50 to-white pt-8 pb-12">
         <div className="group/navbar container mx-auto flex justify-between items-center gap-3 mb-4">
-          <Image src={Logo} width={99} height={67} alt="Logo" />
+          {/* <Image src={Logo} width={99} height={67} alt="Logo" /> */}
+         <Logo />
           <div className="flex items-center gap-4">
             <Link href={'/'} className="text-blue-tone-400 hover:underline">
               Home

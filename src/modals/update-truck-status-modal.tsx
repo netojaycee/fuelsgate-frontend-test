@@ -41,7 +41,7 @@ const UpdateTruckStatusModal = () => {
   const { showToast } = useToastConfig();
   const truck = openModal?.data?.truck as TruckDto;
   const newStatus = openModal?.data?.newStatus as 'available' | 'locked';
-
+console.log(openModal)
   // Current status is available and we're trying to lock it
   const isLockingTruck =
     truck?.status === 'available' && newStatus === 'locked';
@@ -147,6 +147,10 @@ const UpdateTruckStatusModal = () => {
         productId: truck?.productId?._id,
         capacity: truck?.capacity,
         truckNumber: truck?.truckNumber,
+        truckType: truck?.truckType,
+        truckFuelType: (truck as any)?.truckFuelType,
+        truckCategory: (truck as any)?.truckCategory,
+        loadStatus: truck?.loadStatus,
       };
 
       await updateTruckAsync(credentials as any);

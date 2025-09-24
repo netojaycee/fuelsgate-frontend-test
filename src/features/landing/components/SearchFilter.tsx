@@ -9,6 +9,7 @@ import {
 import usePublicSearch from '@/features/landing/hooks/usePublicSearch.hook';
 import { cn } from '@/lib/utils';
 import { Search, Truck, Package, MapPin, Gauge } from 'lucide-react';
+import Image from 'next/image';
 import React, { Suspense } from 'react';
 
 // Truck type options
@@ -16,22 +17,22 @@ const TRUCK_TYPES = [
   {
     label: 'Tanker',
     value: 'tanker',
-    icon: <Truck className="w-7 h-7 text-yellow-400" />,
+    icon: <Image src={"/images/tanker.png"} alt="" width={50} height={50} />,
   },
   {
     label: 'Flat Bed',
     value: 'flatbed',
-    icon: <Truck className="w-7 h-7 text-orange-400" />,
+    icon: <Image src={"/images/flatbed.png"} alt="" width={50} height={50} />,
   },
   {
     label: 'Sidewall',
     value: 'sidewall',
-    icon: <Package className="w-7 h-7 text-blue-400" />,
+    icon: <Image src={"/images/sidewall.png"} alt="" width={50} height={50} />,
   },
   {
     label: 'Lowbed',
     value: 'lowbed',
-    icon: <Gauge className="w-7 h-7 text-purple-400" />,
+    icon: <Image src={"/images/lowbed.png"} alt="" width={50} height={50} />,
   },
 ];
 
@@ -284,7 +285,7 @@ const SearchFilterContent = ({
                       <div className="p-1.5 bg-purple-500/20 rounded-lg">
                         <Gauge className="w-4 h-4 text-purple-400" />
                       </div>
-                     Volume
+                     Tonnage
                     </div>
                     <div className="transform transition-all duration-300 group-hover:scale-105 relative z-30">
                       <CustomSelect

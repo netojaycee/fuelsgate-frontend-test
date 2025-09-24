@@ -5,6 +5,7 @@ import { AuthContext } from '@/contexts/AuthContext';
 import whiteLogo from '@assets/images/logo_white.svg';
 import React, { useCallback, useContext } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Logo from '@/features/dashboard/components/Logo';
 
 const OnboardingNavbar = () => {
   const { resetUser } = useContext(AuthContext);
@@ -20,7 +21,8 @@ const OnboardingNavbar = () => {
     <div className="bg-black">
       <div className="container mx-auto py-7 max-sm:px-2.5">
         <div className="flex justify-between items-center">
-          <Image src={whiteLogo} width={77} height={52} alt="Logo" />
+          <Logo />
+          {/* <Image src={whiteLogo} width={77} height={52} alt="Logo" /> */}
           {pathname !== '/role-select' && (
             <Button
               onClick={handleLogout}

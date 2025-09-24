@@ -54,7 +54,16 @@ const truckListColumns = [
     cell: ({ row }: { row: any }) => {
       const depot = row.getValue('depot');
       const currentState = row.original?.currentState;
-      return depot ? depot : currentState || '';
+      const displayText = depot ? depot : currentState || '';
+      // Show only first 12 chars, ellipsis if longer
+      return (
+        <span
+          className="inline-block max-w-[60px] md:max-w-[120px] truncate"
+          title={displayText}
+        >
+          {displayText}
+        </span>
+      );
     },
   },
 

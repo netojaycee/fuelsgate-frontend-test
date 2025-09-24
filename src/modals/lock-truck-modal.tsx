@@ -343,7 +343,7 @@ const LockTruckModal = () => {
                     { label: 'Escorts', value: 'escorts' },
                     { label: 'Other', value: 'other' },
                   ]}
-                  // isMulti
+                  multiple
                   value={undefined}
                   onChange={(val) => setValue('specialHandling', Array.isArray(val) ? val.map((v: any) => v.value) : undefined)}
                   error={errors.specialHandling?.message}

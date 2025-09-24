@@ -38,14 +38,22 @@ const truckListPublicColumns = [
   //   accessorKey: 'depotHubId.name',
   //   header: 'Depot Hub',
   // },
-  {
+ {
     accessorKey: 'depot',
     header: 'Location',
     cell: ({ row }: { row: any }) => {
-      console.log(row.original, "dd")
       const depot = row.getValue('depot');
       const currentState = row.original?.currentState;
-      return depot ? depot : currentState || '';
+      const displayText = depot ? depot : currentState || '';
+      // Show only first 12 chars, ellipsis if longer
+      return (
+        <span
+          className="inline-block max-w-[60px] md:max-w-[120px] truncate"
+          title={displayText}
+        >
+          {displayText}
+        </span>
+      );
     },
   },
   // {

@@ -41,6 +41,9 @@ const truckListPublicColumns = [
  {
     accessorKey: 'depot',
     header: 'Location',
+    size: 200,
+    minSize: 80,
+    maxSize: 240,
     cell: ({ row }: { row: any }) => {
       const depot = row.getValue('depot');
       const currentState = row.original?.currentState;
@@ -67,6 +70,9 @@ const truckListPublicColumns = [
   {
     accessorKey: 'status',
     header: 'Action',
+   size: 15,
+    minSize: 10,
+    maxSize: 30,
     cell: ({ row }: { row: any }) => {
       return (
         <LockBtn

@@ -52,7 +52,9 @@ const LockBtn = ({
     product: ProductDto | undefined,
     truckType: string | undefined,
     truckCategory: string | undefined,
-    loadStatus: string | undefined;
+    loadStatus: string | undefined,
+    refNo: string | undefined;
+
 
     console.log(truck, "Truckkkk")
 
@@ -115,6 +117,7 @@ const LockBtn = ({
               truckCategory,
               state: selectedState?.value,
               city: selectedLGA?.value,
+              refNo: truck?.refNo,
             },
           });
       } else {

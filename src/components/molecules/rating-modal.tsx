@@ -45,10 +45,11 @@ const RatingModal: React.FC<RatingModalProps> = ({
   const handleSubmit = () => {
     if (rating === 0) return;
 
-    const ratingData: CreateRatingDto = {
+    const ratingData: any = {
       rating,
       review: review.trim() || undefined,
-      ...(orderType === 'order' ? { orderId } : { truckOrderId }),
+      orderId: orderType === 'order' ? orderId : truckOrderId,
+      orderType: orderType === 'order' ? 'product' : 'truck',
     };
 
     createRating(ratingData, {
@@ -88,7 +89,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
                 {ratedUser.firstName} {ratedUser.lastName}
               </Text>
               <Text variant="ps" color="text-gray-500">
-                {orderType === 'order' ? 'Seller' : 'Transporter'}
+                {orderType === 'order' ? 'Seller' : 'Vendor'}
               </Text>
             </div>
           </div>
@@ -97,7 +98,7 @@ const RatingModal: React.FC<RatingModalProps> = ({
           <div>
             <Text variant="pm" fontWeight="medium" classNames="mb-3">
               How would you rate this{' '}
-              {orderType === 'order' ? 'seller' : 'transporter'}?
+              {orderType === 'order' ? 'seller' : 'vendor'}?
             </Text>
             <StarRating
               rating={rating}

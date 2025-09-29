@@ -28,7 +28,7 @@ export default function AuthLayout({
             {/* <Link href={'/'} className="text-blue-tone-400 hover:underline">
               <Image src={whiteLogo} alt="White Logo" width={99} height={66} />
             </Link> */}
-            <Logo white />
+            <Logo />
             <div className="max-w-[562px] mt-20">
               <Heading
                 variant="dl"

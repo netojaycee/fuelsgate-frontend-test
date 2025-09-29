@@ -22,6 +22,9 @@ import { ModalContext } from '@/contexts/ModalContext';
 import { MAKE_A_TRUCK_OFFER } from '@/modals/make-a-truck-offer-modal';
 import useOrderHook from '@/hooks/useOrder.hook';
 import { AuthContext } from '@/contexts/AuthContext';
+import { TRUCK_RFQ } from '@/modals/rfq-modal';
+import { RFQ_TICKET } from '@/routes';
+import { FGEye } from '@fg-icons';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -35,11 +38,22 @@ const TruckRfq = () => {
   // const { data, isLoading, refetch } = useGetTruckOrderDetails(
   //   params.truckOrderId as string,
   // );
+  const handleSendRFQButton = () =>
+    handleToggle &&
+    handleToggle({
+      state: true,
+      name: TRUCK_RFQ,
+      data: { truckOrderId: params.truckOrderId as string },
+    });
+
   const { useGetOrderDetails, useUpdateOrder } = useOrderHook();
   const { data: orderData, isLoading: isLoadingOrder } = useGetOrderDetails(
     params.truckOrderId as string,
   );
 
+  const gotoTicket = () => {
+    router.push(`${RFQ_TICKET}/${orderData?.data?._id}`);
+  };
   console.log(orderData, 'orderData in TruckRfq');
 
   // const { mutateAsync: updateRFQStatus, isPending: isUpdatingStatus } =
@@ -83,7 +97,7 @@ const TruckRfq = () => {
           status === 'accepted' ? 'accepting_order' : 'rejecting_order',
         type: 'truck',
         rfqStatus: status,
-        status: "in-progress", // Assuming you want to set status to in-progress when accepting
+        status: 'in-progress', // Assuming you want to set status to in-progress when accepting
       };
       // console.log(credentials);
       await updateOrder(credentials);
@@ -122,10 +136,10 @@ const TruckRfq = () => {
   const profileToShow = isBuyer
     ? orderData?.data?.profileId
     : orderData?.data?.buyerId;
-  const profileLabel = isBuyer ? 'Transporter' : 'Buyer';
+  const profileLabel = isBuyer ? 'Vendor' : 'Customer';
 
   return (
-  <div className="relative bg-white">
+    <div className="relative bg-white">
       <div className="container mx-auto py-8">
         <div className="relative max-w-[1064px] mx-auto border border-mid-gray-550 rounded-[10px]">
           <Image
@@ -146,7 +160,10 @@ const TruckRfq = () => {
                   fontWeight="semibold"
                   color="text-dark-500"
                 >
-                  {orderData?.data.truckId.truckType === 'tanker' && orderData?.data.truckId.loadStatus === "loaded" ? "Volume RFQ" : "Truck RFQ"}
+                  {orderData?.data.truckId.truckType === 'tanker' &&
+                  orderData?.data.truckId.loadStatus === 'loaded'
+                    ? 'Volume RFQ'
+                    : 'Truck RFQ'}
                 </Heading>
                 <Text
                   variant="pm"
@@ -156,33 +173,38 @@ const TruckRfq = () => {
                   {isBuyer ? (
                     <>
                       {orderData?.data.truckId.truckType === 'tanker' &&
-                       orderData?.data.truckId.loadStatus === 'loaded' ? (
+                      orderData?.data.truckId.loadStatus === 'loaded' ? (
                         <>
-                          This is a quotation for securing{" "}
+                          This is a quotation for securing{' '}
                           <span className="font-bold">
                             {orderData?.data.truckId.capacity}
-                          </span> litres. Kindly contact the transporter for load/truck location and to finalize payment and loading.
+                          </span>{' '}
+                          litres. Kindly contact the vendor for load/truck
+                          location and to finalize payment and loading.
                         </>
                       ) : (
                         <>
-                          This is a quotation for securing truck number{' '}
+                          This is a quotation for securing truck ref number{' '}
                           <span className="font-bold">
-                            {orderData?.data.truckId.truckNumber}
+                            {orderData?.data.truckId.refNo}
                           </span>
-                          . Kindly contact the transporter for truck location and to
-                          finalize payment and loading.
+                          . Kindly contact the vendor for truck location
+                          and to finalize payment and loading.
                         </>
                       )}
                     </>
                   ) : (
                     <>
-                      This is a quotation for your truck order from buyer{' '}
+                      Use the send Invoice button below to send quote for this
+                      order to buyer{'  '}
                       <span className="font-bold">
                         {orderData?.data.buyerId?.userId?.firstName}{' '}
                         {orderData?.data.buyerId?.userId?.lastName}
                       </span>
-                      . Kindly check the chat for buyer&apos;s instructions and
-                      respond as needed.
+                      . In the case of rejection, kindly check the chat for
+                      buyer&apos;s counter offer and respond as needed. In the
+                      case of acceptance please proceed to use the print ticket
+                      button, download ticket and continue process offline.
                     </>
                   )}
                 </Text>
@@ -211,6 +233,317 @@ const TruckRfq = () => {
                   />
                 </TransporterRoot>
 
+                {/* Order Details Section */}
+                <div className="max-w-[496px] mx-auto mt-8 border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <Heading
+                    variant="h6"
+                    classNames="mb-4 text-gray-800"
+                    fontWeight="semibold"
+                  >
+                    📋 Order Details
+                  </Heading>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Tracking ID */}
+                    <div>
+                      <Text
+                        variant="pxs"
+                        color="text-gray-600"
+                        fontWeight="medium"
+                        classNames="mb-1"
+                      >
+                        Tracking ID
+                      </Text>
+                      <Text
+                        variant="ps"
+                        color="text-gray-800"
+                        fontWeight="semibold"
+                      >
+                        {orderData?.data.trackingId}
+                      </Text>
+                    </div>
+
+                    {/* Loading Depot */}
+                    <div>
+                      <Text
+                        variant="pxs"
+                        color="text-gray-600"
+                        fontWeight="medium"
+                        classNames="mb-1"
+                      >
+                        Loading Depot
+                      </Text>
+                      <Text variant="ps" color="text-gray-800">
+                        {orderData?.data.loadingDepot}
+                      </Text>
+                    </div>
+
+                    {/* Destination */}
+                    <div className="col-span-full">
+                      <Text
+                        variant="pxs"
+                        color="text-gray-600"
+                        fontWeight="medium"
+                        classNames="mb-1"
+                      >
+                        Destination
+                      </Text>
+                      <Text variant="ps" color="text-gray-800">
+                        {orderData?.data.destination}, {orderData?.data.city},{' '}
+                        {orderData?.data.state}
+                      </Text>
+                    </div>
+
+                    {/* Loading Date */}
+                    {orderData?.data.loadingDate && (
+                      <div>
+                        <Text
+                          variant="pxs"
+                          color="text-gray-600"
+                          fontWeight="medium"
+                          classNames="mb-1"
+                        >
+                          Loading Date
+                        </Text>
+                        <Text variant="ps" color="text-gray-800">
+                          {new Date(
+                            orderData.data.loadingDate,
+                          ).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </Text>
+                      </div>
+                    )}
+
+                    {/* Status */}
+                    <div>
+                      <Text
+                        variant="pxs"
+                        color="text-gray-600"
+                        fontWeight="medium"
+                        classNames="mb-1"
+                      >
+                        Order Status
+                      </Text>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                          orderData?.data.status === 'completed'
+                            ? 'bg-green-100 text-green-700'
+                            : orderData?.data.status === 'in-progress'
+                            ? 'bg-blue-100 text-blue-700'
+                            : orderData?.data.status === 'pending'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {orderData?.data.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Truck Information */}
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <Text
+                      variant="ps"
+                      color="text-gray-700"
+                      fontWeight="medium"
+                      classNames="mb-3"
+                    >
+                      🚛 Truck Information
+                    </Text>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Text
+                          variant="pxs"
+                          color="text-gray-600"
+                          fontWeight="medium"
+                          classNames="mb-1"
+                        >
+                          Truck Type
+                        </Text>
+                        <Text
+                          variant="ps"
+                          color="text-gray-800"
+                          classNames="capitalize"
+                        >
+                          {orderData?.data.truckId.truckType}
+                        </Text>
+                      </div>
+
+                      <div>
+                        <Text
+                          variant="pxs"
+                          color="text-gray-600"
+                          fontWeight="medium"
+                          classNames="mb-1"
+                        >
+                          Truck Category
+                        </Text>
+                        <Text variant="ps" color="text-gray-800">
+                          {orderData?.data.truckId.truckCategory}
+                        </Text>
+                      </div>
+
+                      {orderData?.data.truckId.truckNumber && (
+                        <div>
+                          <Text
+                            variant="pxs"
+                            color="text-gray-600"
+                            fontWeight="medium"
+                            classNames="mb-1"
+                          >
+                            Truck Number
+                          </Text>
+                          <Text variant="ps" color="text-gray-800">
+                            {orderData?.data.truckId.truckNumber}
+                          </Text>
+                        </div>
+                      )}
+
+                      {orderData?.data.truckId.refNo && (
+                        <div>
+                          <Text
+                            variant="pxs"
+                            color="text-gray-600"
+                            fontWeight="medium"
+                            classNames="mb-1"
+                          >
+                            Ref No.
+                          </Text>
+                          <Text variant="ps" color="text-gray-800">
+                            {orderData?.data.truckId.refNo}
+                          </Text>
+                        </div>
+                      )}
+
+                      <div>
+                        <Text
+                          variant="pxs"
+                          color="text-gray-600"
+                          fontWeight="medium"
+                          classNames="mb-1"
+                        >
+                          Capacity
+                        </Text>
+                        <Text variant="ps" color="text-gray-800">
+                          {orderData?.data.truckId.capacity}{' '}
+                          {orderData?.data.truckId.truckType === 'tanker'
+                            ? 'Ltrs'
+                            : 'Tons'}
+                        </Text>
+                      </div>
+
+                      {orderData?.data.truckId.truckType === 'tanker' && (
+                        <div>
+                          <Text
+                            variant="pxs"
+                            color="text-gray-600"
+                            fontWeight="medium"
+                            classNames="mb-1"
+                          >
+                            Load Status
+                          </Text>
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${
+                              orderData?.data.truckId.loadStatus === 'loaded'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-orange-100 text-orange-700'
+                            }`}
+                          >
+                            {orderData?.data.truckId.loadStatus}
+                          </span>
+                        </div>
+                      )}
+
+                      <div>
+                        <Text
+                          variant="pxs"
+                          color="text-gray-600"
+                          fontWeight="medium"
+                          classNames="mb-1"
+                        >
+                          Current Location
+                        </Text>
+                        <Text variant="ps" color="text-gray-800">
+                          {orderData?.data.truckId.depot}
+                        </Text>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Product Details for tanker trucks */}
+                {orderData?.data.truckId.truckType === 'tanker' &&
+                  orderData?.data.truckId.productId && (
+                    <div className="max-w-[496px] mx-auto mt-8 border border-green-100 rounded-lg p-4 bg-green-50">
+                      <Heading
+                        variant="h6"
+                        classNames="mb-2 text-green-700"
+                        fontWeight="semibold"
+                      >
+                        🛢️ Product Information
+                      </Heading>
+                      <div className="flex flex-col gap-2">
+                        <Text variant="ps" color="text-dark-gray-400">
+                          <span className="font-semibold">Product:</span>{' '}
+                          {orderData.data.truckId.productId.name}
+                        </Text>
+                        <Text variant="ps" color="text-dark-gray-400">
+                          <span className="font-semibold">Product Type:</span>{' '}
+                          {orderData.data.truckId.productId.value?.toUpperCase()}
+                        </Text>
+                        <Text variant="ps" color="text-dark-gray-400">
+                          <span className="font-semibold">Unit:</span>{' '}
+                          {orderData.data.truckId.productId.unit}
+                        </Text>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-dark-gray-400 text-sm">
+                            Product Color:
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {orderData.data.truckId.productId.color?.includes(
+                              '-',
+                            ) ? (
+                              <div className="flex">
+                                <div
+                                  className="w-6 h-6 rounded-l border border-gray-300"
+                                  style={{
+                                    backgroundColor:
+                                      orderData.data.truckId.productId.color.split(
+                                        '-',
+                                      )[0],
+                                  }}
+                                />
+                                <div
+                                  className="w-6 h-6 rounded-r border border-gray-300"
+                                  style={{
+                                    backgroundColor:
+                                      orderData.data.truckId.productId.color.split(
+                                        '-',
+                                      )[1],
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div
+                                className="w-6 h-6 rounded border border-gray-300"
+                                style={{
+                                  backgroundColor:
+                                    orderData.data.truckId.productId.color,
+                                }}
+                              />
+                            )}
+                            <Text variant="pxs" color="text-gray-600">
+                              {orderData.data.truckId.productId.color}
+                            </Text>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                 {/* Cargo Details for non-tanker trucks */}
                 {orderData?.data.truckId.truckType !== 'tanker' && (
                   <div className="max-w-[496px] mx-auto mt-8 border border-blue-100 rounded-lg p-4 bg-blue-50">
@@ -219,32 +552,40 @@ const TruckRfq = () => {
                       classNames="mb-2 text-blue-700"
                       fontWeight="semibold"
                     >
-                      Cargo Details
+                      📦 Cargo Details
                     </Heading>
                     <div className="flex flex-col gap-2">
                       {orderData?.data.cargoType && (
                         <Text variant="ps" color="text-dark-gray-400">
-                          <span className="font-semibold">Cargo Type:</span> {orderData.data.cargoType}
+                          <span className="font-semibold">Cargo Type:</span>{' '}
+                          {orderData.data.cargoType}
                         </Text>
                       )}
                       {orderData?.data.cargoCategory && (
                         <Text variant="ps" color="text-dark-gray-400">
-                          <span className="font-semibold">Cargo Category:</span> {orderData.data.cargoCategory}
+                          <span className="font-semibold">Cargo Category:</span>{' '}
+                          {orderData.data.cargoCategory}
                         </Text>
                       )}
                       {orderData?.data.cargoWeight && (
                         <Text variant="ps" color="text-dark-gray-400">
-                          <span className="font-semibold">Cargo Weight:</span> {orderData.data.cargoWeight}
+                          <span className="font-semibold">Cargo Weight:</span>{' '}
+                          {orderData.data.cargoWeight}
                         </Text>
                       )}
-                      {orderData?.data.specialHandling && orderData.data.specialHandling.length > 0 && (
-                        <Text variant="ps" color="text-dark-gray-400">
-                          <span className="font-semibold">Special Handling:</span> {orderData.data.specialHandling.join(', ')}
-                        </Text>
-                      )}
+                      {orderData?.data.specialHandling &&
+                        orderData.data.specialHandling.length > 0 && (
+                          <Text variant="ps" color="text-dark-gray-400">
+                            <span className="font-semibold">
+                              Special Handling:
+                            </span>{' '}
+                            {orderData.data.specialHandling.join(', ')}
+                          </Text>
+                        )}
                       {orderData?.data.notes && (
                         <Text variant="ps" color="text-dark-gray-400">
-                          <span className="font-semibold">Notes:</span> {orderData.data.notes}
+                          <span className="font-semibold">Notes:</span>{' '}
+                          {orderData.data.notes}
                         </Text>
                       )}
                     </div>
@@ -260,7 +601,9 @@ const TruckRfq = () => {
                     label="View Ticket"
                     width="w-[182px]"
                     height="h-[55px]"
-                    onClick={() => router.push(`/dashboard/rfq/${orderData?.data?._id}`)}
+                    onClick={() =>
+                      router.push(`/dashboard/rfq/${orderData?.data?._id}`)
+                    }
                   />
                 )}
                 {/* Always show RFQ status label */}
@@ -306,9 +649,21 @@ const TruckRfq = () => {
                       label="Send Invoice"
                       width="w-[182px]"
                       height="h-[55px]"
-                      onClick={() => {
-                        /* TODO: implement send invoice */
-                      }}
+                      onClick={handleSendRFQButton}
+                    />
+                  )}
+
+                {orderData?.data?.status !== 'pending' &&
+                  orderData?.data?.status !== 'cancelled' && (
+                    <CustomButton
+                      variant="primary"
+                      onClick={gotoTicket}
+                      height="h-11"
+                      label="Print Ticket"
+                      leftIcon={<FGEye color="white" />}
+                      fontSize="text-sm"
+                      fontWeight="medium"
+                      width="w-40"
                     />
                   )}
 

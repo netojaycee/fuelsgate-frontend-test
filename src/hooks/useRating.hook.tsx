@@ -16,8 +16,9 @@ export const useCreateRating = () => {
       queryClient.invalidateQueries({ queryKey: ['userRatingStats'] });
     },
     onError: (error: any) => {
+      console.log(error,"fff")
       showToast(
-        error.response?.data?.message || 'Something went wrong',
+        error?.message || 'Something went wrong',
         'error',
       );
     },

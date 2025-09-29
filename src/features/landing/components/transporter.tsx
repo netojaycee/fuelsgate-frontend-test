@@ -74,7 +74,7 @@ const Transporter = () => {
               <CustomButton
                 variant="glow"
                 onClick={handleTransporterSignUp}
-                label="Sign Up as Transporter"
+                label="Sign Up as Vendor"
                 width="w-fit"
                 height="h-12"
               />

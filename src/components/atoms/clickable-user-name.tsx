@@ -29,7 +29,8 @@ const ClickableUserName: React.FC<ClickableUserNameProps> = ({
 }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
-  const displayName = `${user.firstName} ${user.lastName}`;
+  // const displayName = `${user.firstName} ${user.lastName}`;
+  const displayName = `${user.firstName}`;
 
   return (
     <>

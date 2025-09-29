@@ -22,7 +22,7 @@ export default function AuthLayout({
         <div className="relative bg-black h-full w-full rounded-[30px]">
           <div className="relative flex flex-col justify-between gap-5 bg-[url('/images/card.svg')] bg-cover bg-no-repeat bg-top-center h-full w-full p-14 pb-20">
             {/* <Image src={whiteLogo} alt="White Logo" width={99} height={66} /> */}
-            <Logo white />
+            <Logo />
             <PasswordProgress />
 
             <Text

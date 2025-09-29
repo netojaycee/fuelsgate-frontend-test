@@ -6,9 +6,13 @@ import ClickableUserName from '@/components/atoms/clickable-user-name';
 const truckListColumns = [
   {
     accessorKey: 'profileId',
-    header: 'Transporter',
-    // minWidth: 120,
-    // maxWidth: 140,
+    header: 'Vendor',
+    // Responsive sizing
+    size: 120, // Default desktop size
+    minSize: 120, // Minimum size
+    maxSize: 180, // Maximum size
+    // Custom responsive sizing using CSS classes
+
     cell: ({ row }: { row: any }) => {
       const transporter = row.getValue('profileId');
       const companyNameRaw =
@@ -51,6 +55,10 @@ const truckListColumns = [
   {
     accessorKey: 'depot',
     header: 'Location',
+    size: 200,
+    minSize: 80,
+    maxSize: 240,
+   
     cell: ({ row }: { row: any }) => {
       const depot = row.getValue('depot');
       const currentState = row.original?.currentState;
@@ -58,7 +66,7 @@ const truckListColumns = [
       // Show only first 12 chars, ellipsis if longer
       return (
         <span
-          className="inline-block max-w-[60px] md:max-w-[120px] truncate"
+          className="inline-block max-w-[100px] md:max-w-[150px] truncate"
           title={displayText}
         >
           {displayText}
@@ -68,14 +76,14 @@ const truckListColumns = [
   },
 
   {
-    accessorKey: 'truckNumber',
-    header: 'Truck No.',
+    accessorKey: 'refNo',
+    header: 'Ref No.',
+    size: 15,
+    minSize: 10,
+    maxSize: 40,
     cell: ({ row }: { row: any }) => {
-      // Hide this cell if loadStatus is 'loaded'
-      if (row.original?.loadStatus === 'loaded') return null;
-      return row.getValue('truckNumber');
+      return row.getValue('refNo');
     },
-    // Optionally, you can add a meta property to help hide the column header in your table component if all rows are loaded
   },
   // {
   //   accessorKey: 'capacity',
@@ -115,6 +123,10 @@ const truckListColumns = [
   {
     accessorKey: 'status',
     header: 'Action',
+    size: 15,
+    minSize: 10,
+    maxSize: 30,
+
     cell: ({ row }: { row: any }) => {
       return (
         <LockBtn

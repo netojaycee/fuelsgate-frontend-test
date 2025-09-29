@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 
 export const truckSchema = yup.object({
-  truckNumber: yup.string().required('Truck number is required'),
+  truckNumber: yup.string().optional(),
   capacity: yup.string().required('Truck capacity is required'),
   productId: yup.string().required('Product is required'),
   depotHubId: yup.string().required('Depot Hub is required'),
@@ -18,7 +18,7 @@ export const truckFormSchema = yup.object({
   truckType: yup.string().required('Truck type is required'),
   truckFuelType: yup.string().required('Truck fuel type is required'),
   truckCategory: yup.string().required('Truck category is required'),
-  truckNumber: yup.string().required('Truck Number is required'),
+  truckNumber: yup.string().optional(),
 
   capacity: yup.string().required('Truck capacity is required'),
 

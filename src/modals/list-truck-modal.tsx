@@ -597,7 +597,7 @@ const ListTruckModal = () => {
               <CustomInput
                 type="type"
                 name="truckNumber"
-                label="Truck number"
+                label="Truck number (optional)"
                 register={register}
                 error={errors.truckNumber?.message}
               />

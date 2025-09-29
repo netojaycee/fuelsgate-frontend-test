@@ -128,7 +128,7 @@ const Calculator = () => {
     // Flatten all pages
     return userTrucks.pages.flatMap((page: any) =>
       (page.data.trucks || []).map((truck: any) => ({
-        label: `${truck.truckNumber} (${truck.truckType})`,
+        label: `${truck.refNo} (${truck.truckType})`,
         value: truck._id,
         truckType: truck.truckType,
         truckCategory: truck.truckCategory,

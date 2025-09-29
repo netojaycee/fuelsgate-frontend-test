@@ -151,9 +151,9 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
   // console.log(`truckOrder`, truckOrder);
   const ticketOwnerLabel =
     userRole === 'transporter'
-      ? 'VENDOR'
+      ? 'TRANSPORTER'
       : userRole === 'buyer'
-      ? 'CUSTOMER'
+      ? 'BUYER'
       : 'RFQ TICKET';
   return (
     <div className="relative bg-[url('/images/Subtract.svg')] bg-left-bottom w-full bg-cover bg-no-repeat overflow-hidden p-6 max-sm:px-3 pb-10">
@@ -182,52 +182,52 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
           <div className="flex items-center justify-between bg-dark-100 p-5 max-sm:px-3 rounded-3xl mb-2">
             <div className="flex items-center">
               <span className="h-14 w-14 rounded-full flex items-center justify-center mr-4 overflow-hidden relative border">
-                {(truckOrder?.truckId as TruckDto)?.truckType === 'tanker' ? (
-                  // Tanker truck - show product color
-                  typeof (truckOrder?.truckId as TruckDto)?.productId?.color ===
-                    'string' &&
-                  (truckOrder?.truckId as TruckDto)?.productId?.color.includes(
-                    '-',
-                  ) ? (
-                    <>
-                      <div
-                        className="absolute top-0 left-0 w-full h-1/2 rounded-t-full"
-                        style={{
-                          backgroundColor: (
-                            truckOrder?.truckId as TruckDto
-                          )?.productId?.color.split('-')[0],
-                        }}
-                      />
-                      <div
-                        className="absolute bottom-0 left-0 w-full h-1/2 rounded-b-full"
-                        style={{
-                          backgroundColor: (
-                            truckOrder?.truckId as TruckDto
-                          )?.productId?.color.split('-')[1],
-                        }}
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <FGTruckFill color="#fff" height={32} width={32} />
-                      </div>
-                    </>
-                  ) : (
-                    <span
-                      className="absolute inset-0 rounded-full"
+                {typeof (truckOrder?.truckId as TruckDto)?.productId?.color ===
+                  'string' &&
+                (truckOrder?.truckId as TruckDto)?.productId?.color.includes(
+                  '-',
+                ) ? (
+                  <>
+                    <div
+                      className="absolute top-0 left-0 w-full h-1/2 rounded-t-full"
                       style={{
-                        backgroundColor: (truckOrder?.truckId as TruckDto)
-                          ?.productId?.color,
+                        backgroundColor: (
+                          truckOrder?.truckId as TruckDto
+                        )?.productId?.color.split('-')[0],
                       }}
                     />
-                  )
+                    <div
+                      className="absolute bottom-0 left-0 w-full h-1/2 rounded-b-full"
+                      style={{
+                        backgroundColor: (
+                          truckOrder?.truckId as TruckDto
+                        )?.productId?.color.split('-')[1],
+                      }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <FGTruckFill color="#fff" height={32} width={32} />
+                    </div>
+                  </>
                 ) : (
-                  // Non-tanker truck - show default blue color
                   <span
-                    className="absolute inset-0 rounded-full bg-blue-600"
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      backgroundColor: (truckOrder?.truckId as TruckDto)
+                        ?.productId?.color,
+                    }}
                   />
                 )}
                 <span className="absolute inset-0 flex items-center justify-center">
                   <FGTruckFill
-                    color="#fff"
+                    color={
+                      typeof (truckOrder?.truckId as TruckDto)?.productId
+                        ?.color === 'string' &&
+                      (
+                        truckOrder?.truckId as TruckDto
+                      )?.productId?.color.includes('-')
+                        ? '#fff'
+                        : '#fff'
+                    }
                     height={32}
                     width={32}
                   />
@@ -248,9 +248,10 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
                   classNames="uppercase"
                   color="text-white"
                 >
-                  {(truckOrder?.truckId as TruckDto)?.truckType === 'tanker'
-                    ? ((truckOrder?.truckId as TruckDto)?.productId as ProductDto)?.value
-                    : (truckOrder?.truckId as TruckDto)?.truckType}
+                  {
+                    ((truckOrder?.truckId as TruckDto)?.productId as ProductDto)
+                      ?.value
+                  }
                 </Heading>
               </div>
             </div>
@@ -278,7 +279,7 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
             <div className="grid grid-cols-2 gap-x-6 gap-y-3">
               <div className="flex flex-col">
                 <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                  Customer
+                  Buyer
                 </Text>
                 <Text variant="pxs" color="text-white">
                   {
@@ -294,68 +295,33 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
 
               <div className="flex flex-col">
                 <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                  Vendor
+                  Transporter
                 </Text>
                 <Text variant="pxs" color="text-white">
                   {(truckOrder?.profileId as TransporterDto)?.companyName}
                 </Text>
               </div>
 
-              {(truckOrder?.truckId as TruckDto)?.truckType === 'tanker' ? (
-               <> <div className="flex flex-col">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                    Product Type
-                  </Text>
-                  <Text variant="pxs" color="text-white uppercase">
-                    {
-                      ((truckOrder?.truckId as TruckDto)?.productId as ProductDto)
-                        ?.value
-                    }
-                  </Text>
-
-            
-                </div>
-                      
               <div className="flex flex-col">
                 <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                  Truck Type
+                  Product Type
                 </Text>
                 <Text variant="pxs" color="text-white uppercase">
-                  {(truckOrder?.truckId as TruckDto)?.truckType}
+                  {
+                    ((truckOrder?.truckId as TruckDto)?.productId as ProductDto)
+                      ?.value
+                  }
                 </Text>
               </div>
-                </>
-              ) : (
-                <div className="flex flex-col">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                    Truck Type
-                  </Text>
-                  <Text variant="pxs" color="text-white uppercase">
-                    {(truckOrder?.truckId as TruckDto)?.truckType}
-                  </Text>
-                </div>
-              )}
-
 
               <div className="flex flex-col">
                 <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                  Truck Category
+                  Truck Number
                 </Text>
                 <Text variant="pxs" color="text-white">
-                  {(truckOrder?.truckId as TruckDto)?.truckCategory}
+                  {(truckOrder?.truckId as TruckDto)?.truckNumber}
                 </Text>
               </div>
-
-              {(truckOrder?.truckId as TruckDto)?.truckNumber && (
-                <div className="flex flex-col">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                    Ref No.
-                  </Text>
-                  <Text variant="pxs" color="text-white">
-                    {(truckOrder?.truckId as TruckDto)?.refNo}
-                  </Text>
-                </div>
-              )}
 
               <div className="flex flex-col">
                 <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
@@ -398,7 +364,7 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
                       color="text-[#FFFFB8]"
                       classNames="mb-1"
                     >
-                      Vendor Contact
+                      Transporter Contact
                     </Text>
                     <Text variant="pxs" color="text-white">
                       {(truckOrder?.profileId as TransporterDto)?.phoneNumber ||
@@ -420,37 +386,20 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
 
               <div className="flex flex-col">
                 <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                  {(truckOrder?.truckId as TruckDto)?.truckType === 'tanker' &&
-                   (truckOrder?.truckId as TruckDto)?.loadStatus === 'loaded'
-                    ? 'Product Volume'
-                    : 'Truck Capacity'}
+                 {(truckOrder?.truckId as TruckDto)?.loadStatus === "loaded" ? "Product Volume" : "Truck Capacity"} 
                 </Text>
-                <div className="flex items-center gap-2">
-                  <Text
-                    variant="pxs"
-                    color="text-white"
-                    classNames="inline-flex items-center gap-1"
-                  >
-                    <FGCheckCircle height={16} width={16} color="#41D195" />
-                    {formatNumber(
-                      (truckOrder?.truckId as TruckDto)?.capacity ?? 0,
-                    )}{' '}
-                    {(truckOrder?.truckId as TruckDto)?.truckType === 'tanker' ? 'Ltrs' : 'Tons'}
-                  </Text>
-                </div>
+                <Text
+                  variant="pxs"
+                  color="text-white"
+                  classNames="inline-flex items-center gap-1"
+                >
+                  <FGCheckCircle height={16} width={16} color="#41D195" />
+                  {formatNumber(
+                    (truckOrder?.truckId as TruckDto)?.capacity ?? 0,
+                  )}{' '}
+                  Ltrs
+                </Text>
               </div>
-
-              {/* Load Status for tanker trucks */}
-              {(truckOrder?.truckId as TruckDto)?.truckType === 'tanker' && (
-                <div className="flex flex-col">
-                  <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                    Load Status
-                  </Text>
-                  <Text variant="pxs" color="text-white capitalize">
-                    {(truckOrder?.truckId as TruckDto)?.loadStatus}
-                  </Text>
-                </div>
-              )}
 
               <div className="flex flex-col">
                 <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
@@ -482,7 +431,6 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
                     : 'TBD'}
                 </Text>
               </div>
-              
               <div className="flex flex-col">
                 {/* Completed time in second column, only if completed */}
                 {truckOrder?.status?.toLowerCase() === 'completed' &&
@@ -502,77 +450,6 @@ const RfqSlip: React.FC<{ ticketData: any }> = ({ ticketData }) => {
                   )}
               </div>
             </div>
-
-            {/* Cargo Details for non-tanker trucks */}
-            {(truckOrder?.truckId as TruckDto)?.truckType !== 'tanker' && (
-              <>
-                <div className="border-b border-dashed border-white/20 my-4" />
-                <Text
-                  variant="pm"
-                  fontWeight="medium"
-                  color="text-white"
-                  classNames="mb-4"
-                >
-                  Cargo Details
-                </Text>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                  {truckOrder?.cargoType && (
-                    <div className="flex flex-col">
-                      <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                        Cargo Type
-                      </Text>
-                      <Text variant="pxs" color="text-white">
-                        {truckOrder.cargoType}
-                      </Text>
-                    </div>
-                  )}
-                  
-                  {truckOrder?.cargoCategory && (
-                    <div className="flex flex-col">
-                      <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                        Cargo Category
-                      </Text>
-                      <Text variant="pxs" color="text-white">
-                        {truckOrder.cargoCategory}
-                      </Text>
-                    </div>
-                  )}
-                  
-                  {truckOrder?.cargoWeight && (
-                    <div className="flex flex-col">
-                      <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                        Cargo Weight
-                      </Text>
-                      <Text variant="pxs" color="text-white">
-                        {truckOrder.cargoWeight}
-                      </Text>
-                    </div>
-                  )}
-                  
-                  {truckOrder?.specialHandling && truckOrder.specialHandling.length > 0 && (
-                    <div className="flex flex-col">
-                      <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                        Special Handling
-                      </Text>
-                      <Text variant="pxs" color="text-white">
-                        {truckOrder.specialHandling.join(', ')}
-                      </Text>
-                    </div>
-                  )}
-                  
-                  {truckOrder?.notes && (
-                    <div className="flex flex-col col-span-2">
-                      <Text variant="pxs" color="text-[#FFFFFFB8]" classNames="mb-1">
-                        Notes
-                      </Text>
-                      <Text variant="pxs" color="text-white">
-                        {truckOrder.notes}
-                      </Text>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
 
             <div className="border-b border-dashed border-white/20 my-4" />
 

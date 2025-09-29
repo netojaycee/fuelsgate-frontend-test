@@ -34,6 +34,7 @@ const Offer: React.FC<OfferActionProps> = ({ item, offer, className }: any) => {
       state: order?.state || '',
       city: order?.city || '',
       loadingDate: order?.loadingDate || '',
+      refNo: order?.truckId?.refNo || '',
     };
   };
 
@@ -156,10 +157,10 @@ const Offer: React.FC<OfferActionProps> = ({ item, offer, className }: any) => {
             <>
               <div className="flex items-center justify-between gap-3 mb-2">
                 <Text variant="pxs" color="text-dark-gray-400">
-                  Truck Number
+                  Ref No.
                 </Text>
                 <Text variant="pxs" color="text-dark-gray-400">
-                  {truckDetails.truckNumber}
+                  {truckDetails?.refNo}
                 </Text>
               </div>
               <div className="flex items-center justify-between gap-3 mb-2">

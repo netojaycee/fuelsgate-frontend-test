@@ -146,7 +146,7 @@ const TruckOrderDetails = () => {
                       fontWeight="medium"
                       classNames="capitalize"
                     >
-                      {role === 'buyer' ? 'Transporter' : 'Buyer'} Details
+                      {role === 'buyer' ? 'Vendor' : 'Customer'} Details
                     </Text>
                     {role === 'buyer' && (
                       <Button

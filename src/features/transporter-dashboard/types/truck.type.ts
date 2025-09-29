@@ -19,4 +19,5 @@ export interface TruckDto {
   status?: TruckStatus
   truckOrderId?: string
   profileType?: string | undefined
+  refNo?: string
 }

@@ -843,7 +843,7 @@ const DashboardHeader = () => {
             {/* <Link href={DASHBOARD}>
               <Image src={whiteLogo} width={99} height={67} alt="Logo" />
             </Link> */}
-<Logo white link={DASHBOARD} />
+<Logo link={DASHBOARD} />
             <MobileMenu />
 
             <div className="flex flex-wrap items-center gap-2 max-md:hidden">

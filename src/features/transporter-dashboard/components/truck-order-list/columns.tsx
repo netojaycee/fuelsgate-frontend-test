@@ -11,34 +11,56 @@ const truckOrderListColumns = [
   {
     accessorKey: 'buyerId',
     header: 'Customer',
+    size: 100,
+    minSize: 100,
+    maxSize: 200,
     cell: ({ row }: any) => (
-      // <ClickableUserName
-      //   user={{
-      //     _id: row.getValue('buyerId').userId._id,
-      //     firstName: row.getValue('buyerId').userId.firstName,
-      //     lastName: row.getValue('buyerId').userId.lastName,
-      //     email: row.getValue('buyerId').userId.email,
-      //     role: 'buyer',
-      //   }}
-      //   variant="ps"
-      //   color="text-blue-600"
-      //   className="whitespace-nowrap"
-      // />
-      <Text variant="ps">
-        {row.getValue('buyerId').userId.firstName}{' '}
-        {row.getValue('buyerId').userId.lastName}
-      </Text>
+      <ClickableUserName
+        user={{
+          _id: row.getValue('buyerId').userId._id,
+          firstName: row.getValue('buyerId').userId.firstName,
+          lastName: row.getValue('buyerId').userId.lastName,
+          email: row.getValue('buyerId').userId.email,
+          role: 'buyer',
+        }}
+        variant="ps"
+        color="text-blue-600"
+        className="whitespace-nowrap"
+      />
+      // <Text variant="ps">
+      //   {row.getValue('buyerId').userId.firstName}{' '}
+      //   {row.getValue('buyerId').userId.lastName}
+      // </Text>
     ),
   },
 
   {
     accessorKey: 'truckId',
-    header: 'Truck Number',
+    header: 'Truck No.',
+    size: 80,
+    minSize: 50,
+    maxSize: 180,
     cell: ({ row }: { row: any }) => {
       const truckNumber = row.original?.truckId?.truckNumber;
       return (
+        <span className="text-dark-gray-600 font-medium truncate max-w-[80px]" title={truckNumber}>
+          {truckNumber || '-'}
+        </span>
+      );
+    },
+  },
+
+  {
+    accessorKey: 'refNo',
+    header: 'Ref No.',
+    size:10,
+    minSize: 10,
+    maxSize: 40,
+    cell: ({ row }: { row: any }) => {
+      const refNo = row.original?.truckId?.refNo;
+      return (
         <span className="text-dark-gray-600 font-medium">
-          {truckNumber || 'Unknown Truck'}
+          {refNo || 'Unknown Ref No.'}
         </span>
       );
     },

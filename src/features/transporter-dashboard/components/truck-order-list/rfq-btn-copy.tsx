@@ -18,7 +18,7 @@ type RfqBtnProps = {
   negotiationId?: string;
 };
 
-const RfqBtn = ({ truckOrderId, status, rfqStatus, negotiationId }: RfqBtnProps) => {
+const RfqBtn = ({ truckOrderId, status, rfqStatus }: RfqBtnProps) => {
   const { handleToggle } = useContext(ModalContext);
   const { useUpdateOrder } = useOrderHook();
     const { mutateAsync: updateOrder, isPending: isUpdatingOrder } =
@@ -28,7 +28,18 @@ const RfqBtn = ({ truckOrderId, status, rfqStatus, negotiationId }: RfqBtnProps)
     handleToggle &&
     handleToggle({ state: true, name: TRUCK_RFQ, data: { truckOrderId } });
     const router = useRouter();
-  
+  const { useUpdateTruckOrderStatus } = useTruckOrderHook();
+  const { mutateAsync: updateOrderStatus, isPending: isUpdating } =
+    useUpdateTruckOrderStatus(truckOrderId);
+
+  const handleStartOrder = async () =>
+    await updateOrderStatus({
+      status: 'in-progress',
+    });
+  const handleCompleteOrder = async () =>
+    await updateOrderStatus({
+      status: 'completed',
+    });
 
     const handleStatusUpdate = async () => {
       try {
@@ -54,30 +65,27 @@ const RfqBtn = ({ truckOrderId, status, rfqStatus, negotiationId }: RfqBtnProps)
       }
     };
 
-  const shouldShowSendInvoice = rfqStatus === 'pending' && status === 'pending';
-  const shouldShowGoToChat = rfqStatus === 'rejected' && status === 'pending';
+  const isRfqAccepted = rfqStatus === 'accepted';
 
-  return shouldShowSendInvoice ? (
+  return !isRfqAccepted ? (
     <CustomButton
-      variant="primary"
+      variant={
+        rfqStatus === 'pending' || rfqStatus === 'rejected'
+          ? 'primary'
+          : 'white'
+      }
       classNames="gap-1.5"
-      label="Send Invoice"
+      leftIcon={
+        rfqStatus === 'sent' ? (
+          <FGCheckCircle width={13} height={13} color="#38C793" />
+        ) : undefined
+      }
+      label={rfqStatus === 'pending' ? 'Send Invoice' : undefined}
       height="h-[38px]"
       fontSize="text-xs"
       fontWeight="medium"
       width="w-[122px]"
-      onClick={handleSendRFQButton}
-    />
-  ) : shouldShowGoToChat ? (
-    <CustomButton
-      variant="primary"
-      classNames="gap-1.5"
-      label="Go to Chat"
-      height="h-[38px]"
-      fontSize="text-xs"
-      fontWeight="medium"
-      width="w-[122px]"
-      onClick={() => router.push(`/dashboard/chat/${negotiationId}`)}
+      onClick={rfqStatus === 'pending' ? handleSendRFQButton : () => {}}
     />
   ) : (
     <CustomButton
@@ -111,3 +119,4 @@ const RfqBtn = ({ truckOrderId, status, rfqStatus, negotiationId }: RfqBtnProps)
 };
 
 export { RfqBtn };
+ 

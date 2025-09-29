@@ -37,7 +37,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
   const handleDeleteTruck = () => {
     showConfirmation({
       title: 'Delete Truck',
-      message: `Are you sure you want to delete truck "${data?.truckNumber}"? This action cannot be undone.`,
+      message: `Are you sure you want to delete truck "${data?.refNo}"? This action cannot be undone.`,
       confirmText: 'Delete',
       cancelText: 'Cancel',
       variant: 'danger',
@@ -147,7 +147,12 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
               color="text-gray-900"
               classNames="truncate"
             >
-              {data?.truckNumber || 'N/A'}
+              {data?.refNo}{' '}
+              {data?.truckNumber && (
+                <>
+                  - <span className="text-gray-500 text-xs">{data?.truckNumber}</span>
+                </>
+              )}
             </Text>
             <Text variant="pxs" color="text-gray-500" classNames="truncate">
               {data?.truckType === 'tanker'
@@ -233,7 +238,7 @@ const Truck: React.FC<TruckProps> = ({ data }) => {
         {data?.capacity && (
           <div className="flex items-center justify-between">
             <Text variant="pxs" color="text-gray-500">
-              {data?.loadStatus === 'loaded' ? "Volume" : "Capacity"}
+              {data?.loadStatus === 'loaded' ? 'Volume' : 'Capacity'}
             </Text>
             <Text variant="ps" fontWeight="semibold" color="text-gray-900">
               {formatNumber(data.capacity)}{' '}

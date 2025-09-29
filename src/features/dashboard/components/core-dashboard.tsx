@@ -36,11 +36,11 @@ const CoreDashboard = () => {
 
   const displayRole =
     role === 'buyer'
-      ? 'Trader'
+      ? 'Customer'
       : role === 'seller'
       ? 'Supplier'
       : role === 'transporter'
-      ? 'Transporter'
+      ? 'Vendor'
       : '';
 
   useEffect(() => {

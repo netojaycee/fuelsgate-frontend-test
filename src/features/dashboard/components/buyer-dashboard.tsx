@@ -172,7 +172,7 @@ const BuyerDashboard = () => {
               )}
               fontWeight="semibold"
               leftIcon={<FGTruck color="#666666" />}
-              label="Transporters"
+              label="Vendors"
             />
 
             <CustomButton

@@ -138,10 +138,10 @@ const RFQDetailModal = () => {
 
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <Text variant="ps" color="text-dark-gray-550">
-                    Truck number
+                   Ref No.
                   </Text>
                   <Text variant="ps" color="text-[#151A23]" fontWeight="bold">
-                    {orderData?.data?.truckId?.truckNumber}
+                    {orderData?.data?.truckId?.refNo}
                   </Text>
                 </div>
 

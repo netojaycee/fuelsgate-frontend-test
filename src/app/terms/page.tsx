@@ -29,13 +29,13 @@ export default function Terms() {
           </p>
         </div>
 
-        {/* Transporters Section */}
+        {/* vendors Section */}
         <section className="mb-10">
           <h2 className="text-2xl font-semibold text-green-700 mb-3 flex items-center gap-2">
             <span role="img" aria-label="truck">
               🚚
             </span>{' '}
-            For Transporters (Truck Owners / Drivers)
+            For Vendors (Truck Owners / Drivers)
           </h2>
           <div className="bg-green-50 rounded-lg p-5 mb-4">
             <h3 className="text-lg font-bold mb-2">
@@ -158,7 +158,7 @@ export default function Terms() {
                 platform. We help you discover and get matched with available
                 trucks at load depots or refineries for your fuel products.
               </li>
-              <li>We provide you with quotes from available transporters.</li>
+              <li>We provide you with quotes from available vendors.</li>
               <li>
                 We generate a{' '}
                 <span className="font-semibold">Ticket Order</span> when a match
@@ -192,8 +192,8 @@ export default function Terms() {
                 not followed.
               </li>
               <li>
-                Pay the Transporter directly for the freight cost (offline, as
-                agreed between you and the transporter).
+                Pay the Vendor directly for the freight cost (offline, as
+                agreed between you and the vendor).
               </li>
               <li>
                 <span className="font-semibold text-red-600">Crucially</span>,
@@ -204,7 +204,7 @@ export default function Terms() {
                 <span className="font-semibold">Ticket Order</span>.
               </li>
               <li>
-                Provide feedback / rating on the transporter via the platform
+                Provide feedback / rating on the vendor via the platform
                 after delivery.
               </li>
             </ul>
@@ -232,8 +232,8 @@ export default function Terms() {
                     the physical transportation.
                   </li>
                   <li>
-                    Ensuring the transporter receives their freight payment
-                    (this is direct between you and the transporter).
+                    Ensuring the vendor receives their freight payment
+                    (this is direct between you and the vendor).
                   </li>
                 </ul>
               </li>

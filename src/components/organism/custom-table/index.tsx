@@ -58,242 +58,281 @@ const CustomTable = ({
     getCoreRowModel: getCoreRowModel(),
     enableRowPinning: true,
     keepPinnedRows: true,
+
+    // Add column sizing
+    columnResizeMode: 'onChange',
+    enableColumnResizing: false, // Set to true if you want manual resizing
+    // Set default column sizing
+    defaultColumn: {
+      minSize: 60,
+      maxSize: 300,
+    },
   });
 
-  console.log(data, 'Ffdfd');
+  // console.log(data, 'Ffdfd');
 
   return (
-    <Table className="my-5 border-separate border-spacing-y-3 w-full">
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map((header, index) => {
-              return (
-                <TableHead
-                  key={header.id}
-                  className={cn(
-                    'h-[38px] text-sm bg-light-gray-300',
-                    index === 0
-                      ? 'rounded-l-xl'
-                      : index === headerGroup.headers.length - 1
-                      ? 'rounded-r-xl'
-                      : '',
-                  )}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                  {/* Pin to left control */}
-                  {/* {
+    <div className="w-full overflow-x-auto">
+      <Table
+        style={{ width: table.getTotalSize() }}
+        className="my-5 border-separate border-spacing-y-1 w-full"
+      >
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header, index) => {
+                return (
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      'h-[30px] text-sm bg-light-gray-300',
+                      index === 0
+                        ? 'rounded-l-xl'
+                        : index === headerGroup.headers.length - 1
+                        ? 'rounded-r-xl'
+                        : '',
+                    )}
+                    style={{
+                      width: header.getSize(),
+                      position: 'relative',
+                    }}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                    {/* Pin to left control */}
+                    {/* {
                     header.column.getIsPinned() ? 
                     <button type='button' onClick={() => header.column.pin(false)}>Unpin</button> :
                     <button type='button' onClick={() => header.column.pin('left')}>Pin to left</button>
                   } */}
-                </TableHead>
-              );
-            })}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody className="max-h-[40px] ">
-        {loading ? (
-          <TableRow className="relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400">
-            <TableCell
-              colSpan={columns.length}
-              className="py-3 text-sm font-normal leading-5 rounded-xl text-center"
-            >
-              <CustomLoader />
-            </TableCell>
-          </TableRow>
-        ) : table?.getRowModel().rows?.length ? (
-          <>
-            {/* Render Top Pinned Rows */}
-            {table.getTopRows().map((row) => {
-              const isTruckList = type === 'truckList';
-              const isTanker = row.original?.truckType === 'tanker';
-              const isLoaded = row.original?.loadStatus === 'loaded';
-              let bgStyle: React.CSSProperties | undefined = undefined;
-              if (isTruckList && isTanker && isLoaded) {
-                const color = row.original?.productId?.color;
-                if (typeof color === 'string' && color.includes('-')) {
-                  const [color1, color2] = color.split('-');
-                  bgStyle = {
-                    background: `linear-gradient(to bottom, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`,
-                    transition: 'background 0.3s',
-                  };
-                } else if (color) {
-                  bgStyle = { backgroundColor: color, transition: 'background 0.3s' };
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody className="max-h-[40px]">
+          {loading ? (
+            <TableRow className="relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400">
+              <TableCell
+                colSpan={columns.length}
+                className="py-3 text-sm font-normal leading-5 rounded-xl text-center"
+              >
+                <CustomLoader />
+              </TableCell>
+            </TableRow>
+          ) : table?.getRowModel().rows?.length ? (
+            <>
+              {/* Render Top Pinned Rows */}
+              {table.getTopRows().map((row) => {
+                const isTruckList = type === 'truckList';
+                const isTanker = row.original?.truckType === 'tanker';
+                const isLoaded = row.original?.loadStatus === 'loaded';
+                let bgStyle: React.CSSProperties | undefined = undefined;
+                if (isTruckList && isTanker && isLoaded) {
+                  const color = row.original?.productId?.color;
+                  if (typeof color === 'string' && color.includes('-')) {
+                    const [color1, color2] = color.split('-');
+                    bgStyle = {
+                      background: `linear-gradient(to bottom, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`,
+                      transition: 'background 0.3s',
+                    };
+                  } else if (color) {
+                    bgStyle = {
+                      backgroundColor: color,
+                      transition: 'background 0.3s',
+                    };
+                  }
                 }
-              }
-              return (
-                <TableRow
-                  key={row.id}
-                  className={cn(
-                    'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
-                    'pinned-row',
-                  )}
-                  style={bgStyle}
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        'py-3 text-sm font-normal leading-5',
-                        index === 0
-                          ? 'rounded-l-xl'
-                          : index === row.getVisibleCells().length - 1
-                          ? 'rounded-r-xl'
-                          : '',
-                      )}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      {/* Add Unpin Button */}
-                      {index === 0 && (
-                        <button onClick={() => row.pin(false)}>Unpin</button>
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })}
+                return (
+                  <TableRow
+                    key={row.id}
+                    className={cn(
+                      'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
+                      'pinned-row',
+                    )}
+                    style={bgStyle}
+                  >
+                    {row.getVisibleCells().map((cell, index) => (
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          'py-3 text-sm font-normal leading-5',
+                          index === 0
+                            ? 'rounded-l-xl'
+                            : index === row.getVisibleCells().length - 1
+                            ? 'rounded-r-xl'
+                            : '',
+                        )}
+                        style={{
+                      width: cell.column.getSize(),
+                    }}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                        {/* Add Unpin Button */}
+                        {index === 0 && (
+                          <button onClick={() => row.pin(false)}>Unpin</button>
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
 
-            {/* Render Center Rows */}
-            {table.getCenterRows().map((row) => {
-              const isTruckList = type === 'truckList';
-              const isTanker = row.original?.truckType === 'tanker';
-              const isLoaded = row.original?.loadStatus === 'loaded';
-              let bgStyle: React.CSSProperties | undefined = undefined;
-              if (isTruckList && isTanker && isLoaded) {
-                const color = row.original?.productId?.color;
-                if (typeof color === 'string' && color.includes('-')) {
-                  const [color1, color2] = color.split('-');
-                  bgStyle = {
-                    background: `linear-gradient(to bottom, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`,
-                    transition: 'background 0.3s',
-                  };
-                } else if (color) {
-                  bgStyle = { backgroundColor: color, transition: 'background 0.3s' };
+              {/* Render Center Rows */}
+              {table.getCenterRows().map((row) => {
+                const isTruckList = type === 'truckList';
+                const isTanker = row.original?.truckType === 'tanker';
+                const isLoaded = row.original?.loadStatus === 'loaded';
+                let bgStyle: React.CSSProperties | undefined = undefined;
+                if (isTruckList && isTanker && isLoaded) {
+                  const color = row.original?.productId?.color;
+                  if (typeof color === 'string' && color.includes('-')) {
+                    const [color1, color2] = color.split('-');
+                    bgStyle = {
+                      background: `linear-gradient(to bottom, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`,
+                      transition: 'background 0.3s',
+                    };
+                  } else if (color) {
+                    bgStyle = {
+                      backgroundColor: color,
+                      transition: 'background 0.3s',
+                    };
+                  }
                 }
-              }
-              return (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
-                  className={cn(
-                    'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
-                  )}
-                  style={bgStyle}
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        'py-3 text-sm font-normal leading-5',
-                        index === 0
-                          ? 'rounded-l-xl'
-                          : index === row.getVisibleCells().length - 1
-                          ? 'rounded-r-xl'
-                          : '',
-                      )}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      {/* Add Pin Buttons */}
-                      {/* {index === 0 && <button onClick={() => row.pin('top')}>Pin to Top</button>} */}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })}
+                return (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && 'selected'}
+                    className={cn(
+                      'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
+                    )}
+                    style={bgStyle}
+                  >
+                    {row.getVisibleCells().map((cell, index) => (
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          'py-0 text-sm font-normal leading-5',
+                          index === 0
+                            ? 'rounded-l-xl'
+                            : index === row.getVisibleCells().length - 1
+                            ? 'rounded-r-xl'
+                            : '',
+                        )}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                        {/* Add Pin Buttons */}
+                        {/* {index === 0 && <button onClick={() => row.pin('top')}>Pin to Top</button>} */}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
 
-            {/* Render Bottom Pinned Rows */}
-            {table.getBottomRows().map((row) => {
-              const isTruckList = type === 'truckList';
-              const isTanker = row.original?.truckType === 'tanker';
-              const isLoaded = row.original?.loadStatus === 'loaded';
-              let bgStyle: React.CSSProperties | undefined = undefined;
-              if (isTruckList && isTanker && isLoaded) {
-                const color = row.original?.productId?.color;
-                if (typeof color === 'string' && color.includes('-')) {
-                  const [color1, color2] = color.split('-');
-                  bgStyle = {
-                    background: `linear-gradient(to bottom, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`,
-                    transition: 'background 0.3s',
-                  };
-                } else if (color) {
-                  bgStyle = { backgroundColor: color, transition: 'background 0.3s' };
+              {/* Render Bottom Pinned Rows */}
+              {table.getBottomRows().map((row) => {
+                const isTruckList = type === 'truckList';
+                const isTanker = row.original?.truckType === 'tanker';
+                const isLoaded = row.original?.loadStatus === 'loaded';
+                let bgStyle: React.CSSProperties | undefined = undefined;
+                if (isTruckList && isTanker && isLoaded) {
+                  const color = row.original?.productId?.color;
+                  if (typeof color === 'string' && color.includes('-')) {
+                    const [color1, color2] = color.split('-');
+                    bgStyle = {
+                      background: `linear-gradient(to bottom, ${color1} 0%, ${color1} 50%, ${color2} 50%, ${color2} 100%)`,
+                      transition: 'background 0.3s',
+                    };
+                  } else if (color) {
+                    bgStyle = {
+                      backgroundColor: color,
+                      transition: 'background 0.3s',
+                    };
+                  }
                 }
-              }
-              return (
-                <TableRow
-                  key={row.id}
-                  className={cn(
-                    'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
-                    'pinned-row',
-                  )}
-                  style={bgStyle}
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        'py-3 text-sm font-normal leading-5',
-                        index === 0
-                          ? 'rounded-l-xl'
-                          : index === row.getVisibleCells().length - 1
-                          ? 'rounded-r-xl'
-                          : '',
-                      )}
+                return (
+                  <TableRow
+                    key={row.id}
+                    className={cn(
+                      'relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400',
+                      'pinned-row',
+                    )}
+                    style={bgStyle}
+                  >
+                    {row.getVisibleCells().map((cell, index) => (
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          'py-3 text-sm font-normal leading-5',
+                          index === 0
+                            ? 'rounded-l-xl'
+                            : index === row.getVisibleCells().length - 1
+                            ? 'rounded-r-xl'
+                            : '',
+                        )}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                        {/* Add Unpin Button */}
+                        {index === 0 && (
+                          <button onClick={() => row.pin(false)}>Unpin</button>
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
+            </>
+          ) : (
+            <TableRow className="relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400">
+              <TableCell
+                colSpan={columns.length}
+                className="py-3 text-sm rounded-xl"
+              >
+                <div className="flex items-center gap-1 justify-center flex-col py-5">
+                  <Image
+                    src={OrderEmptyState}
+                    className="mx-auto mb-3"
+                    width={74}
+                    height={64}
+                    alt="Order Empty State"
+                  />
+                  {emptyState?.title && (
+                    <Text
+                      variant="ps"
+                      color="text-[#3F4254]"
+                      fontWeight="semibold"
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      {/* Add Unpin Button */}
-                      {index === 0 && (
-                        <button onClick={() => row.pin(false)}>Unpin</button>
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              );
-            })}
-          </>
-        ) : (
-          <TableRow className="relative after:absolute after:-bottom-2 after:left-0 after:h-[1px] after:w-full after:bg-mid-gray-400">
-            <TableCell
-              colSpan={columns.length}
-              className="py-3 text-sm rounded-xl"
-            >
-              <div className="flex items-center gap-1 justify-center flex-col py-5">
-                <Image
-                  src={OrderEmptyState}
-                  className="mx-auto mb-3"
-                  width={74}
-                  height={64}
-                  alt="Order Empty State"
-                />
-                {emptyState?.title && (
+                      {emptyState?.title}
+                    </Text>
+                  )}
                   <Text
-                    variant="ps"
-                    color="text-[#3F4254]"
+                    variant="pxs"
+                    color="text-[#666666]"
                     fontWeight="semibold"
                   >
-                    {emptyState?.title}
+                    {emptyState?.message ?? 'No record found'}
                   </Text>
-                )}
-                <Text
-                  variant="pxs"
-                  color="text-[#666666]"
-                  fontWeight="semibold"
-                >
-                  {emptyState?.message ?? 'No record found'}
-                </Text>
-              </div>
-            </TableCell>
-          </TableRow>
-        )}
-      </TableBody>
-    </Table>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
 

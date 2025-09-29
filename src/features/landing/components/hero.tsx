@@ -67,14 +67,14 @@ const Hero = () => {
               className="flex justify-start items-center gap-2 text-lg text-gray-600"
               onClick={() => handleActiveTab('transporter')}
             >
-              Transporter
+              Vendor
             </Link>
             <Link
               href="/#roles"
               className="flex justify-start items-center gap-2 text-lg text-gray-600"
               onClick={() => handleActiveTab('buyer')}
             >
-              Trader
+              Customer
             </Link>
           </div>
         </SheetContent>
@@ -153,7 +153,7 @@ const Hero = () => {
                 sora.className,
               )}
             >
-              Transporter
+              Vendor
             </Link>
             <Link
               href="#roles"
@@ -163,7 +163,7 @@ const Hero = () => {
                 sora.className,
               )}
             >
-              Trader
+              Customer
             </Link>
           </div>
         </div>

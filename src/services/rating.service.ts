@@ -18,7 +18,7 @@ export const ratingService = {
     getUserRatings: async (
         userId: string,
         params?: RatingQueryParams,
-    ): Promise<RatingResponse> => {
+    ): Promise<any> => {
         const queryParams = new URLSearchParams();
         if (params?.page) queryParams.append('page', params.page.toString());
         if (params?.limit) queryParams.append('limit', params.limit.toString());
@@ -29,13 +29,13 @@ export const ratingService = {
     },
 
     // Get rating statistics for a user
-    getUserRatingStats: async (userId: string): Promise<UserRatingStats> => {
+    getUserRatingStats: async (userId: string): Promise<any> => {
         const url = `/ratings/user/${userId}/stats`;
         return await requestHandler('get', url);
     },
 
     // Get my ratings (ratings I've given)
-    getMyRatings: async (params?: RatingQueryParams): Promise<RatingResponse> => {
+    getMyRatings: async (params?: RatingQueryParams): Promise<any> => {
         const queryParams = new URLSearchParams();
         if (params?.page) queryParams.append('page', params.page.toString());
         if (params?.limit) queryParams.append('limit', params.limit.toString());

@@ -41,9 +41,9 @@ const LOCK_TRUCK = 'lOCK_TRUCK';
 const LockTruckModal = () => {
   const [open, setOpen] = useState(true);
   const { handleClose, openModal } = useContext(ModalContext);
-  const { truckId, truckNumber, depotHub, truckSize, truckCategory, truckType, loadStatus, product, state, city } =
+  const { truckId, truckNumber, refNo, depotHub, truckSize, truckCategory, truckType, loadStatus, product, state, city } =
     openModal?.data || {};
-    console.log(truckId, truckNumber, depotHub, truckSize, truckCategory, truckType, loadStatus, product, state, city, "fff")
+    console.log(truckId, truckNumber, refNo, depotHub, truckSize, truckCategory, truckType, loadStatus, product, state, city, "fff")
   const { useCreateOrder } = useOrderHook();
   const { mutateAsync: createNewOrder, isPending: isLoading } =
     useCreateOrder();
@@ -196,10 +196,10 @@ const LockTruckModal = () => {
             <CollapsibleContent className="mt-4">
               <div className="flex items-center justify-between gap-2 mb-4">
                 <Text variant="ps" color="text-dark-gray-550">
-                  Truck number
+                  Ref No.
                 </Text>
                 <Text variant="ps" color="text-[#151A23]" fontWeight="bold">
-                  {truckNumber}
+                  {refNo}
                 </Text>
               </div>
 

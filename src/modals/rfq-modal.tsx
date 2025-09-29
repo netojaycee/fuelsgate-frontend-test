@@ -237,7 +237,7 @@ const RFQModal = () => {
 
                 <div className="flex items-center justify-between gap-2 mb-4">
                   <Text variant="ps" color="text-dark-gray-550">
-                    Truck number
+                 Ref No.
                   </Text>
                   <Text
                     variant="ps"
@@ -245,7 +245,7 @@ const RFQModal = () => {
                     fontWeight="bold"
                     classNames="text-right"
                   >
-                    {orderData?.data?.truckId?.truckNumber}
+                    {orderData?.data?.truckId?.refNo}
                   </Text>
                 </div>
                 {orderData?.data?.truckId?.truckType === 'tanker' && (

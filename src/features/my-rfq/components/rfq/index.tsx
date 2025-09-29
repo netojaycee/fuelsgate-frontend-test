@@ -52,7 +52,7 @@ const RfqComponent = ({ truckOrder }: { truckOrder: TruckOrderDto }) => {
           fontWeight="regular"
           classNames="mb-1"
         >
-          Transporter -{' '}
+          Vendor -{' '}
           <ClickableUserName
             user={{
               _id:

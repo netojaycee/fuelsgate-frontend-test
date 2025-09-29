@@ -20,7 +20,7 @@ const RoleSelect = () => {
     // },
     {
       id: 'transporter',
-      name: 'Transporter',
+      name: 'Vendor',
       description: 'Post trucks at any depot location',
     },
   ];

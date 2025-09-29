@@ -196,13 +196,13 @@ const TruckRfq = () => {
                   ) : (
                     <>
                       Use the send Invoice button below to send quote for this
-                      order to buyer{'  '}
+                      order to customer{'  '}
                       <span className="font-bold">
                         {orderData?.data.buyerId?.userId?.firstName}{' '}
                         {orderData?.data.buyerId?.userId?.lastName}
                       </span>
                       . In the case of rejection, kindly check the chat for
-                      buyer&apos;s counter offer and respond as needed. In the
+                      customer&apos;s counter offer and respond as needed. In the
                       case of acceptance please proceed to use the print ticket
                       button, download ticket and continue process offline.
                     </>

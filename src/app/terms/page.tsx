@@ -56,7 +56,7 @@ export default function Terms() {
               </li>
               <li>
                 We provide you with Request for Quote (RFQ) details from
-                potential buyers.
+                potential customers.
               </li>
               <li>
                 We generate a{' '}
@@ -87,7 +87,7 @@ export default function Terms() {
                 <span className="font-semibold">Ticket Order</span>.
               </li>
               <li>
-                Cooperate fully with the buyer&apos;s representative at the
+                Cooperate fully with the customer&apos;s representative at the
                 depot/park.
               </li>
             </ul>
@@ -109,11 +109,11 @@ export default function Terms() {
                   <li>The quantity or quality of the product.</li>
                   <li>
                     The security of your truck or product during transit (the
-                    buyer&apos;s representative is responsible for escort).
+                    customer&apos;s representative is responsible for escort).
                   </li>
                   <li>
-                    Payment of freight cost by the buyer (this is direct between
-                    you and the buyer).
+                    Payment of freight cost by the customer (this is direct between
+                    you and the customer).
                   </li>
                   <li>
                     Any loss, damage, theft, or dispute arising during or after
@@ -139,7 +139,7 @@ export default function Terms() {
             <span role="img" aria-label="buyer">
               🛒
             </span>{' '}
-            For Traders / Buyers (Truck Hirer)
+            For Customers (Truck Hirer)
           </h2>
           <div className="bg-blue-50 rounded-lg p-5 mb-4">
             <h3 className="text-lg font-bold mb-2">

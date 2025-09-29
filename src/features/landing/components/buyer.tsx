@@ -84,7 +84,7 @@ const Buyer = () => {
               <CustomButton
                 variant="glow"
                 onClick={handleBuyerSignUp}
-                label="Sign Up as Trader"
+                label="Sign Up as Customer"
                 width="w-fit"
                 height="h-12"
               />

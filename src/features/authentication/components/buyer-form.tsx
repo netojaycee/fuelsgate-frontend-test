@@ -55,7 +55,7 @@ const BuyerForm = () => {
         fontFamily={sora.className}
         classNames="mb-5"
       >
-        Buyer Category
+        Customer Category
       </Text>
       <RadioGroup defaultValue={type} onValueChange={handleCategoryChange}>
         <RadioButtonField

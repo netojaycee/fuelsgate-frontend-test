@@ -167,7 +167,7 @@ export default function BuyerCalculator() {
         </div>
         <div>
           <Heading variant="h4" color="text-gray-900" fontWeight="bold">
-            Buyer Transport Fare Calculator
+            Customer Transport Fare Calculator
           </Heading>
           <Text variant="ps" color="text-gray-600">
             Estimate transport fare for your truck between two points

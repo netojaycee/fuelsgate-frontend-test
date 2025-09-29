@@ -112,7 +112,7 @@ const Ticket = () => {
                       fontWeight="medium"
                       classNames="capitalize"
                     >
-                      {role === 'buyer' ? 'Seller' : 'Buyer'} Details
+                      {role === 'buyer' ? 'Seller' : 'Customer'} Details
                     </Text>
                     {role === 'buyer' && (
                       <Button

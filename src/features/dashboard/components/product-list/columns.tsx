@@ -69,7 +69,7 @@ const productListColumns = [
   },
   {
     accessorKey: 'offers',
-    header: 'Buyer Offer',
+    header: 'Customer Offer',
     cell: ({ row }: { row: any }) => {
       const buyerOffer = row.getValue('offers');
       const orders = row.original.orders;

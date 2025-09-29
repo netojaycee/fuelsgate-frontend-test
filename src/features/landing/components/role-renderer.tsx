@@ -58,7 +58,7 @@ const RoleRenderer = () => {
           onClick={() => handleTabChange('buyer')}
         >
           <Users height={16} width={16} color="#666666" />
-          <p className="text-xs sm:text-sm">Traders</p>
+          <p className="text-xs sm:text-sm">Customers</p>
         </RendererTab>{' '}
         <RendererTab
           active={activeTab === 'transporter'}

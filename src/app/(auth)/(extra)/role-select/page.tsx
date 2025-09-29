@@ -10,7 +10,7 @@ const RoleSelect = () => {
   const roles = [
     {
       id: 'buyer',
-      name: 'Trader',
+      name: 'Customer',
       description: 'Search, Find & Negotiate exact trucks you need',
     },
     // {

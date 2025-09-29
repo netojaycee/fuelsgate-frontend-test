@@ -1318,7 +1318,7 @@ const ChatDetails = () => {
                   <>
                     ✅ Negotiation completed! Please{' '}
                     <span className="font-semibold">print the ticket</span> and
-                    contact the buyer to finalize{' '}
+                    contact the customer to finalize{' '}
                     {chatType === 'order' ? 'delivery' : 'service'}.
                   </>
                 )}

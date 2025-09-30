@@ -5,11 +5,12 @@ import MobilePhone from '@assets/images/Transporter.svg';
 import Image from 'next/image';
 import Checklist from './checklist';
 import CustomButton from '@/components/atoms/custom-button';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Settings, BarChart3 } from 'lucide-react';
 import { LandingContext } from '../contexts/LandingContext';
 import { DASHBOARD } from '@/routes';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { FGLocation, FGTruckFill, FGUserHeart } from '@fg-icons';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -47,49 +48,25 @@ const Transporter = () => {
           <Checklist
             title="Anywhere, Anytime"
             description="Active in Dangote refinery, depots, Tin Can Island & Lekki Deep Sea Ports in Lagos"
+            icon={FGLocation}
           />
           <Checklist
             title="Dedicated dashboard"
             description="Reach the market with your brand, deal privately, in real-time"
+            icon={BarChart3}
           />
           <Checklist
             title="List & delist anytime"
             description="Update your cargo / truck availability & location at a click"
+            icon={Settings}
           />
 
           <Checklist
             title="Transaction flexibility"
-            description="Receive RFQs, send quotes, counter-offer, reject or accept & generate smart contracts"
+            description="Receive RFQs, send quotes, counter-offer, reject or accept & generate smart contracts"
+            icon={FGUserHeart}
           />
-          {isLoggedIn ? (
-            <CustomButton
-              onClick={handleDashboardNavigation}
-              variant="glow"
-              label="Go to Dashboard"
-              width="w-fit"
-              height="h-12"
-            />
-          ) : (
-            <div className="flex sm:items-center justify-start mt-auto flex-col sm:flex-row gap-4">
-              <CustomButton
-                variant="glow"
-                onClick={handleTransporterSignUp}
-                label="Sign Up as Vendor"
-                width="w-fit"
-                height="h-12"
-              />
-              <CustomButton
-                variant="plain"
-                onClick={handleSignIn}
-                label="Sign In"
-                width="w-[142px]"
-                color="text-black hover:text-black/50"
-                rightIcon={<ChevronRight color="black" />}
-                height="h-13"
-              />
-            </div>
-          )}
-        </div>
+          </div>
         <div className="relative">
           <Image src={MobilePhone} className="mx-auto" alt="Mobile Phone" />
         </div>

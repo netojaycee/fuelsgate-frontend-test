@@ -5,12 +5,13 @@ import MobilePhone from '@assets/images/Buyer.svg';
 import Image from 'next/image';
 import Checklist from './checklist';
 import CustomButton from '@/components/atoms/custom-button';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Search } from 'lucide-react';
 import { LandingContext } from '../contexts/LandingContext';
 import Link from 'next/link';
 import { DASHBOARD } from '@/routes';
 import { AuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { FGTruckFill, FGLocation, FGUserHeart } from '@fg-icons';
 
 const sora = Sora({ subsets: ['latin'] });
 
@@ -48,18 +49,22 @@ const Buyer = () => {
           <Checklist
             title="Loaded & unloaded trucks"
             description="Cut out the depot loading bureaucracy cut out the calls & search for trucks"
+            icon={FGTruckFill}
           />
           <Checklist
             title="Find exact trucks"
             description="Filter search by location, truck type, truck size, local or bridging deliveries"
+            icon={Search}
           />
           <Checklist
             title="Deal Directly"
             description="Request for quotes, receive quotes, counter-offer, reject or accept & generate smart contract"
+            icon={FGUserHeart}
           />
           <Checklist
             title="Access key Terminals"
             description="Active for loads in Dangote refinery, depots, Tin Can Island & Lekki Deep Sea Ports in Lagos"
+            icon={FGLocation}
           />
           <div>
             <Link

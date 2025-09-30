@@ -6,12 +6,13 @@ import { Text } from "@/components/atoms/text";
 type ChecklistProps = {
   title: string;
   description: string;
+  icon?: any;
 };
 
-const Checklist = ({ title, description }: ChecklistProps) => {
+const Checklist = ({ title, description, icon = FGCheckCircle }: ChecklistProps) => {
   return (
     <div className="flex items-start gap-2">
-      <FGCheckCircle height={25} width={25} className="mt-1.5" />
+      {React.createElement(icon, { height: 25, width: 25, className: "mt-1.5" })}
       <div>
         <Heading
           variant="h6"

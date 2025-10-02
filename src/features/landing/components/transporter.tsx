@@ -5,7 +5,7 @@ import MobilePhone from '@assets/images/Transporter.svg';
 import Image from 'next/image';
 import Checklist from './checklist';
 import CustomButton from '@/components/atoms/custom-button';
-import { ChevronRight, Settings, BarChart3 } from 'lucide-react';
+import { ChevronRight, Settings, BarChart3, RefreshCw } from 'lucide-react';
 import { LandingContext } from '../contexts/LandingContext';
 import { DASHBOARD } from '@/routes';
 import { AuthContext } from '@/contexts/AuthContext';
@@ -46,8 +46,8 @@ const Transporter = () => {
       <div className="grid grid-cols-2 max-lg:grid-cols-1 items-start gap-10 max-sm:gap-2">
         <div className="flex flex-col h-full gap-5 py-5">
           <Checklist
-            title="Anywhere, Anytime"
-            description="Active in Dangote refinery, depots, Tin Can Island & Lekki Deep Sea Ports in Lagos"
+            title="Anytime, anywhere"
+            description="Active in Dangote Refinery, depots & truck Parks in Lagos"
             icon={FGLocation}
           />
           <Checklist
@@ -57,15 +57,43 @@ const Transporter = () => {
           />
           <Checklist
             title="List & delist anytime"
-            description="Update your cargo / truck availability & location at a click"
-            icon={Settings}
+            description="Update product volumes, prices & trucks at a click"
+            icon={RefreshCw}
           />
-
           <Checklist
             title="Transaction flexibility"
-            description="Receive RFQs, send quotes, counter-offer, reject or accept & generate smart contracts"
+            description="Receive RFQs, send quotes, counteroffer or accept deals"
             icon={FGUserHeart}
           />
+
+          {isLoggedIn ? (
+            <CustomButton
+              onClick={handleDashboardNavigation}
+              variant="glow"
+              label="Go to Dashboard"
+              width="w-fit"
+              height="h-12"
+            />
+          ) : (
+            <div className="flex sm:items-center justify-start mt-auto flex-col sm:flex-row gap-4">
+              <CustomButton
+                variant="glow"
+                onClick={handleTransporterSignUp}
+                label="Sign Up as Vendor"
+                width="w-fit"
+                height="h-12"
+              />
+              <CustomButton
+                variant="plain"
+                onClick={handleSignIn}
+                label="Sign In"
+                width="w-[142px]"
+                color="text-black hover:text-black/50"
+                rightIcon={<ChevronRight color="black" />}
+                height="h-13"
+              />
+            </div>
+          )}
           </div>
         <div className="relative">
           <Image src={MobilePhone} className="mx-auto" alt="Mobile Phone" />

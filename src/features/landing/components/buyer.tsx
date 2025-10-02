@@ -5,7 +5,7 @@ import MobilePhone from '@assets/images/Buyer.svg';
 import Image from 'next/image';
 import Checklist from './checklist';
 import CustomButton from '@/components/atoms/custom-button';
-import { ChevronRight, Search } from 'lucide-react';
+import { ChevronRight, FileText, Search, Users } from 'lucide-react';
 import { LandingContext } from '../contexts/LandingContext';
 import Link from 'next/link';
 import { DASHBOARD } from '@/routes';
@@ -47,24 +47,29 @@ const Buyer = () => {
       <div className="grid grid-cols-2 max-lg:grid-cols-1 items-start gap-10 max-sm:gap-2">
         <div className="flex flex-col h-full gap-5 py-5">
           <Checklist
-            title="Loaded & unloaded trucks"
-            description="Cut out the depot loading bureaucracy cut out the calls & search for trucks"
-            icon={FGTruckFill}
-          />
-          <Checklist
-            title="Find exact trucks"
-            description="Filter search by location, truck type, truck size, local or bridging deliveries"
-            icon={Search}
-          />
-          <Checklist
-            title="Deal Directly"
-            description="Request for quotes, receive quotes, counter-offer, reject or accept & generate smart contract"
+            title="Bypass procurement barrier"
+            description="You cannot pay for 500,000ltrs at Dangote Refinery? Unlock access to smaller product volumes"
             icon={FGUserHeart}
           />
           <Checklist
-            title="Access key Terminals"
-            description="Active for loads in Dangote refinery, depots, Tin Can Island & Lekki Deep Sea Ports in Lagos"
-            icon={FGLocation}
+            title="Comprehensive Marketers"
+            description="Select from a list of approved marketers"
+            icon={Users}
+          />
+          <Checklist
+            title="Negotiate Directly"
+            description="Request For Quote; receive quotes; accept/counteroffer"
+            icon={FGUserHeart}
+          />
+          <Checklist
+            title="Digital Ticket"
+            description="'Smart Contract' with terms for volume & truck claims reconciliation"
+            icon={FileText}
+          />
+          <Checklist
+            title="Comprehensive Trucks"
+            description="Search & book from #1 database of vetted trucks of all types"
+            icon={FGTruckFill}
           />
           <div>
             <Link

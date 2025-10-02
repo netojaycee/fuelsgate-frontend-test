@@ -219,7 +219,7 @@ const Hero = () => {
           lineHeight="leading-12"
           classNames="max-w-[850px] mx-auto mb-2 max-sm:text-[30px]"
         >
-          Search, Find & Book Fuels & Dry Cargo{' '}
+          Instantly Book Dangote Fuels & Free{' '}
           <span className="text-gold">Deliveries</span>
         </Heading>
         <Text
@@ -227,9 +227,9 @@ const Hero = () => {
           classNames="max-w-[786px] mx-auto mb-10"
           color="text-mid-gray-175"
         >
-          Save time & money with the smart way to source & secure direct fuel
-          deliveries from Dangote Refinery & depots - Is it trucks only you
-          require? Instantly connect to any truck type & size
+          Secure exact 10,000ltrs to 50,000ltrs product volumes or any truck
+          type you need and arrange offline payment and delivery, on Nigeria&apos;s
+          #1 fuels & general truck logistics marketplace
         </Text>
         <div className="space-y-6">
           <SearchFilter />

@@ -58,7 +58,7 @@ const RoleRenderer = () => {
           onClick={() => handleTabChange('buyer')}
         >
           <Users height={16} width={16} color="#666666" />
-          <p className="text-xs sm:text-sm">Customers</p>
+          <p className="text-xs sm:text-sm">Customer</p>
         </RendererTab>{' '}
         <RendererTab
           active={activeTab === 'transporter'}
@@ -66,7 +66,7 @@ const RoleRenderer = () => {
         >
           <FGTruck height={16} width={16} color="#666666" />
 
-          <p className="text-xs sm:text-sm">Vendors</p>
+          <p className="text-xs sm:text-sm">Vendor</p>
         </RendererTab>
         {/* <RendererTab
           active={activeTab === 'seller'}
